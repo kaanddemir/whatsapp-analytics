@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>WhatsApp Analytics</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}" />
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/favicon.svg') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/recap.css') }}" />
+  <!-- Vendored rather than loaded from a CDN: the dashboard is meant to work
+       on a machine with no internet connection, and a failed CDN request used
+       to take the whole page down with it. -->
+  <script src="{{ url_for('static', filename='vendor/chart.umd.min.js') }}"></script>
+</head>
+<body>
+  <!-- The assistant starts collapsed; the right rail reopens it. -->
+  <div class="app ai-hidden">
+    <!-- ================= LEFT: ANALYTICS ================= -->
+    <main class="analytics">
+      <!-- Context + settings bar -->
+      <header class="topbar">
+        <div class="tb-brand">
+          <h1>WhatsApp Analytics</h1>
+        </div>
+
+        <span class="tb-divider" aria-hidden="true"></span>
+
+        <!-- Chat identity → info popover -->
+        <div class="pop-wrap">
+          <button type="button" class="filter-pill chat-chip" id="chatChip" aria-expanded="false" disabled>
+            <span class="avatar-initials empty" id="chatChipAvatar" data-icon="user"></span>
+            <span id="chatChipName">No chat loaded</span>
+            <span class="chev" data-icon="chevron"></span>
+          </button>
+            <div class="pop chat-pop" id="chatInfoPop" hidden>
+              <div class="pop-head">
+              <h4>Chat Info</h4>
+              </div>
+            <!-- Each row is also the participant filter: picking one scopes the
+                 dashboard to that person. -->
+            <div class="participants" id="chatPopParts"></div>
+          </div>
+        </div>
+
+        <!-- Date range -->
+        <div class="pop-wrap">
+          <button type="button" class="filter-pill date-pill" id="datePill" aria-expanded="false" disabled>
+            <span class="fi" data-icon="calendar-check"></span>
+            <span id="dateRange">Upload a chat to begin</span>
+            <span class="chev" data-icon="chevron"></span>
+          </button>
+          <div class="pop date-pop" id="datePop" hidden>
+            <div class="dp-presets" id="dpPresets">
+              <button type="button" class="seg" data-preset="7">7d</button>
+              <button type="button" class="seg" data-preset="30">30d</button>
+              <button type="button" class="seg" data-preset="90">3m</button>
+              <button type="button" class="seg" data-preset="180">6m</button>
+              <button type="button" class="seg" data-preset="365">1y</button>
+              <button type="button" class="seg" data-preset="all">All</button>
+            </div>
+            <div class="dp-sep"></div>
+            <label class="dp-field">From<input type="date" id="dateStart" /></label>
+            <label class="dp-field">To<input type="date" id="dateEnd" /></label>
+            <div class="dp-actions">
+              <button type="button" class="dp-btn ghost" id="dateReset">Reset</button>
+              <button type="button" class="dp-btn primary" id="dateApply">Apply</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- The story recap. Markup lives in templates/recap.html. -->
+        <button type="button" class="recap-trigger" id="recapBtn" disabled
+                aria-haspopup="dialog" aria-expanded="false" title="Chat Recap">
+          <!-- The three primaries as circle / square / triangle: the button
+               previews the poster world it opens into. -->
+          <span class="wt-marks" aria-hidden="true"><i class="m-circle"></i><i class="m-square"></i><i class="m-tri"></i></span>
+          <span class="wt-label">Recap</span>
+        </button>
+
+
+        <button class="tb-exit" id="topbarExit" type="button" aria-label="Exit to main menu" title="Exit to main menu" hidden>
+          <span data-icon="log-out"></span>
+        </button>
+      </header>
+
+      <!-- Empty state -->
+      <section id="emptyState" class="empty-state">
+        <div class="empty-default">
+          <div class="empty-icon" data-icon="upload"></div>
+          <h2>Upload your WhatsApp chat export</h2>
+          <p>In WhatsApp: <b>Export Chat</b> → <b>Without Media</b>, then drop the <code>.txt</code> here.</p>
+          <label class="btn-primary" for="fileInput2">Choose file
+            <input type="file" id="fileInput2" accept=".txt" hidden />
+          </label>
+          <p class="hint" id="uploadError"></p>
+        </div>
+        <!-- Loading view: the dashed drop zone gives way to a skeleton of the
+             dashboard that is about to appear, so the wait shows what is
+             coming instead of an empty box with a spinner in it. -->
+        <div class="upload-loading">
+          <!-- Filled by dashboard.js from the same cards the dashboard uses. -->
+          <div class="skeleton" id="skeleton" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <!-- Dashboard content (hidden until data loads) -->
+      <div id="dashboard" class="dashboard hidden">
+        <!-- KPI cards -->
+        <section class="kpi-grid">
+          <div class="card kpi" data-info-card="total-messages">
+            <div class="kpi-head"><span class="kpi-ic green" data-icon="message"></span><span>Total Messages</span></div>
+            <div class="kpi-value" id="kpiTotal">—</div>
+            <div class="kpi-delta">in selected range</div>
+            <div class="spark-wrap"><canvas id="sparkTotal"></canvas><p class="spark-empty" id="sparkTotalEmpty" hidden>Nothing to show yet.</p></div>
+          </div>
+          <div class="card kpi" data-info-card="active-days">
+            <div class="kpi-head"><span class="kpi-ic green" data-icon="calendar-check"></span><span>Active Days</span></div>
+            <div class="kpi-value" id="kpiDays">—</div>
+            <div class="kpi-delta">days with messages</div>
+            <div class="spark-wrap"><canvas id="sparkDays"></canvas><p class="spark-empty" id="sparkDaysEmpty" hidden>Nothing to show yet.</p></div>
+          </div>
+          <div class="card kpi" data-info-card="messages-per-day">
+            <div class="kpi-head"><span class="kpi-ic amber" data-icon="message"></span><span>Messages / Day</span></div>
+            <div class="kpi-value" id="kpiPerDay">—</div>
+            <div class="kpi-delta">average on active days</div>
+            <div class="spark-wrap"><canvas id="sparkPerDay"></canvas><p class="spark-empty" id="sparkPerDayEmpty" hidden>Nothing to show yet.</p></div>
+          </div>
+          <div class="card kpi" data-info-card="peak-hour">
+            <div class="kpi-head"><span class="kpi-ic violet" data-icon="clock"></span><span>Peak Hour</span></div>
+            <div class="kpi-value" id="kpiPeak">—</div>
+            <div class="kpi-delta" id="kpiPeakSub">busiest hour of day</div>
+            <div class="spark-wrap"><canvas id="sparkPeak"></canvas><p class="spark-empty" id="sparkPeakEmpty" hidden>Nothing to show yet.</p></div>
+          </div>
+        </section>
+
+        <!-- Main charts -->
+        <section class="chart-row">
+          <div class="card chart-card" data-info-card="messages-over-time">
+            <div class="card-head"><span class="card-head-ic" data-icon="trend"></span><h3>Messages Over Time</h3>
+              <div class="grain-menu" id="grainMenu">
+                <button class="grain-btn" id="grainBtn" aria-haspopup="menu"
+                        aria-expanded="false" aria-label="Chart granularity">
+                  <span class="ic" data-icon="settings"></span>
+                </button>
+                <div class="grain-pop" id="grainPop" role="menu" hidden>
+                  <div class="grain-pop-head">Granularity</div>
+                  <button class="grain-opt" role="menuitem" data-range="monthly">
+                    <span class="tick" data-icon="check"></span>
+                    <span class="name">Monthly</span><span class="meta"></span>
+                  </button>
+                  <button class="grain-opt" role="menuitem" data-range="weekly">
+                    <span class="tick" data-icon="check"></span>
+                    <span class="name">Weekly</span><span class="meta"></span>
+                  </button>
+                  <button class="grain-opt" role="menuitem" data-range="daily">
+                    <span class="tick" data-icon="check"></span>
+                    <span class="name">Daily</span><span class="meta"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="lineChart"></canvas>
+              <p class="chart-empty" id="lineChartEmpty" hidden>Nothing to show yet.</p>
+            </div>
+          </div>
+          <div class="card heat-card" data-info-card="heatmap">
+            <div class="card-head"><span class="card-head-ic" data-icon="calendar-check"></span><h3>Message Heatmap</h3></div>
+            <div class="heatmap" id="heatmap"></div>
+            <div class="heat-legend" id="heatLegend">
+              <span>Less</span>
+              <div class="heat-steps">
+                <i style="background:var(--heat-1)"></i><i style="background:var(--heat-2)"></i>
+                <i style="background:var(--heat-3)"></i><i style="background:var(--heat-4)"></i>
+                <i style="background:var(--heat-5)"></i>
+              </div>
+              <span>More</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Insights row -->
+        <section class="insight-row">
+          <div class="card rank-card media-card" data-info-card="media">
+            <div class="card-head"><span class="card-head-ic" data-icon="image"></span><h3>Media Breakdown</h3></div>
+            <div class="rank-list" id="mediaList"></div>
+            <div class="rank-total" id="mediaTotal" hidden></div>
+            <div class="pager" id="mediaPager" hidden>
+              <button class="pg-btn" id="mediaPrev" aria-label="Previous media types"><span class="ic" data-icon="chevron-left"></span></button>
+              <span class="pg-info" id="mediaPageInfo"></span>
+              <button class="pg-btn" id="mediaNext" aria-label="Next media types"><span class="ic" data-icon="chevron-right"></span></button>
+            </div>
+          </div>
+          <div class="card rank-card" data-info-card="emojis">
+            <div class="card-head"><span class="card-head-ic" data-icon="smile"></span><h3>Top Emojis</h3></div>
+            <div class="rank-list" id="emojiList"></div>
+            <div class="rank-total" id="emojiTotal" hidden></div>
+            <div class="pager" id="emojiPager" hidden>
+              <button class="pg-btn" id="emojiPrev" aria-label="Previous emojis"><span class="ic" data-icon="chevron-left"></span></button>
+              <span class="pg-info" id="emojiPageInfo"></span>
+              <button class="pg-btn" id="emojiNext" aria-label="Next emojis"><span class="ic" data-icon="chevron-right"></span></button>
+            </div>
+          </div>
+          <div class="card rank-card" data-info-card="keywords">
+            <div class="card-head"><span class="card-head-ic" data-icon="list"></span><h3>Top Keywords</h3></div>
+            <div class="rank-list" id="keywordList"></div>
+            <div class="rank-total" id="kwTotal" hidden></div>
+            <div class="pager" id="kwPager" hidden>
+              <button class="pg-btn" id="kwPrev" aria-label="Previous keywords"><span class="ic" data-icon="chevron-left"></span></button>
+              <span class="pg-info" id="kwPageInfo"></span>
+              <button class="pg-btn" id="kwNext" aria-label="Next keywords"><span class="ic" data-icon="chevron-right"></span></button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Message balance (who sent how much) -->
+        <section class="card balance-card" data-info-card="message-balance">
+          <div class="card-head"><span class="card-head-ic" data-icon="users"></span><h3>Message Balance</h3></div>
+          <div class="balance-bar" id="balanceBar"></div>
+          <div class="balance-legend" id="balanceLegend"></div>
+        </section>
+
+        <!-- Bottom insights: four standalone tiles, no wrapper card -->
+        <section class="insights-grid">
+          <div class="card insight" data-info-card="conversation-starter">
+            <div class="insight-top">
+              <span class="insight-ic blue" data-icon="rocket"></span>
+              <span class="insight-label">Conversation Starter</span>
+            </div>
+            <div class="insight-value" id="insStarter">—</div>
+            <div class="insight-sub" id="insStarterSub"></div>
+          </div>
+          <div class="card insight" data-info-card="longest-streak">
+            <div class="insight-top">
+              <span class="insight-ic violet" data-icon="flame"></span>
+              <span class="insight-label">Longest Streak</span>
+            </div>
+            <div class="insight-value" id="insStreak">—</div>
+            <div class="insight-sub" id="insStreakSub"></div>
+          </div>
+          <div class="card insight" data-info-card="night-owl">
+            <div class="insight-top">
+              <span class="insight-ic amber" data-icon="moon"></span>
+              <span class="insight-label">Night Owl</span>
+            </div>
+            <div class="insight-value" id="insNightOwl">—</div>
+            <div class="insight-sub" id="insNightOwlSub"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- ================= RIGHT: AI ASSISTANT ================= -->
+    <aside class="ai-panel">
+     <div class="ai-panel-inner">
+      <div class="ai-header">
+        <h2>AI Assistant</h2>
+        <div class="ai-actions">
+          <div class="mode-menu-wrap">
+            <button class="ai-mode-trigger" id="modeToggle" type="button" aria-label="AI processing mode: Cloud" aria-controls="modeMenu" aria-expanded="false" title="Choose Cloud or Local processing mode">
+              <span data-icon="cloud"></span>
+              <span class="ai-mode-label" id="modeLabel">Cloud</span>
+            </button>
+            <div class="mode-pop" id="modeMenu" role="menu" hidden>
+              <div class="mode-option-row">
+                <button id="cloudMode" class="mode-option active" type="button" role="menuitem">
+                  <span class="mode-option-ic" data-icon="cloud"></span><span><strong>Cloud</strong><small>Aggregate statistics only</small></span><span class="mode-check" aria-hidden="true">✓</span>
+                </button>
+                <button class="model-info-trigger" type="button" aria-label="Show Cloud model" aria-controls="cloudModelInfo" aria-expanded="false"><span data-icon="info"></span></button>
+              </div>
+              <!-- Read-only here: the model is resolved automatically and can
+                   be overridden from Settings → Models. -->
+              <div class="model-info-pop" id="cloudModelInfo" hidden><span>Model</span><strong id="cloudModelInfoName">{{ cloud_llm_name }}</strong></div>
+              <div class="mode-option-row">
+                <button id="localMode" class="mode-option" type="button" role="menuitem">
+                  <span class="mode-option-ic" data-icon="monitor"></span><span><strong>Local</strong><small>Messages stay on this computer</small></span><span class="mode-check" aria-hidden="true">✓</span>
+                </button>
+                <button class="model-info-trigger" type="button" aria-label="Show Local model" aria-controls="localModelInfo" aria-expanded="false"><span data-icon="info"></span></button>
+              </div>
+              <!-- Read-only here, like the Cloud one above. -->
+              <div class="model-info-pop" id="localModelInfo" hidden><span>Model</span><strong id="localModelInfoName">{{ local_llm_name }}</strong></div>
+              <div class="local-message-control" id="localMessageControl" hidden>
+                <span><strong>Message analysis</strong><small id="localAnalysisStatus">Off — statistics only</small></span>
+                <button id="localAnalysisToggle" class="setting-switch" type="button" role="switch" aria-checked="false" aria-label="Enable message analysis"><span></span></button>
+              </div>
+            </div>
+          </div>
+          <button class="chat-clear" id="chatClear" type="button" aria-label="Clear assistant conversation" title="Clear assistant conversation">
+            <span data-icon="trash"></span>
+          </button>
+          <button class="ai-collapse" id="aiCollapse" type="button" aria-label="Hide assistant" title="Hide assistant">
+            <span data-icon="chevron-right"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="suggested" id="suggested">
+        <button class="suggested-title" id="suggestToggle" type="button" aria-expanded="true">
+          <span>Suggested Prompts</span>
+          <span class="chev" data-icon="chevron"></span>
+        </button>
+        <div class="suggest-list">
+          <button class="suggest-btn" data-prompt="Give me a brief activity summary"><span class="ic" data-icon="list"></span> Brief activity summary</button>
+          <button class="suggest-btn" data-prompt="Compare how participants message"><span class="ic" data-icon="user"></span> Compare participants</button>
+          <button class="suggest-btn" data-prompt="When is this chat most active?"><span class="ic" data-icon="sparkles"></span> Most active times</button>
+          <button class="suggest-btn" data-prompt="Which keywords and emojis appear most often?"><span class="ic" data-icon="tag"></span> Frequent keywords &amp; emojis</button>
+        </div>
+      </div>
+
+      <!-- The welcome bubble is written by chat.js, which owns the Cloud and
+           Local wordings and re-prints one on every reset. -->
+      <div class="chat-scroll" id="chatScroll"></div>
+
+      <!-- Cloud mode needs a Groq API key; without one this points at where to
+           add it rather than letting the question fail on send. -->
+      <p class="quota-notice hidden" id="keyNotice">
+        Add your Groq API key in Settings → AI Provider to use Cloud mode.
+      </p>
+
+      <div class="chat-input" id="chatInputWrap">
+        <textarea id="chatInput" rows="1" placeholder="Ask anything..." autocomplete="off" maxlength="2000"></textarea>
+        <button id="sendBtn" class="send-btn" aria-label="Send"><span class="ic" data-icon="arrow-up"></span></button>
+      </div>
+     </div>
+    </aside>
+
+    <!-- ================= SETTINGS PANEL ================= -->
+    <!-- Shares the right column with the assistant: only one is ever mounted. -->
+    <aside class="ai-panel settings-panel" id="settingsPanel" aria-labelledby="settingsTitle">
+      <div class="ai-panel-inner">
+        <div class="ai-header">
+          <h2 id="settingsTitle">Chat Settings</h2>
+          <button class="ai-collapse" id="settingsClose" type="button" aria-label="Close chat settings">
+            <span data-icon="chevron-right"></span>
+          </button>
+        </div>
+
+        <div class="settings-body">
+          <!-- Everyone brings their own Groq key, so the app ships with none.
+               The key is held in this browser session on the server and is
+               never written to disk; restarting the app forgets it. -->
+          <section class="settings-section">
+            <h4>AI Provider</h4>
+            <p class="settings-copy">
+              Cloud mode uses your own Groq API key. Get a free one at
+              <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">console.groq.com</a>.
+            </p>
+            <p class="settings-status" id="keyStatus">Checking…</p>
+            <!-- Both hidden once a key is saved: there is nothing left to type
+                 until the saved one is removed. -->
+            <!-- A form rather than a div: browsers expect a masked field to
+                 sit in one, and Enter then submits without a key handler. It
+                 never posts anywhere; the submit is handled in JavaScript. -->
+            <form class="settings-field" id="keyField" autocomplete="off">
+              <label class="sr-only" for="groqKeyInput">Groq API key</label>
+              <input type="password" id="groqKeyInput" placeholder="gsk_…"
+                     autocomplete="off" spellcheck="false" />
+            </form>
+            <div class="settings-actions">
+              <button type="button" class="pop-btn" id="groqKeySave">
+                <span data-icon="check"></span> Save key
+              </button>
+              <button type="button" class="pop-btn danger" id="groqKeyRemove" hidden>
+                <span data-icon="trash"></span> Remove key
+              </button>
+              <!-- A key from .env cannot be deleted here, but it can be
+                   overridden for this session. -->
+              <button type="button" class="pop-btn" id="groqKeyChange" hidden>
+                <span data-icon="settings"></span> Use a different key
+              </button>
+            </div>
+            <p class="settings-error" id="keyError" hidden></p>
+            <p class="settings-note" id="keyNote">
+              Your key stays on this computer and is never written to disk.
+            </p>
+          </section>
+
+          <!-- Each provider is asked what it actually serves, so the right
+               model is picked without anyone typing an id. These overrides are
+               here rather than in the assistant menu because the automatic
+               choice is correct almost always. -->
+          <section class="settings-section">
+            <h4>Models</h4>
+            <div class="model-row" id="cloudModelControl">
+              <span><strong>Cloud</strong><small id="cloudModelStatus">Checking with Groq…</small></span>
+              <select id="cloudModelSelect" aria-label="Cloud model" hidden></select>
+              <button type="button" class="local-retry" id="cloudModelRetry" hidden>
+                Check again
+              </button>
+            </div>
+            <div class="model-row" id="localModelControl">
+              <span><strong>Local</strong><small id="localModelStatus">Looking for a local server…</small></span>
+              <select id="localModelSelect" aria-label="Local model" hidden></select>
+              <button type="button" class="local-retry" id="localModelRetry" hidden>
+                Check again
+              </button>
+            </div>
+          </section>
+
+          <!-- Chat controls remain visible before upload, but are unavailable
+               until there is a loaded chat to change or delete. -->
+          <section class="settings-section disabled" id="chatActions">
+            <h4>Chat</h4>
+            <div class="settings-actions">
+              <label class="pop-btn" for="fileInput">
+                <span data-icon="upload"></span> Change chat
+                <input type="file" id="fileInput" accept=".txt" hidden disabled />
+              </label>
+              <button type="button" class="pop-btn danger" id="clearDataBtn" disabled>
+                <span data-icon="trash"></span> Delete chat
+              </button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </aside>
+
+    <div class="ai-rail">
+      <!-- Mobile only: the Recap trigger joins the AI + Settings controls in a
+           single floating bottom bar. It proxies the topbar #recapBtn so there is
+           one open path and one enabled state. Hidden on desktop, where Recap
+           lives in the topbar. -->
+      <button class="rail-btn rail-recap" id="railRecapBtn" type="button" disabled
+              aria-label="Chat Recap" title="Chat Recap">
+        <span class="wt-marks" aria-hidden="true"><i class="m-circle"></i><i class="m-square"></i><i class="m-tri"></i></span>
+        <span class="rail-recap-label">Recap</span>
+      </button>
+      <button class="rail-btn" id="aiReopen" type="button" aria-label="Open AI Assistant">
+        <span class="rail-expand" data-icon="chevron-left"></span>
+        <span class="rail-bot" data-icon="bot"></span>
+      </button>
+      <button class="rail-btn rail-settings" id="railSettingsBtn" type="button"
+              aria-label="Chat Settings" title="Chat Settings" aria-controls="settingsPanel" aria-expanded="false">
+        <span data-icon="settings"></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="exitModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="exitModalTitle" aria-describedby="exitModalText">
+      <div class="modal-head">
+        <span class="modal-ic" data-icon="log-out"></span>
+        <h3 id="exitModalTitle">Exit to main menu?</h3>
+      </div>
+      <p class="local-confirm-copy" id="exitModalText">The currently loaded WhatsApp chat and its analysis will be cleared from this session.</p>
+      <div class="modal-actions">
+        <button type="button" class="dp-btn ghost" id="exitCancel">Cancel</button>
+        <button type="button" class="dp-btn danger" id="exitConfirm">Exit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clearing the assistant transcript does not remove the uploaded chat or
+       dashboard statistics, but still requires explicit confirmation. -->
+  <div class="modal-backdrop" id="clearConversationModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="clearConversationTitle" aria-describedby="clearConversationText">
+      <div class="modal-head">
+        <span class="modal-ic" data-icon="trash"></span>
+        <h3 id="clearConversationTitle">Clear AI conversation?</h3>
+      </div>
+      <p class="local-confirm-copy" id="clearConversationText">This removes all messages from the AI Assistant. Your uploaded WhatsApp chat and dashboard statistics will stay available.</p>
+      <div class="modal-actions">
+        <button type="button" class="dp-btn ghost" id="clearConversationCancel">Cancel</button>
+        <button type="button" class="dp-btn danger" id="clearConversationConfirm">Clear messages</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DELETE CONFIRMATION ================= -->
+  <!-- Deleting is the one irreversible action here, so it asks first. The data
+       and privacy notes live in this dialog: they are what the answer depends
+       on, and this is the moment they are actually worth reading. -->
+  <div class="modal-backdrop" id="deleteModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+      <div class="modal-head">
+        <span class="modal-ic" data-icon="trash"></span>
+        <h3 id="deleteModalTitle">Delete this chat?</h3>
+      </div>
+      <ul class="privacy-list">
+        <li><span data-icon="lock"></span> Your chat text is kept in server memory only, tied to this browser session, and is never written to disk.</li>
+        <li><span data-icon="refresh"></span> It is discarded when the server restarts, or when you delete it here.</li>
+        <li><span data-icon="bot"></span> The AI assistant receives summary statistics only, not your message contents.</li>
+      </ul>
+      <div class="modal-actions">
+        <button type="button" class="dp-btn ghost" id="deleteCancel">Cancel</button>
+        <button type="button" class="dp-btn danger" id="deleteConfirm">Delete chat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload failures need an interrupting explanation instead of a small
+       inline line below the picker, which is easy to miss after a skeleton. -->
+  <div class="modal-backdrop" id="uploadErrorModal" hidden>
+    <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="uploadErrorTitle"
+         aria-describedby="uploadErrorText">
+      <div class="modal-head">
+        <span class="modal-ic" data-icon="info"></span>
+        <h3 id="uploadErrorTitle">Couldn’t read this chat</h3>
+      </div>
+      <p class="local-confirm-copy" id="uploadErrorText"></p>
+      <div class="modal-actions">
+        <!-- The heading and this label are rewritten per caller: the same
+             dialog reports a failed upload and a failed filter. -->
+        <button type="button" class="dp-btn primary" id="uploadErrorClose">Try another file</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Local analysis is a separate, privacy-sensitive choice. The confirmation
+       is deliberately shown immediately before message text reaches the local
+       model server. -->
+  <div class="modal-backdrop" id="localConsentModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="localConsentTitle">
+      <div class="modal-head">
+        <span class="modal-ic local-modal-ic" data-icon="monitor"></span>
+        <h3 id="localConsentTitle">Enable local message analysis?</h3>
+      </div>
+      <p class="local-confirm-copy">The selected WhatsApp messages will be sent only to the local model server running on this computer (LM Studio or Ollama). They never leave it: not to Groq, not to any other cloud service. You can turn this off at any time.</p>
+      <p class="local-confirm-error" id="localConsentError" hidden></p>
+      <div class="modal-actions">
+        <button type="button" class="dp-btn ghost" id="localConsentCancel">Cancel</button>
+        <button type="button" class="dp-btn local-confirm" id="localConsentConfirm">Enable locally</button>
+      </div>
+    </div>
+  </div>
+
+  {% include "recap.html" %}
+
+  <script src="{{ url_for('static', filename='js/icons.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

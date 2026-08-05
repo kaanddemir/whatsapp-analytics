@@ -1,0 +1,844 @@
+/* ================= CHAT RECAP =================
+   Bauhaus: paper and ink with the three primaries, a seamless neo-geometric
+   mosaic for the ground, a strict twelve-column grid and flush-left type set in
+   Futura on bordered panels. It deliberately shares nothing with the dashboard's
+   soft green surfaces — the story is a portal into a different room, not a
+   continuation of the page behind it.
+
+   Order here follows recap.html: palette, shell and the mosaic first, then the
+   grid, the panel and the type scale, then one section per slide, then the final
+   card, the topbar trigger, responsive and reduced motion. */
+
+/* ---- Topbar trigger ----
+   The button is a small piece of the poster it opens into: ink ground, the
+   three primaries as circle/square/triangle, a squared frame and the label set
+   in Futura, uppercase and widely tracked. Among the rounded green pills it
+   reads as a deliberate portal rather than one more filter. */
+.recap-trigger {
+  --wt-ink: #141210; --wt-paper: #f2ede3;
+  --wt-red: #d92b1e; --wt-blue: #1b45b8; --wt-yellow: #f2b705;
+  display: flex; align-items: center; gap: 9px;
+  height: 42px; padding: 0 15px; flex-shrink: 0;
+  border: 2px solid var(--wt-ink); border-radius: 3px;
+  background: var(--wt-ink); color: var(--wt-paper);
+  font: 700 12px/1 Futura, "Avenir Next", "Century Gothic", var(--font);
+  letter-spacing: .16em; text-transform: uppercase; cursor: pointer;
+  position: relative;
+  transition: background .15s, color .15s, transform .15s;
+}
+/* The three marks, each a primitive from the deck's vocabulary. */
+.recap-trigger .wt-marks { display: inline-flex; align-items: center; gap: 4px; }
+.recap-trigger .wt-marks i { width: 9px; height: 9px; display: block; }
+.recap-trigger .m-circle { background: var(--wt-red); border-radius: 50%; }
+.recap-trigger .m-square { background: var(--wt-yellow); }
+.recap-trigger .m-tri {
+  background: var(--wt-blue); clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+/* Catch the eye once, not nag: the marks pop in one after another a couple of
+   times, then rest. */
+.recap-trigger:not(:disabled) .wt-marks i { animation: wt-wink 5s ease-in-out 1s infinite; }
+.recap-trigger .m-square { animation-delay: 1.12s; }
+.recap-trigger .m-tri { animation-delay: 1.24s; }
+@keyframes wt-wink {
+  0%, 8%, 100% { transform: none; }
+  3% { transform: translateY(-2px) scale(1.15); }
+}
+/* Hover inverts to the paper ground, the way a two-colour print flips. */
+.recap-trigger:hover:not(:disabled) { background: var(--wt-paper); color: var(--wt-ink); }
+.recap-trigger:active:not(:disabled) { transform: translateY(1px); }
+.recap-trigger:disabled {
+  cursor: default; background: var(--page); color: var(--muted);
+  border-color: var(--hairline-2); opacity: .7;
+}
+/* Greyed out with no chat: the primaries go quiet too. */
+.recap-trigger:disabled .wt-marks i { background: var(--muted); opacity: .55; }
+@media (prefers-reduced-motion: reduce) {
+  .recap-trigger .wt-marks i { animation: none; }
+}
+/* The topbar drops its own title at 700px; the button follows suit and keeps
+   only its marks so the pills still share one row. */
+/* On phone and tablet Recap moves into the floating bottom bar (.rail-recap
+   in styles.css), which the rail turns into at this same 1024px breakpoint, so
+   the topbar trigger is hidden across the whole range to avoid showing both. */
+@media (max-width: 1024px) {
+  .recap-trigger { display: none; }
+}
+
+/* ================= SHELL ================= */
+.recap-overlay {
+  /* Paper, ink and the three primaries. One green is kept so the story still
+     belongs to a WhatsApp app. */
+  --paper: #f2ede3;
+  --ink: #141210;
+  --red: #d92b1e;
+  --blue: #1b45b8;
+  --yellow: #f2b705;
+  --w-green: #1faa55;
+  /* A deep navy ground, warmer and richer than the near-black ink. */
+  --navy: #121c40;
+
+  /* Set per slide by recap.js from the template's data-bg/fg/accent. */
+  --w-bg: var(--paper);
+  --w-fg: var(--ink);
+  --w-accent: var(--red);
+
+  /* Futura is the Bauhaus-era geometric sans and ships with macOS; Avenir Next
+     covers the rest. No webfont, so the CSP story is unchanged. */
+  --font-display: Futura, "Avenir Next", "Century Gothic", "Trebuchet MS",
+                  system-ui, sans-serif;
+
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--w-bg); color: var(--w-fg);
+  font-family: var(--font-display);
+  overflow: hidden; user-select: none;
+  transition: background-color .55s ease, color .55s ease;
+  animation: recap-in .3s ease both;
+}
+.recap-overlay[hidden] { display: none; }
+@keyframes recap-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* Two broad colour washes keep every poster tonal rather than flat. Their
+   palette comes from the active slide, so the gradient changes with the story
+   without introducing a separate per-slide background system. */
+.recap-bg { position: absolute; inset: 0; overflow: hidden; }
+.recap-bg i {
+  position: absolute; display: block; border-radius: 50%;
+  transition: background .55s ease;
+}
+/* The washes now sit under a full-bleed mosaic, so they are dimmed to a hint of
+   tonal depth: at their old strength they fought the pattern for the ground. */
+.recap-bg i:nth-child(1) {
+  width: 108vmax; height: 108vmax; top: -42vmax; left: -30vmax;
+  background: radial-gradient(circle, var(--w-accent) 0%, transparent 68%);
+  opacity: .18;
+}
+.recap-bg i:nth-child(2) {
+  width: 92vmax; height: 92vmax; bottom: -38vmax; right: -28vmax;
+  background: radial-gradient(circle, var(--w-fg) 0%, transparent 66%);
+  opacity: .12;
+}
+
+/* ---- The mosaic ----
+   A seamless neo-geometric ground, after the printed neo-geo textiles: solid
+   cells, each carrying one quarter disc in a second colour. It is gradients
+   only — no image to load, so the CSP story is unchanged — and its colours come
+   from the slide's own --w-* properties, which means the field repaints itself
+   on every slide with no JavaScript at all.
+
+   One layer, one period. An earlier version overlaid a second field on a wider
+   period and the two read as noise rather than as a pattern; the variety here
+   comes from leaving one cell of each supertile plain instead.
+
+   The conic gradient paints the four cells; the radial layers above it are the
+   discs, each anchored in its cell's outer corner with a radius given as a
+   length so neighbouring tiles meet exactly rather than at a rounded-off
+   percentage. */
+.recap-bg::before {
+  content: "";
+  /* Bled past the frame so the blur feathers into the edges of the screen
+     rather than leaving a soft grey border around the poster. */
+  position: absolute; inset: -8%;
+  --tile: clamp(110px, 18vmin, 260px);
+  --m1: var(--w-accent);
+  --m2: var(--w-fg);
+  --m3: color-mix(in srgb, var(--w-fg) 20%, var(--w-bg));
+  --m4: color-mix(in srgb, var(--w-accent) 55%, var(--w-fg));
+  background-color: var(--w-bg);
+  background-image:
+    radial-gradient(circle at 0 0,       var(--m2) 0 var(--tile), transparent 0),
+    radial-gradient(circle at 100% 0,    var(--m3) 0 var(--tile), transparent 0),
+    radial-gradient(circle at 100% 100%, var(--m1) 0 var(--tile), transparent 0),
+    conic-gradient(from 90deg at 50% 50%,
+                   var(--m1) 0 25%, var(--m3) 0 50%,
+                   var(--m4) 0 75%, var(--m2) 0);
+  background-size: calc(var(--tile) * 2) calc(var(--tile) * 2);
+  /* Bold colour, thrown out of focus: the mural stays a mural, and the panels
+     over it are the only crisp thing on screen. */
+  opacity: .5;
+  filter: blur(clamp(2px, .45vmin, 6px));
+}
+
+/* ---- Progress ----
+   Squared off, in the slide's own ink: a Bauhaus poster has no rounded corners. */
+.recap-progress {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 4;
+  display: flex; gap: 5px;
+  padding: max(16px, env(safe-area-inset-top)) clamp(26px, 6vw, 110px) 0;
+}
+.wp-seg { flex: 1; height: 4px; background: var(--w-fg); opacity: .22; overflow: hidden; }
+.wp-fill { display: block; height: 100%; background: var(--w-fg); transform: scaleX(0); transform-origin: left; }
+/* Slides already watched stay filled; only the current one animates. Advance is
+   driven by this animation's `animationend`, so the bar can never disagree with
+   what is on screen. */
+.wp-seg.done { opacity: 1; }
+.wp-seg.done .wp-fill { transform: scaleX(1); }
+.wp-seg.active { opacity: 1; }
+.wp-seg.active .wp-fill { animation: recap-fill var(--dur, 5000ms) linear forwards; }
+.recap-overlay.paused .wp-seg.active .wp-fill { animation-play-state: paused; }
+@keyframes recap-fill { to { transform: scaleX(1); } }
+
+/* Editorial marker: which poster of how many. */
+.recap-count {
+  position: absolute; z-index: 4; margin: 0;
+  top: calc(max(16px, env(safe-area-inset-top)) + 18px);
+  left: clamp(26px, 6vw, 110px);
+  font-size: 12px; font-weight: 600; letter-spacing: .2em;
+  font-variant-numeric: tabular-nums; opacity: .6;
+}
+
+.recap-controls {
+  position: absolute; z-index: 6;
+  top: calc(max(16px, env(safe-area-inset-top)) + 14px);
+  right: clamp(26px, 6vw, 110px);
+  display: flex; gap: 8px;
+}
+.recap-cbtn {
+  width: 38px; height: 38px; display: grid; place-items: center;
+  border: 2px solid var(--w-fg); border-radius: 0; cursor: pointer;
+  background: transparent; color: var(--w-fg);
+  transition: background .15s, color .15s;
+}
+.recap-cbtn:hover { background: var(--w-fg); color: var(--w-bg); }
+.recap-cbtn svg { width: 17px; height: 17px; }
+
+/* Invisible halves for tap navigation. They sit under the stage so a real
+   button on the final card is still clickable. */
+.recap-tap {
+  position: absolute; top: 0; bottom: 0; z-index: 2;
+  border: none; background: none; padding: 0; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.recap-tap.prev { left: 0; width: 30%; }
+.recap-tap.next { left: 30%; right: 0; width: auto; }
+
+.recap-paused-pip {
+  position: absolute; z-index: 6; bottom: max(24px, env(safe-area-inset-bottom));
+  left: 50%; translate: -50% 0;
+  padding: 7px 16px; background: var(--w-fg); color: var(--w-bg);
+  font-size: 11px; font-weight: 600; letter-spacing: .2em;
+}
+.recap-paused-pip[hidden] { display: none; }
+
+/* ---- Loading, flat ----
+   No spinner and no orbit: three primaries keep time in a flush row, the
+   editorial line sets beneath them with the caption tick. Same palette and
+   Futura tracking as every slide, nothing that overlaps or rotates. */
+.recap-status {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: clamp(20px, 3.4vh, 34px);
+  animation: recap-in .4s ease both;
+}
+.recap-status[hidden] { display: none; }
+/* The header band runs edge to edge, exactly as the recap card's does, so the
+   padding belongs to the body rather than the panel. */
+/* Out-ranks .w-panel's own padding, which would otherwise inset the band. */
+.w-panel.recap-status-card { width: min(90vw, 400px); padding: 0; overflow: hidden; }
+/* The wait has no composition of its own to hold, so it centres: the marks and
+   the line sit on the card's axis rather than flush left. */
+.recap-status-body {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: clamp(16px, 2.6vh, 26px);
+  padding: clamp(24px, 3.4vw, 38px) clamp(22px, 3vw, 34px);
+}
+
+.recap-load { display: flex; align-items: flex-end; gap: clamp(9px, 1.4vw, 16px); }
+/* Squared off, in the three primaries; each steps up on its own beat so the
+   row reads as a wave rather than a blink. */
+.wl-cell {
+  width: clamp(16px, 2.4vmin, 22px); height: clamp(16px, 2.4vmin, 22px);
+  transform-origin: bottom;
+  animation: wl-step 1.2s ease-in-out infinite;
+}
+.wl-cell.red    { background: var(--red); }
+.wl-cell.yellow { background: var(--yellow); animation-delay: .16s; }
+.wl-cell.blue   { background: var(--blue);   animation-delay: .32s; }
+
+.recap-status-line {
+  margin: 0; font-size: clamp(15px, 1.7vmin, 18px); font-weight: 700;
+  letter-spacing: .04em; color: var(--w-fg);
+}
+
+@keyframes wl-step {
+  0%, 100% { transform: translateY(0) scaleY(1); opacity: .5; }
+  40%      { transform: translateY(calc(clamp(16px, 2.4vmin, 22px) * -.7)) scaleY(1.18); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wl-cell { animation-duration: 0s !important; opacity: 1; }
+}
+
+/* ================= THE GRID =================
+   The slide is the frame. Twelve columns by eight rows, and every block picks
+   a placement rather than inventing one — five placements across thirteen
+   slides means a repeat is never adjacent to itself. */
+.recap-stage { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.recap-stage button { pointer-events: auto; }
+/* Set by recap.js when the final card has more cells than shrinking can fit.
+   Scrolling has to claim pointer events back from the tap-to-navigate halves. */
+.recap-stage.scrolls { overflow-y: auto; pointer-events: auto; }
+/* Only shown when the recap failed to build; it sits under the status line. */
+.recap-retry { margin-top: 14px; flex: none; padding: 8px 18px; }
+
+.recap-slide {
+  --pad-x: clamp(26px, 6vw, 110px);
+  --pad-y: clamp(74px, 10vh, 124px);
+  position: absolute; inset: 0;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+  column-gap: clamp(10px, 1.8vw, 26px);
+  padding: var(--pad-y) var(--pad-x);
+}
+/* Everything a slide places sits above the mosaic. */
+.w-block, .w-panel, .w-hint { position: relative; z-index: 1; min-width: 0; }
+
+/* ---- The panel ----
+   One surface, used by every slide: a bordered plane with a hard offset shadow,
+   tinted a shade of the slide's own accent. It is what lifts the type off the
+   patterned ground, so the mosaic can run at full bleed underneath. */
+.w-panel {
+  padding: clamp(20px, 2.6vw, 40px);
+  /* Not quite opaque, over a blurred ground: the mural shows through as colour
+     without ever showing through as shape, so the type keeps its contrast. */
+  background: color-mix(in srgb,
+              color-mix(in srgb, var(--w-bg) 88%, var(--w-accent)) 92%, transparent);
+  backdrop-filter: blur(8px) saturate(1.12);
+  border: 3px solid var(--w-accent);
+  box-shadow: clamp(8px, 1.2vw, 20px) clamp(8px, 1.2vw, 20px) 0
+              color-mix(in srgb, var(--w-accent) 28%, transparent);
+}
+
+/* Copy-led slides should frame their words, not the entire grid cell. Charts,
+   ranked lists and the final recap card keep their dedicated measured layouts;
+   ordinary metric panels shrink to their content with a readable upper bound. */
+.w-block.w-panel {
+  inline-size: fit-content;
+  max-inline-size: min(100%, clamp(360px, 42vw, 640px));
+  justify-self: start;
+}
+.at-mid.w-block.w-panel { justify-self: center; }
+.at-br.w-block.w-panel { justify-self: end; }
+
+/* A lone panel takes a generous share of the frame; the placement classes only
+   decide which corner it is pinned to. */
+.at-tl   { grid-column: 1 / 9;  grid-row: 1 / 6; align-self: start; }
+.at-left { grid-column: 1 / 9;  grid-row: 2 / 8; align-self: center; }
+.at-bl   { grid-column: 1 / 9;  grid-row: 3 / 9; align-self: end; }
+.at-mid  { grid-column: 3 / 11; grid-row: 2 / 8; align-self: center; }
+.at-br   { grid-column: 5 / 13; grid-row: 3 / 9; align-self: end; text-align: right; }
+.at-br .w-note { margin-left: auto; }
+/* Statistics and rankings now live under their explanatory copy in one shared
+   panel, so each slide reads as one compact story rather than two loose cards. */
+.w-combined {
+  grid-column: 2 / 12; grid-row: 1 / 9;
+  align-self: center; justify-self: center;
+  box-sizing: border-box;
+  width: min(100%, 900px);
+  display: flex; flex-direction: column;
+  gap: clamp(16px, 2.6vh, 28px);
+}
+.w-combined .w-copy { min-width: 0; }
+.w-combined .w-hours,
+.w-combined .w-heat,
+.w-combined .w-split,
+.w-combined .w-podium,
+.w-combined .w-wordlist,
+.w-combined .w-people {
+  box-sizing: border-box;
+  border-top: 2px solid color-mix(in srgb, var(--w-accent) 48%, transparent);
+  padding-top: clamp(14px, 2vh, 22px);
+}
+.w-combined .w-podium,
+.w-combined .w-wordlist {
+  width: 100%;
+  height: clamp(210px, 30vh, 320px);
+}
+
+/* The two ranked-list slides use the same measured figure area. Their content
+   differs (emoji glyphs versus words), but neither ranking should make its
+   panel look taller or shorter than the other. The value is derived from the
+   available slide height and capped for very large screens. */
+.recap-slide {
+  --rank-panel-height: clamp(300px, 44vh, 420px);
+}
+.w-podium.w-panel,
+.w-wordlist.w-panel {
+  box-sizing: border-box;
+  width: min(100%, clamp(360px, 36vw, 600px));
+  height: var(--rank-panel-height);
+  justify-self: center;
+  overflow: hidden;
+}
+
+/* ================= TYPE ================= */
+/* One number is still the point of most slides, but it is now set inside a
+   panel rather than bleeding off the frame, so the whole scale steps down: a
+   value that overflows its panel would break the composition, not extend it. */
+.w-hero {
+  margin: 0; font-size: var(--hero-size, clamp(64px, 11vw, 180px)); font-weight: 700;
+  line-height: .84; letter-spacing: -.045em; white-space: nowrap;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+/* The counter begins at 0, but the surrounding panel reserves its final width
+   so the bordered card stays still while the number increments. */
+.w-hero.w-counter { min-inline-size: calc(var(--counter-chars) * 1ch); }
+/* Some counters live inside a sentence rather than a hero heading. Give those
+   inline values their final width as well, so their parent panel cannot reflow
+   or shift while thousands separators appear during the count-up. */
+.w-counter:not(.w-hero) {
+  display: inline-block;
+  min-inline-size: calc(var(--counter-chars) * 1ch);
+  font-variant-numeric: tabular-nums;
+}
+/* For values that are words or clock ranges rather than a single count. */
+.w-hero.mid { font-size: clamp(38px, 6vw, 92px); letter-spacing: -.03em; line-height: .92; white-space: normal; overflow-wrap: anywhere; }
+/* The heatmap's weekday and hour form one headline, but separate lines keep
+   the time from wrapping beside the day on narrower recap frames. */
+.s-heatmap .heat-time { margin-top: clamp(18px, 2.2vh, 30px); font-size: clamp(30px, 4.6vw, 70px); }
+/* .92 rather than .9: at this size the descender of a "p" reaches the line
+   below it, and the name under the cover title is set tight against it. */
+.w-title { margin: 0; font-size: clamp(44px, 7.5vw, 108px); font-weight: 700; line-height: .92; letter-spacing: -.04em; }
+.w-title.small { font-size: clamp(32px, 5vw, 72px); }
+/* Lowercase and widely tracked, after Bayer's universal alphabet: it reads as
+   deliberate rather than as a missing capital. */
+.w-eyebrow {
+  margin: 0 0 clamp(10px, 1.4vh, 20px);
+  font-size: clamp(12px, 1.4vw, 17px); font-weight: 600;
+  letter-spacing: .22em; text-transform: lowercase; opacity: .7;
+}
+.w-lede { margin: 0; font-size: clamp(19px, 2.4vw, 34px); font-weight: 600; letter-spacing: -.01em; }
+.w-note {
+  margin: clamp(12px, 1.8vh, 22px) 0 0; max-width: 36ch;
+  font-size: clamp(14px, 1.4vw, 19px); font-weight: 500; line-height: 1.55; opacity: .78;
+}
+/* Keep whole values (a time range, a date, a count) from splitting across a
+   line at their inner space or hyphen. */
+.w-note b { font-weight: 700; opacity: 1; white-space: nowrap; }
+.w-name { margin: clamp(12px, 2vh, 24px) 0 0; font-size: clamp(20px, 2.6vw, 36px); font-weight: 700; overflow-wrap: anywhere; }
+.s-cover .w-note { margin-top: 6px; }
+.w-hint {
+  grid-column: 8 / 13; grid-row: 8 / 9; align-self: end; text-align: right;
+  margin: 0; font-size: 11.5px; letter-spacing: .2em; opacity: .5;
+}
+
+/* ================= s-hour ================= */
+.w-hours {
+  /* Tall enough to read as a chart inside its panel rather than as a strip. */
+  height: clamp(150px, 34vh, 320px);
+  display: flex; align-items: flex-end; gap: clamp(3px, .55vw, 12px);
+}
+.w-hb {
+  flex: 1; min-height: 4px; height: var(--h);
+  background: var(--w-fg); opacity: .34; transform-origin: bottom;
+  animation: recap-grow .55s cubic-bezier(.22, 1, .36, 1) both;
+  animation-delay: calc(360ms + var(--i) * 26ms);
+}
+.w-hb.peak { background: var(--w-accent); opacity: 1; }
+/* A bucket with no messages reads as the chart's baseline, not as a short bar.
+   The min-height floor has to go with it or the two look the same. */
+.w-hb.empty { min-height: 0; opacity: .16; }
+@keyframes recap-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.w-axis {
+  display: flex; justify-content: space-between; margin: 10px 0 0;
+  font-size: 11.5px; font-weight: 600; letter-spacing: .18em; opacity: .5;
+}
+
+/* ================= s-heatmap =================
+   Seven rows of twenty-four, the week as a block. The cells carry no gaps of
+   their own beyond a hairline, so the grid reads as one printed field rather
+   than as a scatter of squares. */
+.w-heat {
+  display: grid;
+  grid-template-columns: auto repeat(24, minmax(0, 1fr));
+  gap: clamp(2px, .35vw, 4px);
+  align-items: center;
+}
+.w-heat-day {
+  padding-right: clamp(6px, .8vw, 10px);
+  font-size: clamp(9px, .95vw, 12px); font-weight: 700;
+  letter-spacing: .08em; opacity: .55;
+}
+.w-hc {
+  /* Square cells, so the block keeps its proportions at any panel width. */
+  aspect-ratio: 1; min-height: 6px;
+  /* --v is the square-rooted share of the busiest hour, and it has to live in
+     the fill rather than in `opacity`: the pop-in animation ends on opacity 1
+     with `both`, which would flatten every cell to full strength the moment it
+     landed. The floor keeps an empty hour visible as part of the grid rather
+     than as a hole in it. */
+  background: color-mix(in srgb,
+              var(--w-accent) calc(8% + var(--v, 0) * 92%), transparent);
+  animation: recap-pop .5s cubic-bezier(.34, 1.56, .64, 1) both;
+  animation-delay: calc(260ms + var(--i, 0) * 22ms);
+}
+/* The axis under the block spans the cells, not the weekday column. */
+.s-heatmap .w-axis { margin-left: clamp(14px, 1.8vw, 22px); }
+
+/* ================= RANKED LISTS =================
+   Emoji and keyword rankings share a dense tile grid. Each result owns a
+   visible area, so a short ranking fills its panel instead of floating in it. */
+.w-podium,
+.w-wordlist {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+  gap: clamp(7px, .9vw, 12px);
+}
+.w-pod,
+.w-word {
+  min-width: 0;
+  padding: clamp(10px, 1.2vw, 16px);
+  background: color-mix(in srgb, var(--w-bg) 72%, var(--w-accent));
+  border-left: 4px solid var(--w-accent);
+}
+.w-pod:last-child:nth-child(odd),
+.w-word:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.w-pod {
+  --d: clamp(34px, 4.4vmin, 50px);
+  display: grid; grid-template-columns: 2.5ch var(--d) 1fr; align-items: center;
+  gap: clamp(8px, 1vw, 14px);
+  animation: recap-pop .6s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+.w-pod.r1 { animation-delay: .3s; }
+.w-pod.r2 { animation-delay: .42s; }
+.w-pod.r3 { animation-delay: .54s; }
+.w-pod.r4 { animation-delay: .66s; }
+.w-pod.r5 { animation-delay: .78s; }
+/* Rank in the first column, editorial and tracked. */
+.w-pod::before {
+  font-size: clamp(14px, 1.5vw, 20px); font-weight: 700; letter-spacing: .12em;
+  font-variant-numeric: tabular-nums; opacity: .55;
+}
+.w-pod.r1::before { content: "01"; }
+.w-pod.r2::before { content: "02"; }
+.w-pod.r3::before { content: "03"; }
+.w-pod.r4::before { content: "04"; }
+.w-pod.r5::before { content: "05"; }
+/* The glyphs sit on their own, no circle behind them. */
+.w-pod .g {
+  display: grid; place-items: center;
+  width: var(--d); height: var(--d); font-size: calc(var(--d) * .62);
+  line-height: 1;
+}
+.w-pod .c {
+  justify-self: end; text-align: right;
+  font-size: clamp(18px, 2vw, 28px); font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.w-pod:not(.r1) .c { opacity: .72; }
+.w-pod.empty,
+.w-word.empty { opacity: .32; }
+.w-pod.empty .g,
+.w-word.empty .t { font-weight: 500; }
+@keyframes recap-pop { from { opacity: 0; transform: scale(.5); } to { opacity: 1; transform: none; } }
+
+.w-word {
+  display: grid; grid-template-columns: 2.2ch minmax(0, 1fr) auto; align-items: center;
+  gap: clamp(8px, 1vw, 14px);
+}
+.w-word .r {
+  font-size: clamp(12px, 1.1vw, 16px); font-weight: 700; color: var(--w-accent);
+  letter-spacing: .1em; font-variant-numeric: tabular-nums;
+}
+.w-word .r::before { content: "0"; }
+.w-word .t { font-size: clamp(18px, 2.1vw, 30px); font-weight: 700; letter-spacing: -.03em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.w-word .c {
+  justify-self: end; font-size: clamp(13px, 1.2vw, 18px); font-weight: 700;
+  font-variant-numeric: tabular-nums; opacity: .55;
+}
+/* The leader is marked with stronger contrast, not a larger tile. */
+.w-word:first-child { background: color-mix(in srgb, var(--w-bg) 58%, var(--w-accent)); }
+.w-word:first-child .c { opacity: .9; }
+@keyframes recap-grow-x { to { transform: scaleX(1); } }
+
+/* ================= s-balance ================= */
+.w-split { display: flex; height: clamp(30px, 6vh, 62px); gap: 4px; }
+.w-split i {
+  display: block; height: 100%; width: var(--w); min-width: 4px; background: var(--c);
+  transform: scaleX(0); transform-origin: left;
+  animation: recap-grow-x .8s cubic-bezier(.22, 1, .36, 1) both;
+  animation-delay: calc(300ms + var(--i) * 130ms);
+}
+/* Everyone past the legible segments, summed. Muted so it reads as the tail of
+   the bar rather than as another named participant. */
+.w-split i.rest { opacity: .28; }
+/* A responsive legend: as many columns as fit, so it is four across on a wide
+   screen and folds down to one on a phone without any breakpoint of its own. */
+.w-people {
+  display: grid;
+  /* Inside half a frame this is one or two columns rather than four, without a
+     breakpoint of its own. */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: clamp(14px, 2.2vh, 26px) clamp(18px, 2.4vw, 40px);
+  margin-top: clamp(16px, 3vh, 32px);
+}
+.w-person {
+  display: grid; grid-template-columns: auto 1fr; align-items: baseline;
+  gap: 4px clamp(10px, 1.2vw, 18px); min-width: 0;
+}
+.w-person .d { width: clamp(14px, 1.4vw, 22px); height: clamp(14px, 1.4vw, 22px); background: var(--c); align-self: center; }
+.w-person .n { font-size: clamp(18px, 2.3vw, 34px); font-weight: 700; letter-spacing: -.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The percentage carries the person's own colour, matching the bar and swatch. */
+.w-person .p { grid-column: 2; font-size: clamp(26px, 3.4vw, 52px); font-weight: 700; letter-spacing: -.03em; color: var(--c); line-height: 1; }
+.w-person .s { grid-column: 2; font-size: clamp(12px, 1.2vw, 15px); opacity: .6; margin-top: 2px; }
+
+/* ================= s-media ================= */
+.s-media .w-hero {
+  /* Media totals can be six digits long; reserve a real line below the number
+     instead of letting its oversized glyphs collide with the description. */
+  font-size: var(--hero-size, clamp(58px, 9vw, 150px));
+  line-height: .82;
+}
+.s-media .w-lede {
+  margin-top: clamp(14px, 2vh, 24px);
+  line-height: 1.1;
+}
+.w-chips { display: flex; flex-wrap: wrap; gap: clamp(8px, 1vw, 14px); margin-top: clamp(14px, 2vh, 24px); }
+/* Solid squared pills rather than outlined boxes: the ink carries the label. */
+.w-chip {
+  padding: 9px 17px; background: var(--w-fg); color: var(--w-bg);
+  font-size: clamp(12px, 1.2vw, 16px); font-weight: 700; letter-spacing: .04em;
+}
+
+/* ================= s-final =================
+   A bounded card rather than a poster: this is the frame that gets saved.
+
+   The slide is the scroll container, not the card. The card is always laid out
+   at its full natural height, and a frame too short to hold it scrolls instead
+   of cutting the last cells off — which is what a height-capped card with a
+   scrolling body did on any window under about 900px tall, silently, because
+   the scrollbar is hidden. One rule for every size: the phone already worked
+   this way, and now the desktop does too. */
+.recap-slide.s-final {
+  display: flex; flex-direction: column; align-items: center;
+  /* `safe` is what makes centring possible in a scroll container: it centres the
+     card while it fits and falls back to the top edge the moment it does not.
+     Plain `center` would slide the card's header up under the pause and close
+     buttons, and whatever goes past the top edge cannot be scrolled back. */
+  justify-content: safe center;
+  overflow-y: auto; scrollbar-width: none;
+  /* Clear of the progress bar, the counter and the controls, for when the card
+     is too tall to centre and sits against the top edge instead. */
+  padding-top: calc(max(16px, env(safe-area-inset-top)) + clamp(78px, 11vh, 104px));
+}
+.recap-slide.s-final::-webkit-scrollbar { width: 0; }
+.s-final .w-card {
+  /* The card has the frame to itself now that the actions panel is gone, so it
+     takes the width that panel used to share. */
+  display: flex; flex-direction: column; flex: none;
+  width: min(100%, 700px);
+  /* Room for the offset shadow, which is outside the box and would otherwise be
+     clipped by the scroll container. */
+  margin-bottom: clamp(20px, 3vh, 34px);
+  /* The header runs edge to edge, so the padding lives on the body instead. */
+  padding: 0; overflow: hidden;
+}
+/* Applied only when a short viewport needs the full share card condensed into
+   the available story frame. Transform preserves the card's proportions. */
+.s-final .w-card.fit-card { transform: scale(var(--card-scale)); transform-origin: top center; }
+.w-card-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px clamp(18px, 2vw, 26px); background: var(--w-accent); color: var(--paper); }
+.w-card-badge { margin: 0; font-size: 11px; font-weight: 700; letter-spacing: .24em; color: inherit; }
+.w-card-edition { padding: 5px 8px; border: 1px solid color-mix(in srgb, var(--paper) 70%, transparent); font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+/* Save and replay, set in the header band ahead of the edition marker: squared
+   outlines in the band's own paper, so they read as part of the print rather
+   than as browser chrome dropped on top of it. */
+.w-card-tools { display: flex; align-items: center; gap: 8px; }
+.w-tool {
+  display: grid; place-items: center; width: 26px; height: 26px; padding: 0;
+  border: 1px solid color-mix(in srgb, var(--paper) 70%, transparent);
+  background: transparent; color: inherit; cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.w-tool svg { width: 13px; height: 13px; }
+/* Inverts to the paper ground on hover, the way the topbar trigger does. */
+.w-tool:hover { background: var(--paper); color: var(--w-accent); border-color: var(--paper); }
+.w-tool:active { transform: translateY(1px); }
+.w-tool:focus-visible { outline: 2px solid var(--paper); outline-offset: 2px; }
+/* One vertical rhythm for the whole body, so the blocks stay evenly spaced
+   however tall each of them turns out to be. */
+/* No scrolling of its own: the body is always drawn whole and the slide around
+   it is what scrolls, so a block can never be cropped off the bottom of the
+   card. The gap alone sets the rhythm now that there is no spare height to
+   distribute. */
+.w-card-body {
+  display: flex; flex-direction: column;
+  gap: clamp(8px, 1.1vh, 14px);
+  padding: clamp(16px, 2vw, 26px);
+}
+/* The accent bar under the title replaces the old free-standing rule: same
+   division, one less element and one less block of vertical space. */
+.w-card-title { padding-bottom: clamp(8px, 1.1vh, 13px); border-bottom: 4px solid var(--w-accent); }
+.w-card-name { margin: 0 0 clamp(5px, .8vh, 9px); font-size: clamp(24px, 2.7vw, 36px); font-weight: 700; letter-spacing: -.03em; line-height: 1.02; overflow-wrap: anywhere; }
+.w-card-span { margin: 0; font-size: 12px; font-weight: 500; letter-spacing: .02em; opacity: .62; }
+/* Headline band: the total sits on the accent, and the daily average rides the
+   right edge of the same band, set small — it is the rate of the number beside
+   it, not a stat of its own. */
+.w-card-hero {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 14px;
+  padding: clamp(10px, 1.3vw, 15px) clamp(13px, 1.6vw, 18px);
+  background: var(--w-accent); color: var(--paper);
+}
+.w-card-hero .hero-main, .w-card-hero .hero-side { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.w-card-hero .hero-side { align-items: flex-end; text-align: right; }
+.w-card-hero b { font-size: clamp(34px, 4.4vw, 56px); font-weight: 700; letter-spacing: -.04em; line-height: .92; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.w-card-hero .hero-side b { font-size: clamp(18px, 2vw, 26px); }
+.w-card-hero span { font-size: 10px; font-weight: 600; letter-spacing: .18em; opacity: .8; }
+/* Three cells across make the final recap read as a broader dashboard rather
+   than a tall two-column list. Cells without data are removed in JS; a lone
+   final cell is centred instead of leaving the last row visually lopsided. */
+.w-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(6px, .8vw, 9px); }
+.w-cell:last-child:nth-child(3n + 1) { grid-column: 2; }
+/* Night Owl's longer caption benefits from the full row instead of sitting in
+   one narrow cell beneath an otherwise complete three-column grid. */
+.w-card-grid .w-cell[data-cell="owl"] { grid-column: 1 / -1; }
+.w-cell {
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; min-width: 0;
+  padding: clamp(7px, .85vw, 10px) clamp(8px, 1vw, 12px);
+  background: color-mix(in srgb, var(--w-bg) 78%, var(--w-accent));
+}
+/* Never wrap: a value breaking over two lines makes its cell taller than the
+   one beside it and the whole grid goes crooked. A name too long for its
+   column is clipped instead. */
+.w-cell b {
+  font-size: clamp(17px, 1.9vw, 25px); font-weight: 700; letter-spacing: -.03em; line-height: 1.05;
+  font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.w-cell span { font-size: 9px; font-weight: 600; letter-spacing: .1em; opacity: .72; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Signature line: glyph and caption share a baseline row rather than stacking. */
+.w-card-emoji {
+  display: flex; align-items: center; gap: clamp(9px, 1.2vw, 14px);
+  padding: clamp(7px, .9vw, 11px) clamp(11px, 1.4vw, 15px);
+  background: color-mix(in srgb, var(--yellow) 34%, var(--w-bg));
+}
+.w-card-emoji b { font-size: clamp(24px, 2.7vw, 34px); line-height: 1; }
+.w-card-emoji span { font-size: 10px; font-weight: 700; letter-spacing: .1em; opacity: .8; }
+/* The imprint and the save confirmation share one line, so a message that
+   appears after a download cannot change the height of the card. */
+.w-card-footline { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.w-card-foot { margin: 0; font-size: 10px; font-weight: 600; letter-spacing: .24em; opacity: .45; }
+.w-card-msg { margin: 0; font-size: 10px; font-weight: 600; letter-spacing: .1em; color: var(--w-accent); text-align: right; }
+.w-card-msg[hidden] { display: none; }
+
+/* ================= RESPONSIVE ================= */
+/* Off the desktop — the same 1024px line at which Recap moves into the floating
+   bottom bar — the corner pinning stops being placement and starts reading as
+   drift: the frame is no longer wide enough for the distance between a panel and
+   the edge to mean anything. Every lone panel settles on the centre of the frame
+   instead, so the deck holds one axis from slide to slide.
+
+   The paired slides are left alone: their two panels already fill the frame
+   between them and are centred on the same line by the base rules. */
+@media (max-width: 1024px) {
+  .at-tl, .at-left, .at-bl, .at-mid, .at-br {
+    /* The panel fills the centred band rather than shrinking to its own text:
+       every slide then hands the next one a panel of the same width, which is
+       what keeps an auto-advancing deck from jumping. */
+    grid-column: 2 / 12; grid-row: 2 / 8; align-self: center;
+    /* Type stays flush left once the panel itself is centred: centring both
+       would leave nothing for the eye to line up on. */
+    text-align: left;
+  }
+  .at-br .w-note { margin-left: 0; }
+}
+
+/* Below this the twelve-column composition stops being readable: every block
+   takes the full width and the slide becomes a vertical poster instead. */
+@media (max-width: 860px) {
+  .recap-slide {
+    --pad-x: clamp(20px, 6vw, 40px);
+    /* Clear of the progress bar, the counter and the controls: on a phone those
+       three share the top strip, and a panel starting under them looked pinned
+       to the chrome rather than placed on the frame. */
+    --pad-y: clamp(96px, 14vh, 132px);
+    grid-template-rows: repeat(12, minmax(0, 1fr));
+  }
+  /* A narrow frame gets a finer mosaic: at the desktop tile size only three or
+     four cells would be visible and the pattern would read as blocks. */
+  .recap-bg::before { --tile: clamp(76px, 26vmin, 150px); }
+  .w-panel { padding: clamp(16px, 5vw, 26px); }
+  /* Full width now, so the panel is centred by the row band alone: it takes
+     the whole frame between the paddings and sits on its middle. */
+  .at-tl, .at-left, .at-bl, .at-mid, .at-br {
+    grid-column: 1 / -1; grid-row: 1 / -1; align-self: center;
+  }
+  /* On a phone each poster has one visual axis. Centre every copy-led panel
+     and the copy area in combined chart panels, rather than retaining desktop
+     corner placement or left-aligned text. */
+  .recap-slide .w-block.w-panel { justify-self: center; text-align: center; }
+  .w-block.w-panel .w-note,
+  .w-combined .w-copy .w-note { margin-inline: auto; }
+
+  .w-combined { grid-column: 1 / -1; grid-row: 1 / 13; width: 100%; }
+  .w-combined .w-copy { text-align: center; }
+  .w-combined .w-podium,
+  .w-combined .w-wordlist { height: clamp(190px, 28vh, 280px); }
+  .w-hours { height: clamp(120px, 24vh, 220px); gap: 2px; }
+  .w-people { gap: 14px; }
+  .w-hint { display: none; }
+
+  /* The final slide leaves the grid on a phone: the card is content-tall and a
+     fixed row span would crop its last block. In flow it takes the height it
+     needs, and a card too tall for the screen scrolls instead of being cut. */
+  .recap-slide.s-final {
+    display: flex; flex-direction: column;
+    /* `safe` is what makes centring possible here at all: it centres the stack
+       while it fits, and falls back to the top edge the moment it does not.
+       Plain `center` would slide the card's header up under the pause and close
+       buttons, and in a scroll container whatever goes past the top edge cannot
+       be scrolled back into view. On a phone the full recap is the tallest block
+       in the deck, so in practice this reads as centred on a tablet and as a
+       top-anchored scroll on a handset. */
+    justify-content: safe center;
+    gap: clamp(12px, 2.4vh, 20px);
+    overflow-y: auto;
+    padding-top: calc(max(16px, env(safe-area-inset-top)) + clamp(78px, 11vh, 104px));
+  }
+  .s-final .w-card {
+    width: 100%; max-width: none; height: auto; max-height: none; flex: none;
+    /* Room for the offset shadow, which is outside the box and would otherwise
+       be clipped by the scroll container. */
+    margin-bottom: 22px;
+  }
+  /* Bigger targets for a thumb than the 26px the header band uses on a desktop. */
+  .w-tool { width: 32px; height: 32px; }
+  .w-tool svg { width: 15px; height: 15px; }
+}
+/* Short landscape windows: the hero type alone would fill the screen. */
+@media (max-height: 560px) {
+  .w-hero { font-size: clamp(52px, 15vh, 110px); }
+  .w-title { font-size: clamp(40px, 13vh, 92px); }
+  .recap-slide { --pad-y: 58px; }
+  .w-hint { display: none; }
+  /* The recap card is the one block that cannot shrink by wrapping, so it
+     tightens its own type and padding instead of overflowing the frame. */
+  .s-final .w-card { width: min(100%, 430px); }
+  .w-card-body { gap: 8px; padding: 14px; }
+  .w-card-name { font-size: clamp(20px, 4vh, 28px); }
+  .w-card-hero { padding: 8px 12px; }
+  .w-card-hero b { font-size: clamp(26px, 6vh, 40px); }
+  .w-card-grid { gap: 5px; }
+  .w-cell { padding: 5px 8px; }
+  .w-cell b { font-size: clamp(14px, 3vh, 19px); }
+  .w-card-emoji b { font-size: clamp(20px, 4.5vh, 28px); }
+  .w-card-foot { display: none; }
+}
+
+/* ================= REDUCED MOTION =================
+   Everything decorative stops, but the progress fill keeps running: it is what
+   drives auto-advance, and it is a 4px bar rather than motion in the content. */
+@media (prefers-reduced-motion: reduce) {
+  .recap-overlay, [data-anim], .w-hb, .w-pod,
+  .w-split i, .recap-trigger::after {
+    animation: none !important;
+  }
+  [data-anim], .w-pod { opacity: 1; transform: none; filter: none; }
+  .w-hb, .w-split i { transform: none; }
+}
+
+/* ================= SLIDE ENTRY ================= */
+[data-anim] { animation: recap-rise .6s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(var(--i, 0) * 85ms); }
+@keyframes recap-rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: none; }
+}

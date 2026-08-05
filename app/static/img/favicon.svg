@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="WhatsApp Analytics">
+  <!-- Three ascending bars on a square tile. The shapes are chunky because
+       this is read at 16px far more often than at 64, where thin strokes
+       disappear. -->
+  <title>WhatsApp Analytics</title>
+  <rect width="64" height="64" rx="14" fill="#25d366"/>
+  <g fill="#ffffff">
+    <rect x="14" y="34" width="10" height="14" rx="3"/>
+    <rect x="27" y="26" width="10" height="22" rx="3"/>
+    <rect x="40" y="18" width="10" height="30" rx="3"/>
+  </g>
+</svg>

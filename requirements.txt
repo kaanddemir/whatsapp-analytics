@@ -1,0 +1,7 @@
+flask>=3.0
+python-dotenv>=1.0
+requests>=2.31
+
+# Tests. Kept here rather than in a second requirements file, so one
+# `pip install -r requirements.txt` leaves a checkout able to run pytest.
+pytest>=8.0

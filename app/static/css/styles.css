@@ -1,0 +1,959 @@
+:root {
+  /* Surfaces */
+  --page: #f6f8f7;
+  --surface: #ffffff;
+  --surface-2: #f4f6f5;
+
+  /* WhatsApp greens */
+  --green: #25d366;
+  --green-600: #1eb257;
+  --green-700: #128c7e;
+  --green-050: #e9f9ef;
+  --green-100: #dcf8c6;
+
+  /* Sequential green ramp for heatmap (light -> dark) */
+  --heat-0: #f1f5f3;
+  --heat-1: #d6f0e0;
+  --heat-2: #a7e3c0;
+  --heat-3: #6fd39c;
+  --heat-4: #34bd74;
+  --heat-5: #12924f;
+
+  /* Accents */
+  --amber: #f6a609;
+  --violet: #8b5cf6;
+  --blue: #3b82f6;
+
+  /* Ink */
+  --ink: #0f1a14;
+  --ink-2: #55605a;
+  --muted: #8a938d;
+  --hairline: #eceeed;
+  --hairline-2: #e2e6e4;
+
+  /* Popover widths — each card is sized to what it actually holds. */
+  --pop-w: 300px;
+
+  --radius: 16px;
+  --shadow: 0 1px 3px rgba(16, 40, 28, 0.06), 0 1px 2px rgba(16, 40, 28, 0.04);
+  --shadow-lg: 0 8px 30px rgba(16, 40, 28, 0.08);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--page);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  /* Prevent accidental horizontal page scrolling. */
+  overflow-x: clip;
+}
+
+.hidden { display: none !important; }
+
+/* ================= ICONS ================= */
+/* Inline SVGs inherit currentColor and fill their box. */
+[data-icon], .ic { display: inline-flex; align-items: center; justify-content: center; }
+[data-icon] svg, .ic svg { width: 1em; height: 1em; display: block; }
+.ic { width: 1.15em; height: 1.15em; }
+
+/* ================= LAYOUT ================= */
+.app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  align-items: start;
+  transition: grid-template-columns .34s cubic-bezier(.4, 0, .2, 1);
+}
+/* dvh follows the mobile visual viewport. */
+.analytics { padding: 24px; max-width: 1180px; margin: 0 auto; width: 100%;
+  display: flex; flex-direction: column; min-height: 100dvh; }
+
+/* ================= CARDS ================= */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+}
+.card-head {
+  display: flex;
+  align-items: center; gap: 9px;
+  justify-content: space-between;
+  min-height: 30px;
+  margin-bottom: 14px;
+}
+.card-head h3 { margin: 0; font-size: 15px; font-weight: 650; }
+.card-head-ic {
+  width: 26px; height: 26px; border-radius: 8px;
+  background: var(--green-050); color: var(--green-600);
+  display: grid; place-items: center; flex-shrink: 0;
+}
+.card-head-ic svg { width: 15px; height: 15px; }
+.card-head .sub, .sub { color: var(--muted); font-weight: 500; }
+.card-head-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+
+/* ================= TOP BAR =================
+   One sticky row: identity/context on the left, actions on the right. */
+.topbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 40;
+  background: var(--page);
+  margin: -24px -24px 20px; padding: 14px 24px;
+  border-bottom: 1px solid var(--hairline);
+}
+.tb-brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.tb-brand h1 { margin: 0; font-size: 17px; font-weight: 750; letter-spacing: -0.3px; white-space: nowrap; }
+.tb-divider { width: 1px; height: 26px; background: var(--hairline-2); flex-shrink: 0; }
+.tb-exit {
+  margin-left: auto; width: 36px; height: 36px; padding: 0; flex-shrink: 0;
+  display: grid; place-items: center; border: 1px solid var(--hairline-2);
+  border-radius: 10px; background: var(--surface); color: var(--muted);
+  box-shadow: var(--shadow); cursor: pointer; transition: .15s;
+}
+.tb-exit[hidden] { display: none; }
+.tb-exit:hover { border-color: var(--green-100); background: var(--green-050); color: var(--green-700); }
+.tb-exit:disabled { opacity: .55; cursor: wait; }
+.tb-exit svg { width: 18px; height: 18px; }
+
+/* ---- Pills (chat identity, date range) ---- */
+.filter-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--hairline-2);
+  border-radius: 12px; padding: 8px 12px; font-size: 13px; font-weight: 550;
+  /* Fixed height: the chat pill's 24px avatar would otherwise make it about
+     5px taller than the date pill, which only holds an icon and text. */
+  height: 42px;
+  color: var(--ink-2); box-shadow: var(--shadow); cursor: pointer;
+  font-family: var(--font); transition: .15s; max-width: 100%;
+}
+.filter-pill:hover:not(:disabled) { border-color: var(--hairline); background: var(--surface-2); }
+.filter-pill[aria-expanded="true"] { border-color: var(--green); background: var(--surface); }
+.filter-pill:disabled { cursor: default; opacity: .6; box-shadow: none; background: var(--page); }
+.filter-pill .fi { font-size: 15px; color: var(--muted); flex-shrink: 0; }
+.filter-pill .chev { color: var(--muted); font-size: 14px; flex-shrink: 0; transition: transform .2s; }
+.filter-pill[aria-expanded="true"] .chev { transform: rotate(180deg); }
+/* Each pill sizes to its own content — a fixed shared width left a lot of dead
+   space next to short names. Long names ellipsise instead of stretching the bar. */
+.chat-chip #chatChipName { max-width: 190px; }
+.chat-chip #chatChipName, #dateRange {
+  min-width: 0; text-align: left;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.avatar-initials {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--green), var(--green-700));
+  color: #fff; font-size: 10px; font-weight: 700;
+  display: grid; place-items: center;
+}
+/* The chip avatar picks up the Upload button's flat green. */
+.chat-chip .avatar-initials { background: var(--green); color: #fff; }
+.avatar-initials.empty { background: var(--surface-2); color: var(--muted); }
+.avatar-initials.empty svg { width: 14px; height: 14px; }
+
+/* ---- Popovers (shared by date / chat info / settings) ---- */
+.pop-wrap { position: relative; display: flex; min-width: 0; }
+.pop {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 60;
+  background: var(--surface); border: 1px solid var(--hairline-2);
+  border-radius: 14px; box-shadow: var(--shadow-lg); padding: 14px;
+  display: flex; flex-direction: column; gap: 10px; cursor: default;
+}
+.pop[hidden] { display: none; }
+.pop-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pop-head h4 { margin: 0; font-size: 13px; font-weight: 700; }
+/* Chat Info stacks its title over a plain caption instead of a badge. */
+.chat-pop .pop-head { flex-direction: column; align-items: flex-start; gap: 2px; }
+.pop-btn {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 9px 12px; border-radius: 10px; font-size: 12.5px; font-weight: 650;
+  cursor: pointer; font-family: var(--font); transition: .15s;
+  border: 1px solid var(--hairline-2); background: var(--surface); color: var(--ink);
+}
+/* `display: flex` above outranks the [hidden] attribute's own display: none,
+   so a hidden .pop-btn would stay on screen without this. */
+.pop-btn[hidden] { display: none; }
+.pop-btn svg { width: 15px; height: 15px; }
+.pop-btn.danger { color: #d64545; border-color: #f3d5d5; }
+.pop-btn.danger:hover { background: #fdecec; }
+
+/* Date picker popover — quick presets on top, custom From/To below. */
+.date-pop { width: var(--pop-w); }
+.dp-presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.dp-presets .seg {
+  padding: 7px 8px; border: 1px solid var(--hairline-2);
+  background: var(--surface); border-radius: 9px;
+}
+.dp-presets .seg:hover:not(:disabled) { background: var(--surface-2); }
+.dp-presets .seg.active {
+  background: var(--green-050); color: var(--green-700);
+  border-color: var(--green-100); box-shadow: none;
+}
+.dp-presets .seg:disabled { opacity: .45; cursor: default; }
+.dp-sep { height: 1px; background: var(--hairline); margin: 2px 0; }
+.dp-field { display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.dp-field input { border: 1px solid var(--hairline-2); border-radius: 9px; padding: 8px 10px; font-family: var(--font); font-size: 13px; color: var(--ink); }
+.dp-field input:focus { outline: none; border-color: var(--green); }
+.dp-actions { display: flex; gap: 8px; margin-top: 2px; }
+.dp-btn { flex: 1; padding: 8px 10px; border-radius: 9px; font-weight: 600; font-size: 13px; cursor: pointer; font-family: var(--font); transition: .15s; border: 1px solid transparent; }
+.dp-btn.ghost { background: var(--surface); border-color: var(--hairline-2); color: var(--ink-2); }
+.dp-btn.ghost:hover { background: var(--surface-2); }
+.dp-btn.primary { background: var(--green); color: #fff; }
+.dp-btn.primary:hover { background: var(--green-600); }
+
+/* Participant rows double as the filter, so they need a button affordance. */
+.pt-pick {
+  display: block; width: 100%; text-align: left;
+  background: none; border: 1px solid transparent; border-radius: 10px;
+  padding: 7px 8px; cursor: pointer; font-family: var(--font); transition: .15s;
+}
+.pt-pick:hover { background: var(--surface-2); }
+/* Selection reads as a neutral highlight; green is reserved for data. */
+.pt-pick.active { background: var(--surface-2); border-color: var(--hairline-2); }
+.pt-all { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--ink); }
+.pt-all .avatar-initials { width: 28px; height: 28px; }
+.pt-all .pt-n { flex: 1; font-weight: 650; }
+.pt-all .pt-c { color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+
+/* Waiting is shown by the dashboard skeleton, not by a label in the topbar:
+   the bar wraps at narrow widths, so an indicator in it moved around, and a
+   dimmed dashboard still reads as finished numbers. */
+/* A filtered chip reads as an applied filter, not just an open menu. */
+.filter-pill.filtered { border-color: var(--green-100); background: var(--green-050); color: var(--green-700); }
+.filter-pill.filtered .chev { color: var(--green-600); }
+.settings-section .pop-btn { cursor: pointer; }
+
+/* Chat info popover — just names and shares, so it needs less room. */
+.chat-pop { width: 260px; }
+.participants { display: flex; flex-direction: column; gap: 10px; }
+.pt-card { display: grid; grid-template-columns: 32px 1fr auto; gap: 4px 10px; align-items: center; }
+.pt-card .avatar-initials { width: 32px; height: 32px; font-size: 12px; grid-row: span 2; }
+.pt-name { font-size: 13px; font-weight: 650; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pt-pct { font-size: 13px; font-weight: 750; font-variant-numeric: tabular-nums; }
+.pt-sub { grid-column: 2 / -1; font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pt-track { grid-column: 2 / -1; height: 5px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin-top: 3px; }
+/* display:block — an inline <span> would ignore width/height and render empty. */
+.pt-bar { display: block; height: 100%; border-radius: 3px; }
+.pt-rows { display: flex; flex-direction: column; gap: 7px; max-height: 260px; overflow-y: auto; }
+.pt-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+.pt-row .pt-dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
+.pt-row .pt-n { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pt-row .pt-c { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Settings panel */
+.settings-panel { display: none; grid-column: 2; grid-row: 1; }
+.app.settings-open .settings-panel { display: block; }
+.app.settings-open .ai-panel:not(.settings-panel) { display: none; }
+.app.settings-closing .settings-panel { display: block; }
+.app.settings-closing .ai-panel:not(.settings-panel) { display: none; }
+.settings-body { margin-top: 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 26px; flex: 1; min-height: 0; }
+.settings-section h4 { margin: 0 0 12px; font-size: 12px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+.settings-section .pop-btn { width: 100%; }
+.settings-actions { display: flex; flex-direction: column; gap: 8px; }
+.settings-section.disabled .pop-btn { opacity: .5; cursor: not-allowed; }
+.settings-section.disabled label.pop-btn { pointer-events: none; }
+
+/* AI Provider: the bring-your-own-key field and the state it reports. */
+.settings-copy { margin: 0 0 10px; font-size: 12px; line-height: 1.5; color: var(--ink-2); }
+.settings-copy a { color: var(--green-600); }
+.settings-status { margin: 0 0 10px; font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.settings-field { margin: 0 0 8px; }
+.settings-field input {
+  width: 100%; padding: 9px 11px; font: inherit; font-size: 12.5px;
+  border: 1px solid var(--hairline-2); border-radius: 10px;
+  background: var(--surface-2); color: var(--ink);
+}
+.settings-field input::placeholder { color: var(--muted); }
+.settings-field input:focus-visible {
+  outline: none; border-color: var(--green); background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(37, 211, 102, .16);
+}
+.settings-error { margin: 8px 0 0; font-size: 11.5px; font-weight: 550; color: #d64545; }
+.settings-error[hidden] { display: none; }
+.settings-note { margin: 10px 0 0; font-size: 11.5px; line-height: 1.5; color: var(--muted); }
+
+/* Visible to screen readers only: the key field is labelled by its placeholder
+   visually, which is not a label. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+.privacy-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.privacy-list li { display: flex; gap: 9px; font-size: 12px; color: var(--ink-2); line-height: 1.5; }
+.privacy-list svg { width: 15px; height: 15px; color: var(--green-600); flex-shrink: 0; margin-top: 1px; }
+
+/* ================= MODAL (delete confirmation) =================
+   Above every panel, including the mobile sheets, since it interrupts them. */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(15, 26, 20, .38);
+  display: grid; place-items: center; padding: 20px;
+}
+.modal-backdrop[hidden] { display: none; }
+.modal {
+  background: var(--surface); border-radius: var(--radius);
+  box-shadow: var(--shadow-lg); padding: 20px;
+  width: min(360px, 100%); display: flex; flex-direction: column; gap: 14px;
+}
+.modal-head { display: flex; align-items: center; gap: 10px; }
+.modal-head h3 { margin: 0; font-size: 16px; font-weight: 700; }
+.modal-ic {
+  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+  background: #fdecec; color: #d64545; display: grid; place-items: center;
+}
+.modal-ic svg { width: 17px; height: 17px; }
+/* The notes are context for the decision, so they read quieter than the title. */
+.modal .privacy-list svg { color: var(--muted); }
+.modal-actions { display: flex; gap: 8px; }
+.dp-btn.danger { background: #d64545; color: #fff; }
+.dp-btn.danger:hover { background: #c03a3a; }
+.local-modal-ic { background: var(--green-050); color: var(--green-700); }
+.local-confirm-copy { margin: -2px 0 0; color: var(--ink-2); font-size: 12.5px; line-height: 1.5; }
+.local-confirm-error { margin: -4px 0 0; color: #c13c3c; font-size: 12px; line-height: 1.4; }
+.dp-btn.local-confirm { background: var(--green); color: #fff; }
+.dp-btn.local-confirm:hover { background: var(--green-600); }
+
+/* ================= EMPTY STATE ================= */
+.empty-state {
+  --halo: var(--surface);
+  background-color: var(--surface);
+  background-image: url("../img/doodles.svg");
+  background-size: 400px 400px;
+  border: 2px dashed var(--hairline-2);
+  border-radius: var(--radius); padding: 60px 32px; text-align: center;
+  box-shadow: var(--shadow);
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.empty-state { cursor: pointer; transition: border-color .15s, background .15s, box-shadow .15s; }
+.empty-state:hover:not(.loading) { border-color: var(--green); box-shadow: var(--shadow-lg); }
+.empty-state.drag { border-color: var(--green); background-color: var(--green-050); --halo: var(--green-050); }
+/* Dragging does tint the fill, so the disc goes white to stay separate. */
+.empty-state.drag .empty-icon { background: #fff; }
+.empty-state.loading { cursor: default; }
+.empty-icon {
+  width: 76px; height: 76px; border-radius: 50%;
+  background: var(--green-050); color: var(--green-600);
+  display: grid; place-items: center; margin-bottom: 22px;
+  box-shadow: 0 0 0 8px rgba(37, 211, 102, 0.06);
+}
+.empty-icon svg { width: 34px; height: 34px; }
+.empty-state h2 { margin: 0 0 8px; font-size: 21px; letter-spacing: -0.01em; }
+.empty-state p { color: var(--ink-2); max-width: 420px; margin: 0 auto 22px; line-height: 1.6; font-size: 14px; }
+.empty-state code { background: var(--surface-2); padding: 2px 6px; border-radius: 6px; font-size: 13px; }
+.btn-primary {
+  display: inline-block; background: var(--green); color: #fff;
+  padding: 11px 22px; border-radius: 11px; font-weight: 650; cursor: pointer;
+  box-shadow: 0 6px 16px rgba(37, 211, 102, 0.32); transition: .15s;
+}
+.btn-primary:hover { background: var(--green-600); }
+.hint { color: #d64545; font-size: 13px; min-height: 20px; margin-top: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+/* Empty state: default content vs. the upload/loading view */
+.empty-default {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 34px 52px;
+  background: radial-gradient(ellipse at 50% 50%, var(--halo) 46%, transparent 78%);
+}
+.upload-loading { display: none; flex-direction: column; gap: 18px; width: 100%; }
+.empty-state.loading .empty-default { display: none; }
+.empty-state.loading .upload-loading { display: flex; }
+.empty-state.loading {
+  border: none; background: none; box-shadow: none;
+  padding: 0; display: block; text-align: left;
+  /* The wallpaper belongs to the drop zone, not to the skeleton. */
+  background-image: none;
+}
+/* Skeleton uses the dashboard's grid and card layout. */
+.skeleton { display: flex; flex-direction: column; gap: 20px; }
+.sk-b {
+  /* inline-block, so a placeholder inherits the line box of the text it
+     stands in for and its row ends up the height it will really be. */
+  display: inline-block; vertical-align: middle;
+  background: var(--surface-2); border-radius: 7px;
+}
+/* For the boxes that already have a height of their own: sparklines, the
+   chart area, the heatmap grid, the balance bar. */
+.sk-fill { display: block; width: 100%; height: 100%; flex: 1; }
+.skeleton .card { position: relative; overflow: hidden; }
+
+/* ================= KPI ================= */
+.analytics { min-width: 0; }
+.dashboard { display: flex; flex-direction: column; gap: 20px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.kpi { display: flex; flex-direction: column; gap: 6px; position: relative; }
+.kpi-head { display: flex; align-items: center; gap: 9px; color: var(--ink-2); font-size: 13px; font-weight: 550; }
+.kpi-head .card-info-menu, .insight-top .card-info-menu { margin-left: auto; flex-shrink: 0; }
+.kpi-ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; font-size: 16px; }
+.kpi-ic.green, .kpi-ic.amber, .kpi-ic.violet {
+  background: var(--green-050); color: var(--green-600);
+}
+.kpi-value { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+.kpi-delta { font-size: 12px; font-weight: 500; color: var(--muted); }
+/* overflow-hidden: Chart.js sizes the canvas from this box, and on fractional
+   device-pixel ratios it can round up and bleed over the card's rounded edge. */
+.spark-wrap { position: relative; height: 40px; margin-top: 4px; overflow: hidden; }
+.chart-wrap { position: relative; height: 240px; }
+.spark-wrap canvas, .chart-wrap canvas { position: absolute; inset: 0; }
+.spark-empty { margin: 0; width: 100%; height: 100%; display: grid; place-items: center; color: var(--muted); font-size: 11px; text-align: center; }
+.chart-empty { margin: 0; width: 100%; height: 100%; display: grid; place-items: center; color: var(--muted); text-align: center; }
+.spark-empty[hidden], .chart-empty[hidden], .heat-legend[hidden] { display: none; }
+
+/* ================= CHARTS ================= */
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* ================= INSIGHT ROW ================= */
+/* All ranked cards show five rows and page through the remaining items. */
+.insight-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+/* Heatmap */
+/* The card shares a row with the line chart and stretches to its height, so
+   the grid grows into that space instead of leaving a void under the legend. */
+.heat-card { display: flex; flex-direction: column; }
+.heatmap { display: flex; flex-direction: column; gap: 4px; flex: 1; min-height: 0; }
+.heat-row {
+  display: grid; grid-template-columns: 32px repeat(24, 1fr);
+  gap: 4px; align-items: stretch; flex: 1; min-height: 16px;
+}
+.heat-row .day-label {
+  font-size: 11px; color: var(--muted); font-weight: 600;
+  align-self: center; line-height: 1;
+}
+.heat-cell { border-radius: 4px; background: var(--heat-0); transition: transform .1s; }
+.heat-cell:hover { transform: scale(1.18); }
+.heat-hours {
+  display: grid; grid-template-columns: 32px repeat(24, 1fr);
+  gap: 4px; margin-bottom: 6px;
+}
+.heat-hours span { font-size: 10px; color: var(--muted); text-align: center; }
+.heat-legend {
+  display: flex; align-items: center; justify-content: flex-end; gap: 7px;
+  margin-top: 14px; font-size: 11px; color: var(--muted);
+}
+/* Discrete swatches, because the map bins into five levels rather than
+   shading continuously; a smooth gradient would promise precision it lacks. */
+.heat-steps { display: flex; gap: 3px; }
+.heat-steps i { width: 11px; height: 11px; border-radius: 3px; }
+
+/* Emoji list */
+/* Ranked lists keep their height even when a list has fewer items than its
+   configured page size. */
+.rank-card {
+  display: flex; flex-direction: column;
+  /* Empty rankings keep the same baseline footprint as populated cards. */
+  min-height: 220px;
+}
+.rank-list { flex: 1; display: flex; flex-direction: column; justify-content: space-around; gap: 14px; }
+.rank-empty { margin: auto; color: var(--muted); text-align: center; }
+.rank-item { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.rank-item.ghost { visibility: hidden; }
+.rank-item .em { font-size: 22px; width: 26px; text-align: center; }
+/* Fixed label column: bars start at the same x on every row, so their lengths
+   are comparable at a glance. Long words are clipped rather than pushing it. */
+/* A third of the row is narrow, so the label and count columns are kept tight
+   enough that the bar still has room to say something. */
+.rank-item .word {
+  width: 82px; flex: none; font-size: 13px; font-weight: 600;
+  color: var(--green-700); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.rank-bar-wrap { flex: 1; min-width: 24px; height: 8px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
+.rank-bar { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--green), var(--green-600)); }
+.rank-count { font-size: 12.5px; font-weight: 700; color: var(--ink-2); width: 46px; text-align: right; font-variant-numeric: tabular-nums; }
+
+.pager { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px; }
+.pager[hidden] { display: none; }
+/* Total uses a full row of the card, separate from the pagination controls. */
+.rank-total {
+  margin-top: 12px; padding: 8px 10px; border: 1px dashed var(--green);
+  border-radius: 8px; background: var(--surface); color: var(--green-700);
+  font-size: 11px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums;
+}
+.rank-total[hidden] { display: none; }
+.pg-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; padding: 0;
+  border: 1px solid var(--hairline-2); background: var(--surface);
+  border-radius: 9px; color: var(--green-700); font-size: 16px;
+  cursor: pointer; transition: .15s;
+}
+.pg-btn:hover:not(:disabled) { background: var(--green-050); border-color: var(--green-100); }
+.pg-btn:disabled { opacity: .35; cursor: default; }
+.pg-info { font-size: 12.5px; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+/* Message balance */
+.balance-card { display: flex; flex-direction: column; min-height: 140px; position: relative; }
+.balance-bar { display: flex; height: 26px; border-radius: 8px; overflow: hidden; gap: 2px; }
+.balance-bar[hidden] { display: none; }
+/* min-width is a visibility floor, not room for a label: at 34px a 1% sender
+   took the same space as a 6% one and the segments no longer summed to the
+   bar, so the smallest ones were clipped away entirely. 3px keeps a lurker
+   visible without lying about the proportions. */
+.balance-seg { display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 12px; font-weight: 700; min-width: 3px; transition: width .4s ease; }
+.balance-legend { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 14px; }
+.balance-legend.balance-empty {
+  position: absolute; inset: 0;
+  min-height: 0; margin-top: 0;
+  align-items: center; justify-content: center;
+}
+.balance-legend.balance-empty .rank-empty { margin: 0; }
+.balance-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.balance-dot { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+.balance-item .bn { font-weight: 650; }
+.balance-item .bc { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Bottom insights: four tiles, each one a self-contained answer. The label
+   sits on top so the value is what the eye lands on, the way the KPI cards
+   read, instead of competing with a 42px icon for the leftmost column. */
+.insights-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+/* The final dashboard row has no space below it, so its info popovers open
+   upward instead of being cut off at the bottom of the page. */
+.insights-grid .card-info-pop { top: auto; bottom: calc(100% + 6px); }
+/* Each tile is a card in its own right, so it inherits the page's surface,
+   border and radius from .card and only adds its own stacking here. */
+.insight {
+  display: flex; flex-direction: column;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.insight:hover { border-color: var(--hairline-2); box-shadow: var(--shadow-lg); }
+.insight-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.insight-ic {
+  width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center;
+  line-height: 0; flex-shrink: 0;
+}
+/* Keep the inline SVGs out of the text baseline so every metric glyph sits in
+   the actual centre of its coloured square. */
+.insight-ic svg { display: block; width: 15px; height: 15px; }
+/* This path is top-heavy by design; a small optical correction centres it. */
+.insight-ic[data-icon="flame"] svg { transform: translateY(1px); }
+.insight-ic.green, .insight-ic.blue, .insight-ic.violet, .insight-ic.amber {
+  background: var(--green-050); color: var(--green-600);
+}
+.insight-label {
+  font-size: 11px; font-weight: 650; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  /* The four labels differ in length; a long one wraps rather than pushing
+     the tile wider than its grid column. */
+  line-height: 1.25;
+}
+.insight-value {
+  font-size: 20px; font-weight: 800; letter-spacing: -0.3px; line-height: 1.25;
+  /* Participant names have no spaces to break on, so anywhere it is. */
+  overflow-wrap: anywhere;
+}
+.insight-sub { font-size: 12px; color: var(--ink-2); margin-top: 4px; }
+
+/* ================= AI PANEL ================= */
+.ai-panel {
+  background: var(--surface); border-left: 1px solid var(--hairline);
+  position: sticky; top: 0; height: 100dvh; overflow: hidden;
+}
+.ai-panel-inner {
+  position: absolute; top: 0; right: 0; width: 400px; height: 100%;
+  padding: 22px 22px 18px; display: flex; flex-direction: column;
+}
+.ai-header { display: flex; align-items: center; justify-content: space-between; }
+.ai-header h2 { margin: 0; font-size: 19px; font-weight: 750; }
+.ai-actions { display: flex; align-items: center; gap: 4px; }
+.mode-menu-wrap { position: relative; }
+.ai-mode-trigger { background: none; border: none; cursor: pointer; color: var(--muted); height: 32px; border-radius: 9px; display: inline-flex; align-items: center; gap: 5px; padding: 0 8px; transition: .15s; }
+.ai-mode-trigger:hover, .ai-mode-trigger[aria-expanded="true"] { background: var(--green-050); color: var(--green-700); }
+.ai-mode-trigger svg { width: 18px; height: 18px; }
+.ai-mode-label { font: 650 12px/1 var(--font); }
+.mode-pop { position: absolute; z-index: 20; top: calc(100% + 7px); right: 0; min-width: 250px; padding: 5px; background: var(--surface); border: 1px solid var(--hairline); border-radius: 11px; box-shadow: var(--shadow-lg); }
+.mode-option-row { display: grid; grid-template-columns: minmax(0, 1fr) 30px; align-items: center; gap: 2px; }
+.mode-option { display: grid; grid-template-columns: 24px minmax(0, 1fr) 14px; align-items: center; width: 100%; gap: 8px; border: 0; border-radius: 8px; padding: 8px; background: transparent; color: var(--ink); font-family: var(--font); text-align: left; cursor: pointer; }
+.mode-option:hover { background: var(--green-050); }
+.mode-option-ic { color: var(--muted); display: grid; place-items: center; }
+.mode-option-ic svg { width: 17px; height: 17px; }
+.mode-option strong, .mode-option small { display: block; }
+.mode-option strong { font-size: 12.5px; font-weight: 650; }
+.mode-option small { margin-top: 2px; color: var(--muted); font-size: 10.5px; line-height: 1.25; }
+.mode-option .mode-check { color: transparent; font-weight: 750; }
+.mode-option.active .mode-option-ic, .mode-option.active .mode-check { color: var(--green-700); }
+.model-info-trigger { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 7px; background: transparent; color: var(--muted); cursor: pointer; }
+.model-info-trigger:hover, .model-info-trigger[aria-expanded="true"] { background: var(--green-050); color: var(--green-700); }
+.model-info-trigger svg { width: 16px; height: 16px; }
+.model-info-pop { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 1px 3px 4px; padding: 7px 9px; border: 1px solid var(--hairline); border-radius: 7px; color: var(--muted); font-size: 11px; }
+.model-info-pop[hidden] { display: none; }
+.model-info-pop strong { color: var(--ink-2); font-weight: 650; }
+.local-message-control { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 10px; margin: 4px 3px 1px; padding: 9px 6px 5px; border-top: 1px solid var(--hairline); }
+.local-message-control[hidden] { display: none !important; }
+.local-message-control strong, .local-message-control small { display: block; }
+.local-message-control strong { font-size: 11.5px; font-weight: 650; }
+.local-message-control small { margin-top: 2px; color: var(--muted); font-size: 10px; }
+/* The local model picker sits in the same two-column row as the switch, so it
+   is bounded rather than stretched by a long model id. */
+/* The Cloud and Local model rows in Settings. Both list what their provider
+   actually serves, so both need the same picker and the same failure shape. */
+.model-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center; gap: 6px 10px; padding: 10px 0;
+}
+.model-row + .model-row { border-top: 1px solid var(--hairline); }
+.model-row strong, .model-row small { display: block; }
+.model-row strong { font-size: 12px; font-weight: 650; }
+.model-row small { margin-top: 2px; color: var(--muted); font-size: 10.5px; }
+/* `display: block` above outranks the [hidden] attribute's own display: none,
+   so a row with nothing to report would keep an empty line without this. */
+.model-row small[hidden] { display: none; }
+.model-row select {
+  max-width: 150px; padding: 5px 7px; font: inherit; font-size: 11px;
+  border: 1px solid var(--hairline-2); border-radius: 7px;
+  background: var(--surface); color: var(--ink); cursor: pointer;
+}
+.model-row select[hidden] { display: none; }
+/* With no models found, the row carries an explanation rather than a control:
+   the text spans both columns and the retry sits on its own line under it. */
+.model-row.no-model { grid-template-columns: minmax(0, 1fr); }
+.model-row.no-model small { margin-top: 4px; line-height: 1.45; }
+.local-retry {
+  justify-self: start; margin-top: 8px; padding: 5px 10px;
+  font: inherit; font-size: 11px; font-weight: 650;
+  border: 1px solid var(--hairline-2); border-radius: 7px;
+  background: var(--surface); color: var(--ink-2); cursor: pointer; transition: .15s;
+}
+.local-retry:hover { background: var(--surface-2); color: var(--ink); }
+.local-retry[hidden] { display: none; }
+.setting-switch { width: 38px; height: 22px; padding: 2px; border: 0; border-radius: 999px; background: #dce4df; cursor: pointer; transition: background .18s ease; }
+.setting-switch span { display: block; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(16, 40, 28, .18); transition: transform .18s ease; }
+.setting-switch[aria-checked="true"] { background: var(--green); }
+.setting-switch[aria-checked="true"] span { transform: translateX(16px); }
+.setting-switch:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.setting-switch:disabled { opacity: .55; cursor: wait; }
+.ai-collapse { background: none; border: none; cursor: pointer; color: var(--muted); width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; transition: .15s; flex-shrink: 0; }
+.ai-collapse:hover { background: var(--surface-2); color: var(--ink); }
+.ai-collapse svg { width: 20px; height: 20px; }
+.chat-clear { background: none; border: none; cursor: pointer; color: var(--muted); width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; transition: .15s; flex-shrink: 0; }
+.chat-clear:hover:not(:disabled) { background: #fdf0f0; color: #c13c3c; }
+.chat-clear:disabled { opacity: .45; cursor: wait; }
+.chat-clear svg { width: 18px; height: 18px; }
+
+/* Collapsed AI panel: analytics widens, a full-height rail on the right reopens it */
+.app.ai-hidden { grid-template-columns: minmax(0, 1fr) 52px; }
+/* Settings takes the full panel width even when the assistant is collapsed. */
+.app.settings-open { grid-template-columns: minmax(0, 1fr) 400px; }
+.ai-rail {
+  position: fixed; right: 0; top: 0; height: 100dvh; width: 52px;
+  background: var(--green); z-index: 50;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 22px 0 18px;
+  gap: 12px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s ease;
+}
+.app.ai-hidden:not(.settings-open) .ai-rail { opacity: 1; pointer-events: auto; transition-delay: .12s; }
+.rail-btn {
+  background: none; border: none; cursor: pointer; color: #fff;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 0; width: 100%;
+}
+/* White rail controls retain contrast against the green background. */
+.rail-btn .rail-expand,
+.rail-btn .rail-bot,
+.rail-settings span {
+  width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center;
+  background: #fff; color: var(--green-700); transition: background .15s, color .15s;
+}
+.rail-btn:hover .rail-expand,
+.rail-btn:hover .rail-bot,
+.rail-settings:hover span { background: var(--green-050); color: var(--green-700); }
+.rail-btn .rail-expand svg,
+.rail-btn .rail-bot svg,
+.rail-settings svg { width: 21px; height: 21px; }
+.rail-settings { margin-top: 0; }
+/* The Recap proxy is a mobile-only member of the floating bar; on desktop
+   Recap lives in the topbar, so the rail never shows it. */
+.rail-recap { display: none; }
+
+.suggested { margin-top: 18px; }
+.suggested-title {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  font-size: 12px; font-weight: 650; color: var(--ink-2); margin: 0 0 10px;
+  background: none; border: none; padding: 2px 0; cursor: pointer; font-family: var(--font);
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.suggested-title .chev { display: inline-flex; width: 15px; height: 15px; color: var(--muted); transition: transform .2s; }
+.suggested-title .chev svg { width: 100%; height: 100%; }
+.suggested.collapsed .suggested-title .chev { transform: rotate(-90deg); }
+.suggest-list { overflow: hidden; }
+.suggested.collapsed .suggest-list { display: none; }
+.suggest-btn {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; margin-bottom: 8px;
+  background: var(--surface); border: 1px solid var(--hairline-2); border-radius: 11px;
+  padding: 11px 13px; font-size: 13px; font-weight: 550; color: var(--ink); cursor: pointer;
+  transition: .15s; font-family: var(--font);
+}
+.suggest-btn:hover { background: var(--green-050); border-color: var(--green-100); }
+.suggest-btn .ic { color: var(--green-600); font-size: 16px; flex-shrink: 0; }
+
+.chat-scroll { flex: 1; overflow-y: auto; margin: 16px -6px 12px; padding: 4px 6px; display: flex; flex-direction: column; gap: 14px; }
+.msg { display: flex; gap: 9px; max-width: 92%; align-items: flex-end; }
+.msg.ai { align-self: flex-start; }
+.msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.bubble { padding: 11px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; }
+.msg.ai .bubble { background: var(--surface-2); border: 1px solid var(--hairline); border-top-left-radius: 4px; }
+.msg.user .bubble { background: var(--green); color: #fff; border-top-right-radius: 4px; }
+.bubble.typing { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); white-space: nowrap; }
+.typing-dots { display: inline-flex; align-items: center; gap: 4px; }
+.typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: typing-dot 1.05s ease-in-out infinite; }
+.typing-dots span:nth-child(2) { animation-delay: .14s; }
+.typing-dots span:nth-child(3) { animation-delay: .28s; }
+@keyframes typing-dot { 0%, 60%, 100% { opacity: .35; } 30% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .typing-dots span { animation: none; opacity: .75; } }
+
+/* Rendered-markdown AI bubbles */
+.bubble.md { white-space: normal; }
+.bubble.md > *:first-child { margin-top: 0; }
+.bubble.md > *:last-child { margin-bottom: 0; }
+.bubble.md p { margin: 0 0 8px; }
+.bubble.md strong { font-weight: 650; }
+.bubble.md em { font-style: italic; }
+.bubble.md code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85em; background: rgba(0,0,0,.06); padding: 1px 5px; border-radius: 5px; }
+.bubble.md h3, .bubble.md h4 { margin: 10px 0 6px; font-size: 14px; font-weight: 650; }
+.bubble.md h4 { font-size: 13px; }
+.bubble.md ul, .bubble.md ol { margin: 4px 0 8px; padding-left: 20px; }
+.bubble.md li { margin: 2px 0; }
+
+/* Copy button on AI replies */
+.copy-btn { flex-shrink: 0; width: 26px; height: 26px; padding: 5px; border: none; background: transparent; color: var(--muted); border-radius: 7px; cursor: pointer; opacity: 0; transition: opacity .15s, background .15s, color .15s; align-self: flex-end; }
+.copy-btn svg { width: 100%; height: 100%; }
+.msg.ai:hover .copy-btn { opacity: .7; }
+/* Without a hover state there is nothing to reveal it, so it just stays out. */
+@media (hover: none) { .copy-btn { opacity: .7; } }
+.copy-btn:hover { opacity: 1 !important; background: var(--surface-2); color: var(--ink); }
+.copy-btn.copied { opacity: 1 !important; color: var(--green-700); }
+
+.chat-input {
+  display: flex; gap: 10px; align-items: flex-end;
+  background: var(--surface); border: 1px solid var(--hairline-2);
+  border-radius: 26px; padding: 7px 7px 7px 16px;
+  box-shadow: 0 1px 3px rgba(16, 40, 28, 0.05);
+}
+.chat-input:focus-within { border-color: var(--green); }
+.chat-input textarea { flex: 1; border: none; outline: none; font-size: 14.5px; line-height: 1.4; font-family: var(--font); color: var(--ink); background: transparent; resize: none; max-height: 140px; overflow-y: auto; padding: 9px 0; }
+.chat-input textarea::placeholder { color: var(--muted); }
+.chat-input.disabled { opacity: .55; }
+.chat-input textarea:disabled { cursor: not-allowed; }
+.send-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--green); color: #fff; cursor: pointer; flex-shrink: 0; transition: .15s; display: grid; place-items: center; }
+.send-btn svg { width: 20px; height: 20px; stroke-width: 2.6; }
+.send-btn:hover { background: var(--green-600); }
+.send-btn:disabled { background: var(--surface-2); color: var(--muted); cursor: not-allowed; }
+
+/* AI usage / quota indicator */
+/* Shown when Cloud mode has no API key to use. The daily-quota meter that used
+   to sit here is gone: every user supplies their own key now. */
+.quota-notice { font-size: 11.5px; color: #d64545; text-align: center; margin: 0 0 8px; font-weight: 550; }
+
+/* Date-range preset buttons */
+.seg { border: none; background: transparent; padding: 5px 12px; border-radius: 7px; font-size: 12px; font-weight: 600; color: var(--ink-2); cursor: pointer; font-family: var(--font); transition: .15s; }
+.seg.active { background: var(--surface); color: var(--green-700); box-shadow: var(--shadow); }
+
+/* Granularity picker: a quiet icon in the card header that opens a menu, so
+   the chart keeps its full width instead of paying for three always-on buttons. */
+.grain-menu { position: relative; }
+.grain-btn {
+  display: grid; place-items: center; width: 30px; height: 30px; padding: 0;
+  border: 1px solid transparent; border-radius: 8px; background: transparent;
+  color: var(--green-600); cursor: pointer; transition: .15s;
+}
+.grain-btn:hover { background: var(--green-050); color: var(--green-700); }
+.grain-btn[aria-expanded="true"] {
+  background: var(--green-050); border-color: var(--green-100); color: var(--green-700);
+}
+.grain-btn .ic { display: block; width: 17px; height: 17px; }
+.grain-btn svg { width: 100%; height: 100%; }
+
+.grain-pop {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 30;
+  min-width: 194px; padding: 5px;
+  background: var(--surface); border: 1px solid var(--hairline-2);
+  border-radius: 11px; box-shadow: 0 8px 24px rgba(16, 40, 28, .12);
+}
+.grain-pop[hidden] { display: none; }
+.grain-pop-head {
+  padding: 6px 9px 7px; font-size: 11px; font-weight: 650;
+  letter-spacing: .3px; text-transform: uppercase; color: var(--muted);
+}
+.grain-opt {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 7px 9px; border: none; border-radius: 8px; background: transparent;
+  font-family: var(--font); font-size: 13px; font-weight: 550;
+  color: var(--ink); cursor: pointer; text-align: left; transition: background .12s;
+}
+.grain-opt:hover { background: var(--surface-2); }
+.grain-opt .name { flex: 1; }
+/* Point count for the current date range: says why a grain may read poorly. */
+.grain-opt .meta { font-size: 11.5px; font-weight: 500; color: var(--muted); }
+.grain-opt .tick { width: 14px; height: 14px; color: var(--green-700); opacity: 0; }
+/* Same popover shell, but it holds a concise definition and one new detail
+   instead of repeating the value already visible on its dashboard card. */
+.info-pop { min-width: 226px; }
+.card-info-pop { min-width: 250px; max-width: 292px; padding: 5px; }
+.info-copy { margin: 0; padding: 0 9px 9px; color: var(--muted); font-size: 11.5px; line-height: 1.45; }
+.info-detail {
+  border-top: 1px solid var(--hairline); padding: 9px;
+  display: flex; flex-direction: column; gap: 3px;
+  font-size: 12px; font-weight: 550; color: var(--ink-2);
+}
+.info-detail b { color: var(--green-700); font-size: 12px; font-weight: 700; line-height: 1.4; font-variant-numeric: tabular-nums; }
+.grain-opt .tick svg { width: 100%; height: 100%; }
+.grain-opt.active { color: var(--green-700); font-weight: 650; }
+.grain-opt.active .tick { opacity: 1; }
+.grain-opt.dense .meta { color: var(--amber); }
+.grain-opt:focus-visible { outline: 2px solid var(--green-700); outline-offset: -2px; }
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1024px) {
+  /* One column in every state — collapsed, expanded and settings-open all
+     stopped meaning anything once the panel left the grid. */
+  .app, .app.ai-hidden, .app.settings-open { grid-template-columns: minmax(0, 1fr); }
+  .analytics { max-width: none; }
+
+  /* ---- Panels as sheets ----
+     Both asides share this: they slide up over the page and only one is ever
+     open, which the .app classes already guarantee. */
+  .ai-panel {
+    position: fixed; inset: 0; z-index: 70; height: 100dvh;
+    border-left: none; background: var(--surface);
+    transform: translateY(100%);
+    transition: transform .28s cubic-bezier(.4, 0, .2, 1);
+  }
+  /* The desktop inner box is absolutely positioned at a fixed 400px; on a
+     375px screen that alone pushed the page sideways. */
+  .ai-panel-inner {
+    position: static; width: 100%; height: 100%;
+    padding: max(16px, env(safe-area-inset-top)) 16px
+             max(14px, env(safe-area-inset-bottom)) 16px;
+  }
+  .app:not(.ai-hidden) .ai-panel:not(.settings-panel) { transform: none; }
+  /* Settings is display:none off-grid on desktop; here it is a sheet like the
+     assistant, stacked above it so the two can never show through each other. */
+  .settings-panel { display: block; grid-column: auto; grid-row: auto; z-index: 71; }
+  .app.settings-open .settings-panel { transform: none; }
+  .app.settings-open .ai-panel:not(.settings-panel) { display: block; }
+  /* The settings-close chevron points right on desktop, where the panel slides
+     sideways; a sheet dismisses downwards, so the arrow follows it. */
+  .ai-collapse svg { transform: rotate(90deg); }
+
+  /* ---- Rail becomes an iOS-style floating glass bar ----
+     The three primary actions — Recap, AI, Settings — collapse into one
+     centred, translucent pill at the bottom of the screen, instead of the
+     topbar orphaning the Recap button onto a second row. Visibility still
+     comes from .app.ai-hidden:not(.settings-open), so the bar disappears on
+     its own whenever a sheet is open. */
+  .ai-rail {
+    position: fixed; left: 50%; right: auto; top: auto;
+    transform: translateX(-50%);
+    bottom: max(16px, env(safe-area-inset-bottom));
+    flex-direction: row; align-items: center; justify-content: center;
+    width: auto; height: auto; gap: 5px; z-index: 45;
+    padding: 6px; border-radius: 999px;
+    background: rgba(255, 255, 255, .68);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, .55);
+    box-shadow: 0 10px 34px rgba(16, 40, 28, .22),
+                inset 0 1px 0 rgba(255, 255, 255, .7);
+  }
+  /* Icon actions (AI, Settings) are round tap targets inside the glass. */
+  .rail-btn {
+    width: 46px; height: 46px; border-radius: 50%; padding: 0;
+    justify-content: center; flex-shrink: 0;
+    background: none; border: none; box-shadow: none;
+  }
+  .rail-btn:active { background: rgba(16, 40, 28, .06); }
+  /* The expand chevron only made sense as a hint on the full-height strip. */
+  .rail-btn .rail-expand { display: none; }
+  .rail-settings { margin-top: 0; }
+  .rail-btn .rail-bot, .rail-settings span {
+    background: none; color: var(--green-700);
+    width: 24px; height: 24px; border-radius: 0;
+  }
+  .rail-btn:hover .rail-bot, .rail-settings:hover span { background: none; }
+
+  /* The Recap proxy is the bar's primary, labelled segment: an ink pill that
+     previews the Bauhaus world it opens, set apart from the two icon buttons.
+     Hidden until a chat is loaded so the bar carries no dead control. */
+  .rail-recap {
+    display: flex; align-items: center; gap: 8px;
+    width: auto; height: 46px; padding: 0 16px 0 14px;
+    border-radius: 999px; flex-shrink: 0;
+    background: #141210; color: #f2ede3;
+    font: 700 12px/1 Futura, "Avenir Next", "Century Gothic", system-ui, sans-serif;
+    letter-spacing: .14em; text-transform: uppercase;
+  }
+  .rail-recap[disabled] { display: none; }
+  .rail-recap:active { transform: scale(.97); }
+  .rail-recap .wt-marks { display: inline-flex; align-items: center; gap: 4px; }
+  .rail-recap .wt-marks i { width: 9px; height: 9px; display: block; }
+  .rail-recap .m-circle { background: #d92b1e; border-radius: 50%; }
+  .rail-recap .m-square { background: #f2b705; }
+  .rail-recap .m-tri { background: #1b45b8; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+  .rail-recap-label { display: block; }
+
+  /* A fixed sheet leaves the page behind it scrollable; JS marks the body
+     while one is open. */
+  body.sheet-open { overflow: hidden; }
+
+  .kpi-grid, .insights-grid { grid-template-columns: repeat(2, 1fr); }
+  .chart-row, .insight-row { grid-template-columns: minmax(0, 1fr); }
+  /* Room for the floating buttons, so they never cover the last card. */
+  .dashboard { padding-bottom: 76px; }
+}
+
+/* Phone: tighten the shell, size controls for fingers, keep the heatmap whole. */
+@media (max-width: 700px) {
+  .analytics { padding: 14px; }
+  /* The topbar bleeds to the edges with negative margins, so they have to
+     track the page padding or the sticky bar sits inset. */
+  .topbar { gap: 8px; margin: -14px -14px 16px; padding: 12px 14px; }
+  .tb-divider, .tb-brand h1 { display: none; }
+  .card { padding: 14px; }
+  .kpi-value { font-size: 24px; }
+  .insight-value { font-size: 18px; }
+  .chart-wrap { height: 200px; }
+  .chat-chip #chatChipName { max-width: 120px; }
+  .balance-legend { gap: 10px 14px; }
+  .msg { max-width: 100%; }
+
+  /* Popovers anchor to their pill, and the right-hand pill's card ran off the
+     screen. On a phone they span the viewport instead. */
+  .pop {
+    position: fixed; left: 12px; right: 12px; width: auto;
+    top: auto; max-height: 70dvh; overflow-y: auto;
+  }
+
+  /* iOS zooms the page when a focused field is under 16px. */
+  .chat-input textarea, .dp-field input { font-size: 16px; }
+  .dp-field input { min-height: 42px; -webkit-appearance: none; appearance: none; }
+
+  /* Touch targets */
+  .pg-btn, .grain-btn { width: 38px; height: 38px; }
+  .grain-opt { padding: 11px 9px; }
+  .dp-presets .seg { padding: 11px 8px; }
+  .pt-pick { padding: 10px 8px; }
+
+  /* Heatmap: 24 hours have to fit a 360px card, so the gutter and the day
+     column give up what the cells need. */
+  .heat-row, .heat-hours { grid-template-columns: 24px repeat(24, 1fr); gap: 2px; }
+  .heat-row { min-height: 13px; }
+  .heat-cell { border-radius: 2px; }
+  /* Scaling a cell up covers its neighbours, and there is no hover to undo it. */
+  .heat-cell:hover { transform: none; }
+  .heat-row .day-label { font-size: 9px; }
+  .heat-hours span { font-size: 8px; }
+}
+
+/* Two KPI columns start clipping their values around here. */
+@media (max-width: 400px) {
+  .kpi-grid, .insights-grid { grid-template-columns: minmax(0, 1fr); }
+}

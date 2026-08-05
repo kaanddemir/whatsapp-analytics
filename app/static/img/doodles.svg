@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <!-- Seamless doodle tile for the upload drop zone. Every mark sits well
+       inside the 400x400 bounds, so nothing is clipped at the seam and the
+       tile repeats without a visible join. Drawn here rather than borrowed:
+       the look is WhatsApp's wallpaper, the artwork is our own. -->
+  <defs>
+    <g id="heart"><path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z"/></g>
+    <g id="star"><path d="M12 3.5l2.5 5.4 5.9.7-4.4 4 1.2 5.8L12 16.5 6.8 19.4 8 13.6 3.6 9.6l5.9-.7L12 3.5z"/></g>
+    <g id="bubble"><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-6 4V6z"/></g>
+    <g id="smiley">
+      <circle cx="12" cy="12" r="8.5"/>
+      <path d="M8.5 14c.9 1.3 2.1 2 3.5 2s2.6-.7 3.5-2M9 9.5v1M15 9.5v1"/>
+    </g>
+    <g id="cup">
+      <path d="M4.5 7.5h12v6a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5v-6z"/>
+      <path d="M16.5 9.5h1.8a2.2 2.2 0 0 1 0 4.4h-1.8M8 4.5V3M12 4.5V3"/>
+    </g>
+    <g id="camera">
+      <path d="M3 8.5a2 2 0 0 1 2-2h2.2l1.3-2h6.9l1.3 2H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8z"/>
+      <circle cx="12" cy="12.5" r="3.5"/>
+    </g>
+    <g id="music">
+      <path d="M9 18V6l10-2v12"/>
+      <circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>
+    </g>
+    <g id="mail">
+      <rect x="3" y="6" width="18" height="12" rx="2"/>
+      <path d="M3.5 7.5l8.5 6 8.5-6"/>
+    </g>
+    <g id="clock"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5.3l3.3 2"/></g>
+    <g id="plane"><path d="M21 3L3 10.5l7 2.8L13 21l8-18z"/><path d="M10 13.3L21 3"/></g>
+    <g id="sun">
+      <circle cx="12" cy="12" r="4.5"/>
+      <path d="M12 2.5V5M12 19v2.5M2.5 12H5M19 12h2.5M5.2 5.2L7 7M17 17l1.8 1.8M18.8 5.2L17 7M7 17l-1.8 1.8"/>
+    </g>
+    <g id="cloud"><path d="M7 18.5h10.5a3.5 3.5 0 0 0 .3-7 5.5 5.5 0 0 0-10.4-1A4 4 0 0 0 7 18.5z"/></g>
+    <g id="balloon">
+      <path d="M12 15.5c3 0 5.5-2.9 5.5-6.5S15 3 12 3 6.5 5.4 6.5 9s2.5 6.5 5.5 6.5z"/>
+      <path d="M12 15.5V17c0 2-2 2-2 4"/>
+    </g>
+    <g id="gift">
+      <rect x="3.5" y="9" width="17" height="11" rx="1.5"/>
+      <path d="M2.5 9h19M12 9v11"/>
+      <path d="M12 9C11 5 9.5 3.5 8 3.5A2.2 2.2 0 0 0 8 9h4zM12 9c1-4 2.5-5.5 4-5.5A2.2 2.2 0 0 1 16 9h-4z"/>
+    </g>
+    <g id="checks"><path d="M3 13l4 4 8-9"/><path d="M11 17l8-9"/></g>
+    <g id="phone">
+      <rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/>
+      <path d="M10.5 5.5h3M12 18.4h.01"/>
+    </g>
+    <g id="headphones">
+      <path d="M4 15v-2a8 8 0 0 1 16 0v2"/>
+      <rect x="2.5" y="14.5" width="4.5" height="6" rx="2"/>
+      <rect x="17" y="14.5" width="4.5" height="6" rx="2"/>
+    </g>
+    <g id="flower">
+      <circle cx="12" cy="12" r="2.5"/>
+      <circle cx="12" cy="6.6" r="3.1"/><circle cx="17.4" cy="12" r="3.1"/>
+      <circle cx="12" cy="17.4" r="3.1"/><circle cx="6.6" cy="12" r="3.1"/>
+    </g>
+    <g id="leaf">
+      <path d="M20 4c0 9-5 13-11 13a5 5 0 0 1-5-5c0-6 6-8 16-8z"/>
+      <path d="M4 20c3-6 7-9 12-11"/>
+    </g>
+    <g id="moon"><path d="M20.5 13.5A8.5 8.5 0 1 1 10.5 3.5a6.8 6.8 0 0 0 10 10z"/></g>
+    <g id="bolt"><path d="M13 2.5L4.5 13.5H11l-1 8 8.5-11H12l1-8z"/></g>
+    <g id="glasses">
+      <circle cx="6.5" cy="14" r="3.5"/><circle cx="17.5" cy="14" r="3.5"/>
+      <path d="M10 14h4M3 11l2-4M21 11l-2-4"/>
+    </g>
+    <g id="dots">
+      <circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/>
+    </g>
+  </defs>
+
+  <g fill="none" stroke="#e0e7e3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <use href="#heart"      transform="translate(35,32)   scale(1.35) rotate(-12 12 12)"/>
+    <use href="#star"       transform="translate(118,45)  scale(1.35) rotate(8 12 12)"/>
+    <use href="#bubble"     transform="translate(196,30)  scale(1.35)"/>
+    <use href="#smiley"     transform="translate(285,42)  scale(1.35) rotate(10 12 12)"/>
+    <use href="#cup"        transform="translate(352,35)  scale(1.35) rotate(-8 12 12)"/>
+
+    <use href="#camera"     transform="translate(45,128)  scale(1.35) rotate(6 12 12)"/>
+    <use href="#music"      transform="translate(122,112) scale(1.35) rotate(-10 12 12)"/>
+    <use href="#mail"       transform="translate(205,125) scale(1.35) rotate(4 12 12)"/>
+    <use href="#clock"      transform="translate(280,115) scale(1.35)"/>
+    <use href="#plane"      transform="translate(356,128) scale(1.35) rotate(-14 12 12)"/>
+
+    <use href="#sun"        transform="translate(38,205)  scale(1.35)"/>
+    <use href="#cloud"      transform="translate(120,195) scale(1.35)"/>
+    <use href="#balloon"    transform="translate(200,208) scale(1.35) rotate(8 12 12)"/>
+    <use href="#gift"       transform="translate(285,198) scale(1.35) rotate(-6 12 12)"/>
+    <use href="#checks"     transform="translate(356,205) scale(1.35) rotate(10 12 12)"/>
+
+    <use href="#phone"      transform="translate(42,285)  scale(1.35) rotate(-8 12 12)"/>
+    <use href="#headphones" transform="translate(125,278) scale(1.35)"/>
+    <use href="#flower"     transform="translate(202,290) scale(1.35) rotate(12 12 12)"/>
+    <use href="#leaf"       transform="translate(288,282) scale(1.35) rotate(-10 12 12)"/>
+    <use href="#moon"       transform="translate(356,275) scale(1.35) rotate(6 12 12)"/>
+
+    <use href="#bolt"       transform="translate(40,360)  scale(1.35) rotate(8 12 12)"/>
+    <use href="#glasses"    transform="translate(122,356) scale(1.35) rotate(-6 12 12)"/>
+    <use href="#dots"       transform="translate(205,362) scale(1.35)"/>
+    <use href="#heart"      transform="translate(288,358) scale(1.35) rotate(14 12 12)"/>
+    <use href="#star"       transform="translate(356,352) scale(1.35) rotate(-10 12 12)"/>
+
+    <!-- Loose marks between the rows, so the grid the doodles sit on does not
+         read as a grid. -->
+    <circle cx="88" cy="90" r="2.2"/><circle cx="252" cy="84" r="1.8"/>
+    <circle cx="172" cy="168" r="2"/><circle cx="330" cy="172" r="2.4"/>
+    <circle cx="80" cy="248" r="1.8"/><circle cx="245" cy="255" r="2.2"/>
+    <circle cx="160" cy="330" r="2"/><circle cx="332" cy="336" r="1.8"/>
+    <use href="#star" transform="translate(90,160) scale(0.7) rotate(14 12 12)"/>
+    <use href="#star" transform="translate(262,318) scale(0.7) rotate(-8 12 12)"/>
+    <use href="#heart" transform="translate(168,88) scale(0.65) rotate(10 12 12)"/>
+    <use href="#heart" transform="translate(330,240) scale(0.65) rotate(-14 12 12)"/>
+  </g>
+</svg>

@@ -1,0 +1,351 @@
+<!-- ================= CHAT RECAP =================
+     A full-screen, auto-advancing recap of the whole chat, kept out of
+     index.html because it is a fifteen-slide deck and the page is already long.
+
+     The visual language is Bauhaus: paper and ink with the three primaries, a
+     strict twelve-column grid and flush-left type. The ground is a seamless
+     neo-geometric mosaic built entirely in recap.css, and every slide sets
+     its content on bordered panels over it — a print pinned to a papered wall.
+
+     Every slide is an inert <template> carrying four attributes:
+
+       data-bg / data-fg / data-accent   colour names from the palette
+       data-dur                          how long the slide holds, in ms
+
+     recap.js only maps those names onto custom properties and writes values
+     into [data-slot] nodes. Reveal order inside a slide is [data-anim] plus
+     --i, which recap.css turns into a staggered delay. The mosaic derives
+     its colours from the same three properties, so it repaints with the slide.
+
+     Panel vocabulary:
+       .w-panel            the bordered, offset-shadowed surface itself
+       .at-tl .at-left .at-bl .at-mid .at-br    where a lone panel sits
+       .w-combined        copy followed by its statistic in one panel
+     Charts and rankings stay with their explanatory copy rather than floating
+     as a separate panel on the mosaic. -->
+
+<div class="recap-overlay" id="recapOverlay" role="dialog" aria-modal="true"
+     aria-label="Chat Recap" tabindex="-1" hidden>
+
+  <div class="recap-bg" aria-hidden="true"><i></i><i></i></div>
+
+  <!-- One segment per slide, built at open time so a skipped slide leaves no gap. -->
+  <div class="recap-progress" id="recapProgress"></div>
+
+  <!-- Editorial marker: which poster of how many. -->
+  <p class="recap-count" id="recapCount" aria-hidden="true"></p>
+
+  <div class="recap-controls">
+    <button type="button" class="recap-cbtn" id="recapPause"
+            aria-label="Pause" title="Pause"><span data-icon="pause"></span></button>
+    <button type="button" class="recap-cbtn" id="recapClose"
+            aria-label="Close Recap" title="Close"><span data-icon="close"></span></button>
+  </div>
+
+  <!-- Tap targets sit under the stage: left third goes back, the rest forward.
+       Kept out of the tab order and the accessibility tree: they are invisible
+       halves of the screen, and the arrow keys already cover the keyboard. -->
+  <button type="button" class="recap-tap prev" id="recapPrev"
+          tabindex="-1" aria-hidden="true"></button>
+  <button type="button" class="recap-tap next" id="recapNext"
+          tabindex="-1" aria-hidden="true"></button>
+
+  <div class="recap-stage" id="recapStage" aria-live="polite"></div>
+
+  <!-- The wait stays flat: three primaries step in place, the editorial line
+       sets flush beneath them. No ring, no orbit, just the palette keeping time. -->
+  <div class="recap-status" id="recapStatus" hidden>
+    <!-- The wait is the deck's first panel: same header band and surface as the
+         recap card, so the story looks the same before it has any data. -->
+    <div class="recap-status-card w-panel">
+      <!-- No edition pill here: the year comes from the chat, and the wait is
+           by definition the moment before there is one. -->
+      <div class="w-card-header">
+        <p class="w-card-badge">chat recap</p>
+      </div>
+      <div class="recap-status-body">
+        <div class="recap-load" aria-hidden="true">
+          <i class="wl-cell red"></i>
+          <i class="wl-cell yellow"></i>
+          <i class="wl-cell blue"></i>
+        </div>
+        <p class="recap-status-line">
+          <span id="recapStatusText">Building your recap…</span>
+        </p>
+        <!-- Shown only when the recap could not be built. Without it a failed
+             load leaves an empty deck whose only exit is Escape. -->
+        <button type="button" class="dp-btn primary recap-retry" id="recapRetry" hidden>
+          Try again
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <span class="recap-paused-pip" id="recapPip" hidden>paused</span>
+
+  <!-- ---------------- SLIDES ---------------- -->
+
+  <!-- The order follows the dashboard, card for card, reading left to right and
+       then down: totals, active days, peak hour, the timeline, the heatmap,
+       media, emojis, keywords, balance, then the four insight tiles. A slide
+       may carry two of the dashboard's cards where they say one thing — the
+       messages-a-day average is the line under the active-days count — so
+       fourteen cards become thirteen posters between the cover and the recap.
+
+       The pairs rotate so no two adjacent posters share a background; that
+       alternation is most of what makes fifteen slides read as a series. -->
+
+  <template data-slide="cover" data-bg="paper" data-fg="ink" data-accent="red" data-dur="4600">
+    <div class="recap-slide s-cover">
+      <div class="w-block w-panel at-bl">
+        <p class="w-eyebrow" data-anim style="--i:0">whatsapp analytics</p>
+        <h2 class="w-title" data-anim style="--i:1">your chat,<br />recapped</h2>
+        <p class="w-name" data-slot="chatName" data-anim style="--i:3"></p>
+        <p class="w-note" data-slot="span" data-anim style="--i:4"></p>
+      </div>
+      <p class="w-hint at-br" data-anim style="--i:5">tap to move · hold to pause</p>
+    </div>
+  </template>
+
+  <template data-slide="total" data-bg="yellow" data-fg="ink" data-accent="red" data-dur="5000">
+    <div class="recap-slide s-total">
+      <div class="w-block w-panel at-left">
+        <p class="w-eyebrow" data-anim style="--i:0">together you sent</p>
+        <p class="w-hero" data-anim style="--i:1"><span data-slot="total"></span></p>
+        <p class="w-lede" data-anim style="--i:3">messages</p>
+        <p class="w-note" data-anim style="--i:4">across <b data-slot="days"></b> days of talking</p>
+      </div>
+    </div>
+  </template>
+
+  <template data-slide="days" data-bg="blue" data-fg="paper" data-accent="yellow" data-dur="5000">
+    <div class="recap-slide s-days">
+      <div class="w-block w-panel at-br">
+        <p class="w-eyebrow" data-anim style="--i:0">you showed up on</p>
+        <p class="w-hero" data-anim style="--i:1"><span data-slot="days"></span></p>
+        <p class="w-lede" data-anim style="--i:3">different days</p>
+        <p class="w-note" data-anim style="--i:4">averaging <b data-slot="perDay"></b> messages on each one</p>
+      </div>
+    </div>
+  </template>
+
+  <template data-slide="hour" data-bg="navy" data-fg="paper" data-accent="yellow" data-dur="5800">
+    <div class="recap-slide s-hour">
+      <div class="w-panel w-combined">
+        <div class="w-copy">
+          <p class="w-eyebrow" data-anim style="--i:0">your hour is</p>
+          <p class="w-hero mid" data-slot="peak" data-anim style="--i:1"></p>
+          <p class="w-note" data-anim style="--i:2"><b data-slot="peakShare"></b> of everything you ever said landed there</p>
+        </div>
+        <div class="w-hours" data-slot="hourBars" data-anim style="--i:3"></div>
+        <p class="w-axis" data-anim style="--i:4"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></p>
+      </div>
+    </div>
+  </template>
+
+  <template data-slide="timeline" data-bg="paper" data-fg="ink" data-accent="red" data-dur="5800">
+    <div class="recap-slide s-timeline">
+      <div class="w-panel w-combined">
+        <div class="w-copy">
+          <p class="w-eyebrow" data-anim style="--i:0">your loudest month</p>
+          <p class="w-hero mid" data-slot="peakMonth" data-anim style="--i:1"></p>
+          <p class="w-note" data-anim style="--i:2"><b data-slot="peakMonthCount"></b> messages in that month alone, out of <b data-slot="monthCount"></b> months of talking</p>
+        </div>
+        <div class="w-hours" data-slot="monthBars" data-anim style="--i:3"></div>
+        <p class="w-axis" data-anim style="--i:4">
+          <span data-slot="monthFirst"></span><span data-slot="monthLast"></span>
+        </p>
+      </div>
+    </div>
+  </template>
+
+  <template data-slide="heatmap" data-bg="ink" data-fg="paper" data-accent="yellow" data-dur="5800">
+    <div class="recap-slide s-heatmap">
+      <div class="w-panel w-combined">
+        <div class="w-copy">
+          <p class="w-eyebrow" data-anim style="--i:0">the hour you never miss</p>
+          <p class="w-hero mid" data-slot="heatDay" data-anim style="--i:1"></p>
+          <p class="w-hero mid heat-time" data-slot="heatTime" data-anim style="--i:2"></p>
+          <p class="w-note" data-anim style="--i:3"><b data-slot="heatPeakCount"></b> messages landed in that one hour of that one weekday</p>
+        </div>
+        <div class="w-heat" data-slot="heatGrid" data-anim style="--i:4"></div>
+        <p class="w-axis" data-anim style="--i:5"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></p>
+      </div>
+    </div>
+  </template>
+
+  <template data-slide="media" data-bg="yellow" data-fg="ink" data-accent="red" data-dur="5400">
+    <div class="recap-slide s-media">
+      <div class="w-block w-panel at-bl">
+        <p class="w-eyebrow" data-anim style="--i:0">you also shared</p>
+        <p class="w-hero" data-anim style="--i:1"><span data-slot="mediaTotal"></span></p>
+        <p class="w-lede" data-anim style="--i:3">photos, clips and files</p>
+        <div class="w-chips" data-slot="mediaChips" data-anim style="--i:4"></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- The five most-used emojis read as a ranked table: rank, glyph and count
+       in aligned columns. -->
+  <template data-slide="emojis" data-bg="paper" data-fg="ink" data-accent="red" data-dur="6500">
+    <div class="recap-slide s-emoji">
+      <div class="w-panel w-combined">
+        <div class="w-copy">
+          <p class="w-eyebrow" data-anim style="--i:0">your top</p>
+          <p class="w-title small" data-anim style="--i:1">emoji</p>
+          <p class="w-note" data-anim style="--i:3"><b data-slot="emojiTop"></b> alone showed up <b data-slot="emojiCount"></b> times</p>
+        </div>
+        <div class="w-podium" data-slot="podium" data-anim style="--i:2"></div>
+      </div>
+    </div>
+  </template>
+
+  <template data-slide="words" data-bg="ink" data-fg="paper" data-accent="yellow" data-dur="6500">
+    <div class="recap-slide s-words">
+      <div class="w-panel w-combined">
+        <div class="w-copy">
+          <p class="w-eyebrow" data-anim style="--i:0">the words you</p>
+          <p class="w-title small" data-anim style="--i:1">kept coming<br />back to</p>
+        </div>
+        <div class="w-wordlist" data-slot="words" data-anim style="--i:2"></div>
+      </div>
+    </div>
+  </template>
+
+  <template data-slide="balance" data-bg="blue" data-fg="paper" data-accent="yellow" data-dur="6000">
+    <div class="recap-slide s-balance">
+      <div class="w-panel w-combined">
+        <div class="w-copy">
+          <p class="w-eyebrow" data-anim style="--i:0">who did</p>
+          <p class="w-title small" data-anim style="--i:1">the talking</p>
+        </div>
+        <div class="w-split" data-slot="splitBar" data-anim style="--i:2"></div>
+        <div class="w-people" data-slot="people" data-anim style="--i:3"></div>
+      </div>
+    </div>
+  </template>
+
+  <template data-slide="day" data-bg="yellow" data-fg="ink" data-accent="blue" data-dur="4800">
+    <div class="recap-slide s-day">
+      <div class="w-block w-panel at-mid">
+        <p class="w-eyebrow" data-anim style="--i:0">your busiest day of the week</p>
+        <p class="w-hero mid" data-slot="busiestDay" data-anim style="--i:1"></p>
+        <p class="w-note" data-anim style="--i:3">
+          <b data-slot="dayCount"></b> messages landed there, <b data-slot="dayShare"></b> of everything
+        </p>
+      </div>
+    </div>
+  </template>
+
+  <template data-slide="starter" data-bg="navy" data-fg="paper" data-accent="yellow" data-dur="5000">
+    <div class="recap-slide s-starter">
+      <div class="w-block w-panel at-br">
+        <p class="w-eyebrow" data-anim style="--i:0">breaking the silence first</p>
+        <p class="w-hero mid" data-slot="starter" data-anim style="--i:1"></p>
+        <p class="w-note" data-anim style="--i:3">
+          started <b data-slot="starterPct"></b> of your conversations
+        </p>
+      </div>
+    </div>
+  </template>
+
+  <template data-slide="streak" data-bg="paper" data-fg="ink" data-accent="red" data-dur="5000">
+    <div class="recap-slide s-streak">
+      <div class="w-block w-panel at-tl">
+        <p class="w-eyebrow" data-anim style="--i:0">your longest streak ran</p>
+        <p class="w-hero" data-anim style="--i:1"><span data-slot="streak"></span></p>
+        <p class="w-lede" data-anim style="--i:3">days without a break</p>
+        <p class="w-note" data-slot="streakRange" data-anim style="--i:4"></p>
+      </div>
+    </div>
+  </template>
+
+  <template data-slide="owl" data-bg="ink" data-fg="paper" data-accent="yellow" data-dur="5200">
+    <div class="recap-slide s-owl">
+      <div class="w-block w-panel at-left">
+        <p class="w-eyebrow" data-anim style="--i:0">the one who never sleeps</p>
+        <p class="w-hero mid" data-slot="owl" data-anim style="--i:1"></p>
+        <p class="w-note" data-anim style="--i:3">
+          <b data-slot="owlCount"></b> messages after midnight —
+          <b data-slot="owlShare"></b> of everything they sent
+        </p>
+      </div>
+    </div>
+  </template>
+
+  <!-- The last slide is the shareable one, so it is a bounded card rather than
+       a full-bleed poster: it has to survive being cropped into an image. A
+       duration of 0 means "hold here" — the story ends rather than looping. -->
+  <template data-slide="final" data-bg="paper" data-fg="ink" data-accent="blue" data-dur="0">
+    <div class="recap-slide s-final">
+      <div class="w-card w-panel">
+        <!-- The edition marker is the last year the chat ran, so the poster
+             dates itself the way a printed annual would. The two things you can
+             do with the card ride in the same band, ahead of it: the card is the
+             whole slide now, so its own header is where its actions belong.
+             Neither button is drawn by the canvas export — they are chrome on
+             the card, not part of the poster that gets saved. -->
+        <div class="w-card-header">
+          <p class="w-card-badge">chat recap</p>
+          <div class="w-card-tools">
+            <button type="button" class="w-tool" id="recapDownload"
+                    aria-label="Save as image" title="Save as image">
+              <span data-icon="download"></span>
+            </button>
+            <button type="button" class="w-tool" id="recapReplay"
+                    aria-label="Watch again" title="Watch again">
+              <span data-icon="refresh"></span>
+            </button>
+            <span class="w-card-edition" data-slot="edition"></span>
+          </div>
+        </div>
+        <div class="w-card-body">
+          <!-- Title block: the name leads, the date span sits under it as a
+               caption so the two never compete for the same weight. -->
+          <div class="w-card-title">
+            <p class="w-card-name" data-slot="chatName"></p>
+            <p class="w-card-span" data-slot="span"></p>
+          </div>
+          <!-- The headline number gets its own band, with the daily average
+               riding along on the right: one is the other's rate. -->
+          <div class="w-card-hero">
+            <div class="hero-main">
+              <b data-slot="total"></b>
+              <span>messages</span>
+            </div>
+            <div class="hero-side" data-cell="perDay">
+              <b data-slot="perDay"></b>
+              <span>a day</span>
+            </div>
+          </div>
+          <!-- One cell per dashboard tile, in the dashboard's own reading
+               order. Each carries a data-cell key: a chat that never produced
+               the number drops the cell rather than printing a zero, and the
+               grid closes up around the gap. -->
+          <div class="w-card-grid">
+            <div class="w-cell" data-cell="days"><b data-slot="days"></b><span>active days</span></div>
+            <div class="w-cell" data-cell="peak"><b data-slot="peak"></b><span>peak hour</span></div>
+            <div class="w-cell" data-cell="word"><b data-slot="word"></b><span>top word</span></div>
+            <div class="w-cell" data-cell="talker"><b data-slot="talker"></b><span data-slot="talkerLabel">most messages</span></div>
+            <div class="w-cell" data-cell="starter"><b data-slot="starter"></b><span data-slot="starterLabel">starts the chat</span></div>
+            <div class="w-cell" data-cell="streak"><b data-slot="streak"></b><span>day streak</span></div>
+            <div class="w-cell" data-cell="owl"><b data-slot="owl"></b><span data-slot="owlLabel">night owl</span></div>
+          </div>
+          <!-- The emoji reads as a signature line rather than a stat: glyph on
+               the left, its caption beside it, one line tall. -->
+          <div class="w-card-emoji" data-cell="emoji">
+            <b data-slot="emoji"></b>
+            <span data-slot="emojiLabel"></span>
+          </div>
+          <!-- The imprint line, and the place the save reports back to. The
+               message only ever replaces the footer's own space, so confirming
+               a download cannot make the card taller. -->
+          <div class="w-card-footline">
+            <p class="w-card-foot">whatsapp analytics</p>
+            <p class="w-card-msg" id="recapDownloadMsg" hidden></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+</div>
