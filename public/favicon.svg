@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="WhatsApp Analytics">
+  <title>WhatsApp Analytics</title>
+  <!-- A squared speech bubble (tail bottom-right) holding three rising bars;
+       chunky shapes so it still reads at 16px. Same mark as the top bar icon. -->
+  <path fill="#168568" d="M16 6h32a10 10 0 0 1 10 10v26a10 10 0 0 1-10 10h-2v8l-10-8H16A10 10 0 0 1 6 42V16A10 10 0 0 1 16 6Z"/>
+  <g fill="#fff">
+    <rect x="17" y="31" width="8" height="12" rx="2.5"/>
+    <rect x="28" y="24" width="8" height="19" rx="2.5"/>
+    <rect x="39" y="16" width="8" height="27" rx="2.5"/>
+  </g>
+</svg>

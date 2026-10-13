@@ -8,26 +8,23 @@
 # Environment
 .env
 .env.*
-!.env.example
 
-# Python
-venv/
-.venv/
-__pycache__/
-*.py[cod]
-*$py.class
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-htmlcov/
+# Node / Vite
+node_modules/
 dist/
-build/
-*.egg-info/
+*.tsbuildinfo
+*.local
+coverage/
 
-# Chat exports / caches
+# Browser test output
+test-results/
+playwright-report/
+
+# Chat exports. Real WhatsApp exports are .txt or .zip and must never be
+# committed; synthetic test fixtures use the .chat extension instead.
 *.txt
-!requirements.txt
-uploads/
+*.zip
+# Font licence shipped with the Recap typeface.
+!src/ui/recap/fonts/OFL.txt
 .cache/
 *.log
