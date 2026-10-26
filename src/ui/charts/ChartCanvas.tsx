@@ -10,6 +10,7 @@
 
    The canvas is an image to assistive technology (role="img" + a one-line
    summary); every chart card also offers its numbers as a table. */
+import { useI18n } from "@/ui/i18n";
 import { useEffect, useRef } from "react";
 import {
   BarController,
@@ -79,6 +80,7 @@ interface Props {
 }
 
 export function ChartCanvas({ config, paint, summary, height = 240 }: Props) {
+  const { locale } = useI18n();
   const canvas = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<AnyChart | null>(null);
   const paintRef = useRef(paint);
@@ -99,6 +101,7 @@ export function ChartCanvas({ config, paint, summary, height = 240 }: Props) {
         maintainAspectRatio: false,
         ...(reducedMotion() ? { animation: false as const } : {}),
         ...config.options,
+        locale: locale === "tr" ? "tr-TR" : "en-US",
       },
     } as ChartConfiguration<Kind>) as AnyChart;
     applyChartTheme(chart, themeRef.current, paintRef.current);
@@ -108,7 +111,7 @@ export function ChartCanvas({ config, paint, summary, height = 240 }: Props) {
       chart.destroy();
       if (chartRef.current === chart) chartRef.current = null;
     };
-  }, [config]);
+  }, [config, locale]);
 
   useEffect(() => {
     const chart = chartRef.current;

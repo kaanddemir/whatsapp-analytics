@@ -8,17 +8,14 @@
 # Environment
 .env
 .env.*
+!.env.example
+!.env.*.example
 
 # Node / Vite
 node_modules/
 dist/
 *.tsbuildinfo
-*.local
 coverage/
-
-# Browser test output
-test-results/
-playwright-report/
 
 # Chat exports. Real WhatsApp exports are .txt or .zip and must never be
 # committed; synthetic test fixtures use the .chat extension instead.
@@ -28,3 +25,16 @@ playwright-report/
 !src/ui/recap/fonts/OFL.txt
 .cache/
 *.log
+
+# Optional model downloads (fetch-model.ts accepts a local destination).
+**/Xenova/multilingual-e5-small/
+
+# Python launcher bytecode
+__pycache__/
+*.pyc
+
+# Benchmark output and local credentials
+*.jsonl
+*.pem
+*.key
+.npmrc

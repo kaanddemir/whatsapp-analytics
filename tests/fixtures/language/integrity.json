@@ -1,0 +1,7 @@
+{
+  "algorithm": "sha256",
+  "file": "final.json",
+  "sha256": "ea61634d874b78a3c59a17d84f6ef18cb89885e69dfcbb4ec8dfbfc02868e5de",
+  "frozenBeforeImplementation": true,
+  "rule": "Run final once after implementation; never tune from its failures."
+}

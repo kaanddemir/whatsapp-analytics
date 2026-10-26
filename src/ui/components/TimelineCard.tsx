@@ -6,11 +6,11 @@
 import { useMemo } from "react";
 import type { ChartConfiguration } from "chart.js";
 import type { Grain, Stats } from "@/model";
-import { formatBucket, formatCount, plural } from "../format";
+import { formatBucket, formatCount, plural } from "@/i18n/format";
 import { ChartCanvas, type Paint } from "../charts/ChartCanvas";
 import { DataTable } from "../charts/DataTable";
 import { Card, ChartView, Empty, ViewToggle, useView } from "./Card";
-import { useI18n } from "../i18n/context";
+import { useI18n } from "@/ui/i18n";
 
 const DENSE_POINTS = 60;
 const GRAINS: readonly Grain[] = ["daily", "weekly", "monthly"];

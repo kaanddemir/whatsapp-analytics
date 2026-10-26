@@ -18,9 +18,10 @@
    swipe, Space or a long press to pause, Escape or the close button to
    leave. Focus is trapped inside and returns to the trigger on close. */
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { ChevronLeft, ChevronRight, Pause, Play, X } from "lucide-react";
 import type { Stats } from "@/model";
-import { useI18n } from "../i18n/context";
-import type { TranslationKey } from "../i18n/en";
+import { useI18n } from "@/ui/i18n";
+import type { TranslationKey } from "@/i18n/en";
 import { Finale } from "./Finale";
 import { Playback, SceneView } from "./scenes";
 import { buildStory, type Scene } from "./story";
@@ -46,16 +47,6 @@ function useReducedMotion(): boolean {
   return reduced;
 }
 
-const Glyph = ({ d }: { d: string }) => (
-  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d={d} /></svg>
-);
-const GLYPHS = {
-  prev: "M15.5 5 8.5 12l7 7",
-  next: "m8.5 5 7 7-7 7",
-  play: "M8 5.5v13l10.5-6.5z",
-  pause: "M7.5 5.5h3v13h-3zM13.5 5.5h3v13h-3z",
-  close: "M6 6l12 12M18 6 6 18",
-};
 
 interface Props {
   stats: Stats;
@@ -222,11 +213,11 @@ export function Recap({ stats, onClose }: Props) {
           <div className="rc-tools">
             {playable && (
               <button type="button" className="rc-btn" onClick={() => setUserPaused((p) => !p)} aria-label={userPaused ? t("rcPlay") : t("rcPause")} aria-pressed={userPaused}>
-                <Glyph d={userPaused ? GLYPHS.play : GLYPHS.pause} />
+                {userPaused ? <Play size={20} /> : <Pause size={20} />}
               </button>
             )}
             <button type="button" className="rc-btn" onClick={onClose} aria-label={t("rcClose")}>
-              <Glyph d={GLYPHS.close} />
+              <X size={20} />
             </button>
           </div>
         </div>
@@ -248,14 +239,14 @@ export function Recap({ stats, onClose }: Props) {
 
       <div className="rc-nav">
         <button type="button" className="rc-btn rc-nav-prev" onClick={prev} disabled={at === 0} aria-label={t("rcPrev")}>
-          <Glyph d={GLYPHS.prev} />
+          <ChevronLeft size={20} />
         </button>
         {/* With reduced motion the first scene explains why nothing advances. */}
         {reduced && userPaused && at === 0
           ? <p className="rc-hint">{t("rcManual")}</p>
           : <p className="rc-counter" aria-hidden="true">{at + 1} / {scenes.length}</p>}
         <button type="button" className="rc-btn rc-nav-next" onClick={next} disabled={at === last} aria-label={t("rcNext")}>
-          <Glyph d={GLYPHS.next} />
+          <ChevronRight size={20} />
         </button>
       </div>
 

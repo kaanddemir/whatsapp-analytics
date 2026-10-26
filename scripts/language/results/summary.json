@@ -1,0 +1,732 @@
+{
+  "baseline": {
+    "behaviour": {
+      "proposal.tr": {
+        "n": 8,
+        "precision": 0.8,
+        "recall": 1,
+        "f1": 0.888888888888889,
+        "fp": 1,
+        "fn": 0,
+        "precisionGap": 0.33333333333333337,
+        "recallGap": 0,
+        "passes": false
+      },
+      "acceptance.tr": {
+        "n": 8,
+        "precision": 0.6,
+        "recall": 0.75,
+        "f1": 0.6666666666666665,
+        "fp": 2,
+        "fn": 1,
+        "precisionGap": 0.6666666666666667,
+        "recallGap": 0.5,
+        "passes": false
+      },
+      "apology.tr": {
+        "n": 8,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "fp": 0,
+        "fn": 0,
+        "precisionGap": 0,
+        "recallGap": 0,
+        "passes": true
+      },
+      "cancellation.tr": {
+        "n": 8,
+        "precision": 0.75,
+        "recall": 0.75,
+        "f1": 0.75,
+        "fp": 1,
+        "fn": 1,
+        "precisionGap": 0.33333333333333337,
+        "recallGap": 0.5,
+        "passes": false
+      },
+      "proposal.en": {
+        "n": 8,
+        "precision": 0.6666666666666666,
+        "recall": 1,
+        "f1": 0.8,
+        "fp": 2,
+        "fn": 0,
+        "precisionGap": 0,
+        "recallGap": 0,
+        "passes": false
+      },
+      "acceptance.en": {
+        "n": 8,
+        "precision": 0.6666666666666666,
+        "recall": 1,
+        "f1": 0.8,
+        "fp": 2,
+        "fn": 0,
+        "precisionGap": 0,
+        "recallGap": 0,
+        "passes": false
+      },
+      "apology.en": {
+        "n": 8,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "fp": 0,
+        "fn": 0,
+        "precisionGap": 0,
+        "recallGap": 0,
+        "passes": true
+      },
+      "cancellation.en": {
+        "n": 8,
+        "precision": 0.8,
+        "recall": 1,
+        "f1": 0.888888888888889,
+        "fp": 1,
+        "fn": 0,
+        "precisionGap": 0.33333333333333337,
+        "recallGap": 0,
+        "passes": false
+      }
+    },
+    "router": {
+      "tr": {
+        "intent": {
+          "correct": 12,
+          "n": 17,
+          "rate": 0.7058823529411765
+        },
+        "operation": {
+          "correct": 10,
+          "n": 17,
+          "rate": 0.5882352941176471
+        },
+        "person": {
+          "correct": 1,
+          "n": 3,
+          "rate": 0.3333333333333333
+        },
+        "period": {
+          "correct": 1,
+          "n": 3,
+          "rate": 0.3333333333333333
+        },
+        "unsupported": {
+          "correct": 1,
+          "n": 1,
+          "rate": 1
+        }
+      },
+      "en": {
+        "intent": {
+          "correct": 12,
+          "n": 16,
+          "rate": 0.75
+        },
+        "operation": {
+          "correct": 12,
+          "n": 16,
+          "rate": 0.75
+        },
+        "person": {
+          "correct": 2,
+          "n": 2,
+          "rate": 1
+        },
+        "period": {
+          "correct": 0,
+          "n": 1,
+          "rate": 0
+        },
+        "unsupported": {
+          "correct": 4,
+          "n": 4,
+          "rate": 1
+        }
+      },
+      "mixed": {
+        "intent": {
+          "correct": 2,
+          "n": 3,
+          "rate": 0.6666666666666666
+        },
+        "operation": {
+          "correct": 2,
+          "n": 3,
+          "rate": 0.6666666666666666
+        },
+        "person": {
+          "correct": 1,
+          "n": 2,
+          "rate": 0.5
+        },
+        "period": {
+          "correct": 0,
+          "n": 0,
+          "rate": null
+        },
+        "unsupported": {
+          "correct": 0,
+          "n": 0,
+          "rate": null
+        }
+      }
+    },
+    "context": {
+      "correct": 5,
+      "n": 8,
+      "rate": 0.625
+    },
+    "exactAnswers": {
+      "tr": {
+        "correct": 2,
+        "n": 5,
+        "rate": 0.4
+      },
+      "en": {
+        "correct": 2,
+        "n": 3,
+        "rate": 0.6666666666666666
+      },
+      "mixed": {
+        "correct": 1,
+        "n": 1,
+        "rate": 1
+      }
+    },
+    "retrieval": {
+      "tr->tr": {
+        "n": 3,
+        "recall1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "evidenceTop1": 3
+      },
+      "en->en": {
+        "n": 3,
+        "recall1": 0.6666666666666666,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "evidenceTop1": 2
+      },
+      "tr->en": {
+        "n": 1,
+        "recall1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "evidenceTop1": 1
+      },
+      "en->tr": {
+        "n": 1,
+        "recall1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "evidenceTop1": 1
+      }
+    },
+    "negatives": {
+      "n": 2,
+      "showingEvidence": 1,
+      "qualified": 2
+    }
+  },
+  "development": {
+    "behaviour": {
+      "proposal.tr": {
+        "n": 8,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "fp": 0,
+        "fn": 0,
+        "precisionGap": 0,
+        "recallGap": 0,
+        "passes": true
+      },
+      "acceptance.tr": {
+        "n": 8,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "fp": 0,
+        "fn": 0,
+        "precisionGap": 0,
+        "recallGap": 0,
+        "passes": true
+      },
+      "apology.tr": {
+        "n": 8,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "fp": 0,
+        "fn": 0,
+        "precisionGap": 0,
+        "recallGap": 0,
+        "passes": true
+      },
+      "cancellation.tr": {
+        "n": 8,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "fp": 0,
+        "fn": 0,
+        "precisionGap": 0,
+        "recallGap": 0,
+        "passes": true
+      },
+      "proposal.en": {
+        "n": 8,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "fp": 0,
+        "fn": 0,
+        "precisionGap": 0,
+        "recallGap": 0,
+        "passes": true
+      },
+      "acceptance.en": {
+        "n": 8,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "fp": 0,
+        "fn": 0,
+        "precisionGap": 0,
+        "recallGap": 0,
+        "passes": true
+      },
+      "apology.en": {
+        "n": 8,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "fp": 0,
+        "fn": 0,
+        "precisionGap": 0,
+        "recallGap": 0,
+        "passes": true
+      },
+      "cancellation.en": {
+        "n": 8,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "fp": 0,
+        "fn": 0,
+        "precisionGap": 0,
+        "recallGap": 0,
+        "passes": true
+      }
+    },
+    "router": {
+      "tr": {
+        "intent": {
+          "correct": 17,
+          "n": 17,
+          "rate": 1
+        },
+        "operation": {
+          "correct": 17,
+          "n": 17,
+          "rate": 1
+        },
+        "person": {
+          "correct": 3,
+          "n": 3,
+          "rate": 1
+        },
+        "period": {
+          "correct": 3,
+          "n": 3,
+          "rate": 1
+        },
+        "unsupported": {
+          "correct": 1,
+          "n": 1,
+          "rate": 1
+        }
+      },
+      "en": {
+        "intent": {
+          "correct": 16,
+          "n": 16,
+          "rate": 1
+        },
+        "operation": {
+          "correct": 16,
+          "n": 16,
+          "rate": 1
+        },
+        "person": {
+          "correct": 2,
+          "n": 2,
+          "rate": 1
+        },
+        "period": {
+          "correct": 1,
+          "n": 1,
+          "rate": 1
+        },
+        "unsupported": {
+          "correct": 4,
+          "n": 4,
+          "rate": 1
+        }
+      },
+      "mixed": {
+        "intent": {
+          "correct": 3,
+          "n": 3,
+          "rate": 1
+        },
+        "operation": {
+          "correct": 3,
+          "n": 3,
+          "rate": 1
+        },
+        "person": {
+          "correct": 2,
+          "n": 2,
+          "rate": 1
+        },
+        "period": {
+          "correct": 0,
+          "n": 0,
+          "rate": null
+        },
+        "unsupported": {
+          "correct": 0,
+          "n": 0,
+          "rate": null
+        }
+      }
+    },
+    "context": {
+      "correct": 8,
+      "n": 8,
+      "rate": 1
+    },
+    "exactAnswers": {
+      "tr": {
+        "correct": 5,
+        "n": 5,
+        "rate": 1
+      },
+      "en": {
+        "correct": 3,
+        "n": 3,
+        "rate": 1
+      },
+      "mixed": {
+        "correct": 1,
+        "n": 1,
+        "rate": 1
+      }
+    },
+    "retrieval": {
+      "tr->tr": {
+        "n": 3,
+        "recall1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "evidenceTop1": 3
+      },
+      "en->en": {
+        "n": 3,
+        "recall1": 0.6666666666666666,
+        "recall5": 1,
+        "recall10": 1,
+        "evidenceTop1": 2
+      },
+      "tr->en": {
+        "n": 1,
+        "recall1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "evidenceTop1": 1
+      },
+      "en->tr": {
+        "n": 1,
+        "recall1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "evidenceTop1": 1
+      }
+    },
+    "negatives": {
+      "n": 2,
+      "showingEvidence": 1,
+      "qualified": 2
+    }
+  },
+  "final": {
+    "behaviour": {
+      "proposal.tr": {
+        "n": 8,
+        "precision": 0.75,
+        "recall": 0.75,
+        "f1": 0.75,
+        "fp": 1,
+        "fn": 1,
+        "precisionGap": 0.5,
+        "recallGap": 0.5,
+        "passes": false
+      },
+      "acceptance.tr": {
+        "n": 8,
+        "precision": 0.5,
+        "recall": 0.25,
+        "f1": 0.3333333333333333,
+        "fp": 1,
+        "fn": 3,
+        "precisionGap": 0.5,
+        "recallGap": 0.5,
+        "passes": false
+      },
+      "apology.tr": {
+        "n": 8,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "fp": 0,
+        "fn": 0,
+        "precisionGap": 0,
+        "recallGap": 0,
+        "passes": true
+      },
+      "cancellation.tr": {
+        "n": 8,
+        "precision": 1,
+        "recall": 0.75,
+        "f1": 0.8571428571428571,
+        "fp": 0,
+        "fn": 1,
+        "precisionGap": 0,
+        "recallGap": 0.5,
+        "passes": false
+      },
+      "proposal.en": {
+        "n": 8,
+        "precision": 1,
+        "recall": 0.75,
+        "f1": 0.8571428571428571,
+        "fp": 0,
+        "fn": 1,
+        "precisionGap": 0,
+        "recallGap": 0.5,
+        "passes": false
+      },
+      "acceptance.en": {
+        "n": 8,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "fp": 0,
+        "fn": 0,
+        "precisionGap": 0,
+        "recallGap": 0,
+        "passes": true
+      },
+      "apology.en": {
+        "n": 8,
+        "precision": 1,
+        "recall": 0.75,
+        "f1": 0.8571428571428571,
+        "fp": 0,
+        "fn": 1,
+        "precisionGap": 0,
+        "recallGap": 0.5,
+        "passes": false
+      },
+      "cancellation.en": {
+        "n": 8,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "fp": 0,
+        "fn": 0,
+        "precisionGap": 0,
+        "recallGap": 0,
+        "passes": true
+      }
+    },
+    "router": {
+      "tr": {
+        "intent": {
+          "correct": 17,
+          "n": 17,
+          "rate": 1
+        },
+        "operation": {
+          "correct": 16,
+          "n": 17,
+          "rate": 0.9411764705882353
+        },
+        "person": {
+          "correct": 2,
+          "n": 2,
+          "rate": 1
+        },
+        "period": {
+          "correct": 2,
+          "n": 3,
+          "rate": 0.6666666666666666
+        },
+        "unsupported": {
+          "correct": 3,
+          "n": 3,
+          "rate": 1
+        }
+      },
+      "en": {
+        "intent": {
+          "correct": 12,
+          "n": 16,
+          "rate": 0.75
+        },
+        "operation": {
+          "correct": 12,
+          "n": 16,
+          "rate": 0.75
+        },
+        "person": {
+          "correct": 2,
+          "n": 2,
+          "rate": 1
+        },
+        "period": {
+          "correct": 2,
+          "n": 3,
+          "rate": 0.6666666666666666
+        },
+        "unsupported": {
+          "correct": 3,
+          "n": 3,
+          "rate": 1
+        }
+      },
+      "mixed": {
+        "intent": {
+          "correct": 3,
+          "n": 3,
+          "rate": 1
+        },
+        "operation": {
+          "correct": 3,
+          "n": 3,
+          "rate": 1
+        },
+        "person": {
+          "correct": 0,
+          "n": 0,
+          "rate": null
+        },
+        "period": {
+          "correct": 1,
+          "n": 1,
+          "rate": 1
+        },
+        "unsupported": {
+          "correct": 0,
+          "n": 0,
+          "rate": null
+        }
+      }
+    },
+    "context": {
+      "correct": 6,
+      "n": 8,
+      "rate": 0.75
+    },
+    "exactAnswers": {
+      "tr": {
+        "correct": 3,
+        "n": 4,
+        "rate": 0.75
+      },
+      "en": {
+        "correct": 1,
+        "n": 2,
+        "rate": 0.5
+      },
+      "mixed": {
+        "correct": 1,
+        "n": 1,
+        "rate": 1
+      }
+    },
+    "retrieval": {
+      "tr->tr": {
+        "n": 3,
+        "recall1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "evidenceTop1": 3
+      },
+      "en->en": {
+        "n": 3,
+        "recall1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "evidenceTop1": 3
+      },
+      "tr->en": {
+        "n": 1,
+        "recall1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "evidenceTop1": 1
+      },
+      "en->tr": {
+        "n": 1,
+        "recall1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "evidenceTop1": 1
+      }
+    },
+    "negatives": {
+      "n": 2,
+      "showingEvidence": 2,
+      "qualified": 2
+    }
+  },
+  "integrity": {
+    "algorithm": "sha256",
+    "file": "final.json",
+    "sha256": "ea61634d874b78a3c59a17d84f6ef18cb89885e69dfcbb4ec8dfbfc02868e5de",
+    "frozenBeforeImplementation": true,
+    "rule": "Run final once after implementation; never tune from its failures."
+  },
+  "limitations": [
+    "Synthetic labels authored before implementation; not independently adjudicated by another human.",
+    "Only 4 positives and 4 negatives per new behaviour/language cell; existing 3664-row evaluation retained separately.",
+    "Retrieval uses 8 positives and 2 negatives with tiny corpora; Recall@5 and @10 cannot establish large-chat ranking accuracy.",
+    "New final set was evaluated once; no language rules changed afterward.",
+    "No inferred psychological judgments, confirmed event states, or semantic relevance guarantees.",
+    "Older blind English proposal/acceptance and Turkish cancellation recall regressions retained explicitly; English acceptance comparison disabled."
+  ],
+  "validation": {
+    "unitTestsPassed": 839,
+    "defaultSkipped": 11,
+    "realModelTestsPassed": 5,
+    "typecheck": true,
+    "projectCheck": true,
+    "productionBuild": true,
+    "browser": {
+      "checks": [
+        "direct Overview entry",
+        "four-message metric",
+        "no Ask navigation or input",
+        "participant filtering",
+        "Recap navigation and focus return"
+      ],
+      "errors": []
+    }
+  },
+  "decision": "B — Partial improvement"
+}

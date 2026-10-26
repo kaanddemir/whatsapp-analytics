@@ -78,7 +78,7 @@ export function kpis(messages: readonly Message[], period: Period, hours: readon
 }
 
 const WHITESPACE = /\S+/g;
-const countWords = (text: string) => text.match(WHITESPACE)?.length ?? 0;
+export const countWords = (text: string) => text.match(WHITESPACE)?.length ?? 0;
 
 function series(keys: readonly number[], counts: Map<number, number>, bounds: (k: number) => [number, number], period: NonNullable<Period>): TimeSeries {
   return {

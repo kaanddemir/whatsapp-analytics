@@ -10,6 +10,7 @@
      people.ts    balance, response time, starter, night owl
      insights.ts  most active window, longest streak
      highlights.ts  derived details for card explanations and Recap
+     trends.ts    recent weeks vs the weeks before, longest silence
      numbers.ts   exact rounding, median, largest remainder, ranking */
 import type { AnalysisFilters, AnalysisOptions, Insights, ParseResult, Stats } from "@/model";
 import { DEFAULT_OPTIONS } from "@/model";
@@ -19,6 +20,7 @@ import { longestStreak, mostActiveWindow } from "./insights";
 import { highlights } from "./highlights";
 import { conversationStarter, nightOwl, participants, senderCounts } from "./people";
 import { selectScope } from "./scope";
+import { trends } from "./trends";
 import { detectLocale, keywordExtractor, type KeywordExtractor, type KeywordLocale } from "./text";
 import { busiestWeekday, kpis, timeline, timing } from "./volume";
 
@@ -88,5 +90,6 @@ export function analyze(parsed: ParseResult, filters: AnalysisFilters, options: 
     participants: people,
     insights,
     highlights: highlights(period, k, series, time, contentStats, people, insights, options),
+    trends: trends(scoped, humans, period, options, scope.precedingHuman),
   };
 }

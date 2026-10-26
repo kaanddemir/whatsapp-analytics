@@ -1,0 +1,726 @@
+{
+  "mode": "dev",
+  "fixtureSha256": "e84c9ba3cf4e03682de873ed9b6f0642c6eb24f25a627bc1e44b39b45094c2c4",
+  "model": "Xenova/multilingual-e5-small",
+  "at": "2026-10-26T21:37:25.934Z",
+  "behaviour": {
+    "proposal.tr": {
+      "n": 8,
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "formal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "informal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "precisionGap": 0,
+      "recallGap": 0,
+      "passes": true
+    },
+    "acceptance.tr": {
+      "n": 8,
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "formal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "informal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "precisionGap": 0,
+      "recallGap": 0,
+      "passes": true
+    },
+    "apology.tr": {
+      "n": 8,
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "formal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "informal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "precisionGap": 0,
+      "recallGap": 0,
+      "passes": true
+    },
+    "cancellation.tr": {
+      "n": 8,
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "formal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "informal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "precisionGap": 0,
+      "recallGap": 0,
+      "passes": true
+    },
+    "proposal.en": {
+      "n": 8,
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "formal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "informal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "precisionGap": 0,
+      "recallGap": 0,
+      "passes": true
+    },
+    "acceptance.en": {
+      "n": 8,
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "formal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "informal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "precisionGap": 0,
+      "recallGap": 0,
+      "passes": true
+    },
+    "apology.en": {
+      "n": 8,
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "formal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "informal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "precisionGap": 0,
+      "recallGap": 0,
+      "passes": true
+    },
+    "cancellation.en": {
+      "n": 8,
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "formal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "informal": {
+        "n": 4,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "precisionGap": 0,
+      "recallGap": 0,
+      "passes": true
+    }
+  },
+  "router": {
+    "tr": {
+      "intent": {
+        "correct": 17,
+        "n": 17,
+        "rate": 1
+      },
+      "operation": {
+        "correct": 17,
+        "n": 17,
+        "rate": 1
+      },
+      "person": {
+        "correct": 3,
+        "n": 3,
+        "rate": 1
+      },
+      "period": {
+        "correct": 3,
+        "n": 3,
+        "rate": 1
+      },
+      "unsupported": {
+        "correct": 1,
+        "n": 1,
+        "rate": 1
+      }
+    },
+    "en": {
+      "intent": {
+        "correct": 16,
+        "n": 16,
+        "rate": 1
+      },
+      "operation": {
+        "correct": 16,
+        "n": 16,
+        "rate": 1
+      },
+      "person": {
+        "correct": 2,
+        "n": 2,
+        "rate": 1
+      },
+      "period": {
+        "correct": 1,
+        "n": 1,
+        "rate": 1
+      },
+      "unsupported": {
+        "correct": 4,
+        "n": 4,
+        "rate": 1
+      }
+    },
+    "mixed": {
+      "intent": {
+        "correct": 3,
+        "n": 3,
+        "rate": 1
+      },
+      "operation": {
+        "correct": 3,
+        "n": 3,
+        "rate": 1
+      },
+      "person": {
+        "correct": 2,
+        "n": 2,
+        "rate": 1
+      },
+      "period": {
+        "correct": 0,
+        "n": 0,
+        "rate": null
+      },
+      "unsupported": {
+        "correct": 0,
+        "n": 0,
+        "rate": null
+      }
+    }
+  },
+  "context": {
+    "correct": 8,
+    "n": 8,
+    "rate": 1
+  },
+  "exactAnswers": {
+    "tr": {
+      "correct": 5,
+      "n": 5,
+      "rate": 1
+    },
+    "en": {
+      "correct": 3,
+      "n": 3,
+      "rate": 1
+    },
+    "mixed": {
+      "correct": 1,
+      "n": 1,
+      "rate": 1
+    }
+  },
+  "retrieval": {
+    "tr->tr": {
+      "n": 3,
+      "recall1": 1,
+      "recall5": 1,
+      "recall10": 1,
+      "evidenceTop1": 3
+    },
+    "en->en": {
+      "n": 3,
+      "recall1": 0.6666666666666666,
+      "recall5": 1,
+      "recall10": 1,
+      "evidenceTop1": 2
+    },
+    "tr->en": {
+      "n": 1,
+      "recall1": 1,
+      "recall5": 1,
+      "recall10": 1,
+      "evidenceTop1": 1
+    },
+    "en->tr": {
+      "n": 1,
+      "recall1": 1,
+      "recall5": 1,
+      "recall10": 1,
+      "evidenceTop1": 1
+    }
+  },
+  "negatives": {
+    "n": 2,
+    "showingEvidence": 1,
+    "qualified": 2
+  },
+  "failures": {
+    "behaviour": [],
+    "router": [],
+    "context": [],
+    "exact": [],
+    "retrieval": [
+      {
+        "question": "Where did we talk about a promotion?",
+        "lang": "en",
+        "texts": [
+          "I got promoted at work today!",
+          "The shop has a promotion on soap.",
+          "My manager quit."
+        ],
+        "gold": [
+          0
+        ],
+        "factLang": "en",
+        "answerable": true,
+        "shown": [
+          1,
+          0
+        ],
+        "r1": 0,
+        "r5": 1,
+        "r10": 1,
+        "qualified": false,
+        "text": "I found messages in the whole chat that may be related. The most relevant come first.",
+        "note": null
+      }
+    ]
+  },
+  "cases": {
+    "exact": [
+      {
+        "question": "Ayşe’ye göre değil, Can’ın kaç mesajı var?",
+        "lang": "tr",
+        "expected": 3,
+        "actual": "3",
+        "correct": true
+      },
+      {
+        "question": "Ayşe’nin mesaj sayısı kaç?",
+        "lang": "tr",
+        "expected": 2,
+        "actual": "2",
+        "correct": true
+      },
+      {
+        "question": "2024 Martında kaç mesaj attık?",
+        "lang": "tr",
+        "expected": 0,
+        "actual": "0",
+        "correct": true
+      },
+      {
+        "question": "12 Nisan 2024’te kaç mesaj attık?",
+        "lang": "tr",
+        "expected": 2,
+        "actual": "2",
+        "correct": true
+      },
+      {
+        "question": "Kaç foto göndermişiz?",
+        "lang": "tr",
+        "expected": 0,
+        "actual": "0",
+        "correct": true
+      },
+      {
+        "question": "How many msgs did Ayşe send?",
+        "lang": "en",
+        "expected": 2,
+        "actual": "2",
+        "correct": true
+      },
+      {
+        "question": "How many messages on April 12, 2024?",
+        "lang": "en",
+        "expected": 2,
+        "actual": "2",
+        "correct": true
+      },
+      {
+        "question": "How many deleted messages?",
+        "lang": "en",
+        "expected": 0,
+        "actual": "0",
+        "correct": true
+      },
+      {
+        "question": "Ayşe kaç message gönderdi?",
+        "lang": "mixed",
+        "expected": 2,
+        "actual": "2",
+        "correct": true
+      }
+    ],
+    "retrieval": [
+      {
+        "question": "Taşınma konuşmasını bul",
+        "lang": "tr",
+        "texts": [
+          "Taşınma için nakliyeci arıyorum.",
+          "Tatil için otel baktım.",
+          "Taşınmaya hiç niyetim yok."
+        ],
+        "gold": [
+          0
+        ],
+        "factLang": "tr",
+        "answerable": true,
+        "shown": [
+          0,
+          2,
+          1
+        ],
+        "r1": 1,
+        "r5": 1,
+        "r10": 1,
+        "qualified": false,
+        "text": "Sohbetin tamamı kapsamında bununla ilgili olabilecek mesajlar buldum. En ilgili görünenler önce geliyor.",
+        "note": null
+      },
+      {
+        "question": "Find the conversation about the rental deposit",
+        "lang": "en",
+        "texts": [
+          "The landlord returned our rental deposit.",
+          "We deposited the cake at reception.",
+          "The rent went up."
+        ],
+        "gold": [
+          0
+        ],
+        "factLang": "en",
+        "answerable": true,
+        "shown": [
+          0,
+          2,
+          1
+        ],
+        "r1": 1,
+        "r5": 1,
+        "r10": 1,
+        "qualified": false,
+        "text": "I found messages in the whole chat that may be related. The most relevant come first.",
+        "note": null
+      },
+      {
+        "question": "Kahvaltıdan bahsettiğimiz mesajları bul",
+        "lang": "tr",
+        "texts": [
+          "Kahvaltıyı sahilde yapalım.",
+          "Kahvaltı yapmadım.",
+          "Bilgisayar bozuldu."
+        ],
+        "gold": [
+          0,
+          1
+        ],
+        "factLang": "tr",
+        "answerable": true,
+        "shown": [
+          1,
+          0,
+          2
+        ],
+        "r1": 1,
+        "r5": 1,
+        "r10": 1,
+        "qualified": true,
+        "text": "Sohbetin tamamı kapsamında bununla ilgili olabilecek mesajlar buldum. En ilgili görünenler önce geliyor.",
+        "note": "Sorunuzdaki kelimeler bu mesajlarda geçmiyor; yalnızca anlam benzerliğine göre sıralandılar, bu yüzden bazıları ilgisiz olabilir."
+      },
+      {
+        "question": "Where did we talk about a promotion?",
+        "lang": "en",
+        "texts": [
+          "I got promoted at work today!",
+          "The shop has a promotion on soap.",
+          "My manager quit."
+        ],
+        "gold": [
+          0
+        ],
+        "factLang": "en",
+        "answerable": true,
+        "shown": [
+          1,
+          0
+        ],
+        "r1": 0,
+        "r5": 1,
+        "r10": 1,
+        "qualified": false,
+        "text": "I found messages in the whole chat that may be related. The most relevant come first.",
+        "note": null
+      },
+      {
+        "question": "İşten ayrıldığını söylediği konuşmayı bul",
+        "lang": "tr",
+        "texts": [
+          "I handed in my resignation today.",
+          "My new job starts Monday.",
+          "The cake was delicious."
+        ],
+        "gold": [
+          0
+        ],
+        "factLang": "en",
+        "answerable": true,
+        "shown": [
+          0,
+          1
+        ],
+        "r1": 1,
+        "r5": 1,
+        "r10": 1,
+        "qualified": true,
+        "text": "Sohbetin tamamı kapsamında bununla ilgili olabilecek mesajlar buldum. En ilgili görünenler önce geliyor.",
+        "note": "Sorunuzdaki kelimeler bu mesajlarda geçmiyor; yalnızca anlam benzerliğine göre sıralandılar, bu yüzden bazıları ilgisiz olabilir."
+      },
+      {
+        "question": "Find when we discussed moving house",
+        "lang": "en",
+        "texts": [
+          "Eşyaları yeni eve taşıdık.",
+          "Ev sahibi kirayı artırmış.",
+          "Otobüs geç kaldı."
+        ],
+        "gold": [
+          0
+        ],
+        "factLang": "tr",
+        "answerable": true,
+        "shown": [
+          0,
+          1,
+          2
+        ],
+        "r1": 1,
+        "r5": 1,
+        "r10": 1,
+        "qualified": true,
+        "text": "I found messages in the whole chat that may be related. The most relevant come first.",
+        "note": "None of your question’s words appear in these messages; they were ranked by similar meaning alone, so some may be unrelated."
+      },
+      {
+        "question": "Akşam gelemeyeceğimi söylediğim konuşmayı bul",
+        "lang": "tr",
+        "texts": [
+          "Akşam gelemeyeceğim, işim çıktı.",
+          "Akşam geleceğim, bekle beni.",
+          "Yarın toplantı var."
+        ],
+        "gold": [
+          0
+        ],
+        "factLang": "tr",
+        "answerable": true,
+        "shown": [
+          0,
+          1,
+          2
+        ],
+        "r1": 1,
+        "r5": 1,
+        "r10": 1,
+        "qualified": false,
+        "text": "Sohbetin tamamı kapsamında bununla ilgili olabilecek mesajlar buldum. En ilgili görünenler önce geliyor.",
+        "note": null
+      },
+      {
+        "question": "Find where I said I couldn't attend dinner",
+        "lang": "en",
+        "texts": [
+          "I can't attend dinner tonight.",
+          "I can attend dinner tonight.",
+          "The cinema was closed."
+        ],
+        "gold": [
+          0
+        ],
+        "factLang": "en",
+        "answerable": true,
+        "shown": [
+          0,
+          1
+        ],
+        "r1": 1,
+        "r5": 1,
+        "r10": 1,
+        "qualified": true,
+        "text": "I found messages in the whole chat that may be related. The most relevant come first.",
+        "note": "I can’t tell who “I” and “they” refer to in this chat; choose a person with the participant filter to narrow it down."
+      },
+      {
+        "question": "Who won the lunar chess tournament?",
+        "lang": "en",
+        "texts": [
+          "Coffee was nice today.",
+          "Yarın yağmur var."
+        ],
+        "gold": [],
+        "factLang": "mixed",
+        "answerable": false,
+        "shown": [],
+        "r1": 0,
+        "r5": 0,
+        "r10": 0,
+        "qualified": true,
+        "text": "I couldn’t find a conversation about this in the whole chat.",
+        "note": null
+      },
+      {
+        "question": "Kara deliklerden bahsettiğimiz konuşmayı bul",
+        "lang": "tr",
+        "texts": [
+          "Marketten süt aldım.",
+          "The rent is due tomorrow."
+        ],
+        "gold": [],
+        "factLang": "mixed",
+        "answerable": false,
+        "shown": [
+          0,
+          1
+        ],
+        "r1": 0,
+        "r5": 0,
+        "r10": 0,
+        "qualified": true,
+        "text": "Sohbetin tamamı kapsamında bununla ilgili olabilecek mesajlar buldum. En ilgili görünenler önce geliyor.",
+        "note": "Sorunuzdaki kelimeler bu mesajlarda geçmiyor; yalnızca anlam benzerliğine göre sıralandılar, bu yüzden bazıları ilgisiz olabilir."
+      }
+    ]
+  }
+}

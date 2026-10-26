@@ -12,7 +12,7 @@
    (ms); every keyframe animates *from* a hidden state, so the resting style is
    the final data state. Reduced motion and pause need nothing else. */
 import type { CSSProperties, ReactNode } from "react";
-import { initials } from "../format";
+import { initials } from "@/i18n/format";
 import type { Person } from "./story";
 
 const delay = (ms: number): CSSProperties => ({ ["--d" as string]: Math.round(ms) });
@@ -177,11 +177,12 @@ export function Dial({ hours, peak, compact = false }: { hours: readonly number[
   );
 }
 
-export function WeekColumns({ totals, labels, peak }: { totals: readonly number[]; labels: readonly string[]; peak: number }) {
-  const max = Math.max(1, ...totals);
+export function WeekColumns({ averages, labels, peak }: { averages: readonly number[]; labels: readonly string[]; peak: number }) {
+  // Averages can be under 1, so scale to the largest rather than to at least 1.
+  const max = Math.max(...averages) || 1;
   return (
     <div className="rc-week" aria-hidden="true">
-      {totals.map((v, d) => (
+      {averages.map((v, d) => (
         <div key={d} className={`rc-week-col${d === peak ? " is-peak" : ""}`}>
           <span className="rc-week-bar rc-a-grow-y" style={{ ["--h" as string]: `${Math.max(v ? 3 : 1, (v / max) * 100)}%`, ...delay(250 + d * 90) }} />
           <span className="rc-week-label">{labels[d]}</span>

@@ -5,8 +5,8 @@
    Every panel has a visible heading and a close button: on narrow screens the
    stylesheet turns it into a bottom sheet over a scrim, where both matter. */
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { Icon } from "./Icon";
-import { useI18n } from "../i18n/context";
+import { X } from "lucide-react";
+import { useI18n } from "@/ui/i18n";
 
 interface Props {
   /** Accessible name of the trigger. */
@@ -85,7 +85,7 @@ export function Popover({ label, title, trigger, triggerClassName = "pill", pane
             <div className="pop-head">
               <h2 id={headingId} className="pop-heading">{title ?? label}</h2>
               <button type="button" className="icon-btn pop-close" aria-label={t("close")} onClick={close}>
-                <Icon name="close" size={16} />
+                <X size={16} />
               </button>
             </div>
             <div className="pop-body">{children(close)}</div>

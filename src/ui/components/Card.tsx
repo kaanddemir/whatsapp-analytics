@@ -3,8 +3,8 @@
    switching views never changes the card's size. */
 import { useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { CARD_TITLE_KEYS, type CardKey } from "../cardInfo";
-import { useI18n } from "../i18n/context";
-import { Icon } from "./Icon";
+import { useI18n } from "@/ui/i18n";
+import { ChartColumn, Table, type LucideIcon } from "lucide-react";
 
 interface Props {
   cardKey: CardKey;
@@ -28,9 +28,9 @@ export function Card({ cardKey, controls, className = "", children }: Props) {
 }
 
 export type View = "chart" | "table";
-const VIEWS: readonly { id: View; key: "chartView" | "tableView"; icon: "chart" | "table" }[] = [
-  { id: "chart", key: "chartView", icon: "chart" },
-  { id: "table", key: "tableView", icon: "table" },
+const VIEWS: readonly { id: View; key: "chartView" | "tableView"; icon: LucideIcon }[] = [
+  { id: "chart", key: "chartView", icon: ChartColumn },
+  { id: "table", key: "tableView", icon: Table },
 ];
 
 /** Two-button segmented switch; arrow keys move between the options. */
@@ -48,7 +48,7 @@ export function ViewToggle({ view, onView }: { view: View; onView: (view: View) 
     <div ref={group} className="view-toggle" role="group" aria-label={t("view")} onKeyDown={onKey}>
       {VIEWS.map((v) => (
         <button key={v.id} type="button" data-view={v.id} aria-pressed={view === v.id} aria-label={t(v.key)} title={t(v.key)} onClick={() => onView(v.id)}>
-          <Icon name={v.icon} size={16} />
+          <v.icon size={16} />
         </button>
       ))}
     </div>

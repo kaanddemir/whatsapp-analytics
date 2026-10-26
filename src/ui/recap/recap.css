@@ -1,4 +1,4 @@
-/* ================= RECAP =================
+/* RECAP
    Warm Editorial + Playful Geometric. Colours are not written here: the
    player sets --rc-bg/fg/muted/reveal/on-reveal/support/p0..p7 on .rc from
    tokens.ts for the current scene's ground (cream, forest or ink), so every
@@ -59,7 +59,7 @@
 }
 .rc:focus { outline: none; }
 
-/* ---------- Chrome: progress, chapter, controls ---------- */
+/* Chrome: progress, chapter, controls */
 .rc-top {
   position: absolute; z-index: 3; top: 0; left: 0; right: 0;
   padding: calc(env(safe-area-inset-top, 0px) + 10px) max(var(--rc-gutter), env(safe-area-inset-right, 0px)) 0 max(var(--rc-gutter), env(safe-area-inset-left, 0px));
@@ -84,8 +84,8 @@
   background: color-mix(in srgb, var(--rc-bg) 70%, transparent); color: var(--rc-fg); cursor: pointer;
   transition: background-color var(--rc-micro) ease, border-color var(--rc-micro) ease, transform var(--rc-micro) ease;
 }
-.rc-btn path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.rc-btn[aria-pressed] path { fill: currentColor; stroke: none; }
+/* Play and pause read as solid shapes. */
+.rc-btn[aria-pressed] .lucide { fill: currentColor; }
 .rc-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--rc-fg) 12%, var(--rc-bg)); border-color: var(--rc-fg); }
 .rc-btn:active:not(:disabled) { transform: scale(.94); }
 .rc-btn:disabled { opacity: .3; cursor: default; }
@@ -123,7 +123,7 @@
   .rc-bar { min-height: 46px; }
 }
 
-/* ---------- Stage and scene families ---------- */
+/* Stage and scene families */
 .rc-stage {
   position: absolute; z-index: 2;
   top: var(--rc-top); bottom: var(--rc-bottom); left: var(--rc-side); right: var(--rc-side);
@@ -172,7 +172,7 @@
   .rc-scene[data-layout="finale"] { grid-template: "figure copy" minmax(0, 1fr) / minmax(0, 1fr) minmax(0, 1fr); column-gap: clamp(20px, 6cqw, 96px); }
 }
 
-/* ---------- Type ---------- */
+/* Type */
 /* Display type is never clipped (no line clamp): Turkish capitals carry marks
    above the cap height. Sizes are bounded by both the stage height (cqb) and
    the copy column's width (cqi) instead. */
@@ -197,7 +197,7 @@
 .rc-svg-label { font-family: var(--rc-font-display); font-weight: 800; }
 .rc-svg-axis { font: 700 10px var(--rc-font-ui); fill: var(--rc-muted); }
 
-/* ---------- Figures ---------- */
+/* Figures */
 .rc-dial-face circle { fill: none; stroke: var(--rc-muted); stroke-width: 1.2; opacity: .55; }
 .rc-dial-face line { stroke: var(--rc-muted); stroke-width: 1.4; opacity: .7; }
 
@@ -258,7 +258,7 @@
 .rc-media { --tile: min(calc((100cqh - 3 * 10px) / 4), 34cqw, 140px); list-style: none; margin: 0; padding: 0; display: grid; align-content: center; gap: 10px; width: 100%; height: 100%; }
 .rc-media li { display: grid; grid-template-columns: var(--tile) minmax(0, 1fr); align-items: center; gap: 14px; }
 .rc-media-tile { justify-self: center; display: grid; place-items: center; width: max(18px, calc(var(--s) * var(--tile))); aspect-ratio: 1; border-radius: 22%; background: var(--rc-support); color: var(--rc-on-reveal); }
-.rc-media-tile svg { width: 56%; height: 56%; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.rc-media-tile .lucide { width: 56%; height: 56%; stroke-width: 1.8; }
 .rc-media li:first-child .rc-media-tile { background: var(--rc-reveal); }
 .rc-media-text { font: 600 clamp(.8125rem, 2.4cqmin, 1rem)/1.2 var(--rc-font-ui); }
 
@@ -279,7 +279,7 @@
 .rc-peak-label { font: 650 clamp(.8125rem, 2.4cqmin, 1rem)/1.25 var(--rc-font-ui); color: var(--rc-muted); }
 .rc-peak-col.is-peak .rc-peak-label { color: var(--rc-fg); }
 
-/* ---------- Finale ---------- */
+/* Finale */
 .rc-poster { display: block; width: auto; height: auto; max-width: 100cqw; max-height: 100cqh; border-radius: clamp(8px, 1.6cqmin, 16px); box-shadow: 0 18px 50px rgba(26, 26, 23, .22); }
 .rc-poster-pending { aspect-ratio: 9 / 16; height: 100cqh; max-width: 100cqw; }
 .rc-poster-html { box-sizing: border-box; aspect-ratio: 9 / 16; height: 100cqh; max-width: 100cqw; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; padding: 8%; background: #12382B; color: #F4EEE1; }
@@ -294,7 +294,7 @@
 .rc-button.primary { background: var(--rc-fg); color: var(--rc-bg); }
 .rc-button:hover:not(:disabled) { background: color-mix(in srgb, var(--rc-fg) 12%, var(--rc-bg)); color: var(--rc-fg); }
 .rc-button[aria-pressed="true"] { background: color-mix(in srgb, var(--rc-fg) 14%, var(--rc-bg)); }
-.rc-button[aria-pressed="true"]::before { content: "✓ "; }
+.rc-button .lucide { margin-right: 6px; vertical-align: -2px; }
 .rc-button.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--rc-fg) 86%, var(--rc-bg)); color: var(--rc-bg); }
 .rc-button:active:not(:disabled) { transform: scale(.97); }
 .rc-button:disabled { opacity: .6; cursor: progress; }
@@ -305,7 +305,7 @@
   .rc-scene[data-layout="finale"] .rc-kicker { display: none; }
 }
 
-/* ---------- Motion primitives ---------- */
+/* Motion primitives */
 .rc-a-rise { animation: rc-rise var(--rc-text) var(--rc-ease) both; animation-delay: calc(var(--d, 0) * 1ms); }
 .rc-a-fade { animation: rc-fade var(--rc-text) ease both; animation-delay: calc(var(--d, 0) * 1ms); }
 .rc-a-pop { transform-box: fill-box; transform-origin: center; animation: rc-pop 520ms var(--rc-spring) both; animation-delay: calc(var(--d, 0) * 1ms); }

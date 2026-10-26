@@ -75,9 +75,10 @@ p { margin: 0; }
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 :focus-visible { outline: var(--border-strong) solid var(--color-focus); outline-offset: 2px; }
-.icon { flex: none; }
+/* Icons come from lucide-react: decorative (aria-hidden) unless labelled, sized per use, coloured by currentColor. */
+.lucide { flex: none; }
 
-/* ================= Controls ================= */
+/* Controls */
 .btn, .pill, .icon-btn, .seg {
   font: var(--font-control); color: inherit; cursor: pointer;
   border: var(--border-thin) solid var(--color-border); border-radius: var(--radius-control); background: var(--color-surface);
@@ -98,7 +99,7 @@ p { margin: 0; }
 .icon-btn { width: var(--control-md); height: var(--control-md); display: inline-grid; place-items: center; padding: 0; color: var(--color-text-secondary); }
 .pill { min-height: var(--control-md); display: inline-flex; align-items: center; gap: var(--space-2); padding: 0 var(--space-3); max-width: 100%; color: var(--color-text); }
 .pill.filtered { background: var(--color-selected); border-color: var(--color-accent); }
-.pill .icon { color: var(--color-text-muted); }
+.pill .lucide { color: var(--color-text-muted); }
 .pill-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .avatar { display: inline-grid; place-items: center; flex: none; width: 24px; height: 24px; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-surface); font: 700 .6875rem/1 ui-sans-serif, system-ui, sans-serif; }
 .seg { min-height: var(--control-sm); padding: 0 var(--space-3); }
@@ -111,70 +112,118 @@ p { margin: 0; }
 .theme-option:hover { color: var(--color-text); background: var(--color-hover); }
 .theme-option[aria-pressed="true"] { color: var(--color-accent); background: var(--color-surface); box-shadow: 0 1px 2px rgba(11, 15, 13, .1), 0 0 0 1px var(--color-border); }
 /* In the menu: a full-width segment with names beside the icons. */
-.theme-selector.labelled { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; width: 100%; border-radius: var(--radius-control); }
+.theme-selector.labelled { display: grid; grid-template-columns: repeat(3, auto); gap: 4px; width: 100%; border-radius: var(--radius-control); }
 .language-selector.labelled { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.theme-selector.labelled .theme-option { display: inline-flex; justify-content: center; gap: 6px; width: auto; border-radius: calc(var(--radius-control) - 3px); font: var(--font-label); }
+.theme-selector.labelled .theme-option { display: inline-flex; justify-content: center; gap: 6px; width: auto; min-width: 0; padding: 0 10px; white-space: nowrap; border-radius: calc(var(--radius-control) - 3px); font: var(--font-label); }
 
-/* ================= Shell ================= */
+/* Shell */
 .app { min-height: 100vh; }
 .appbar { position: sticky; top: 0; z-index: 30; background: color-mix(in srgb, var(--color-page) 92%, transparent); border-bottom: 1px solid var(--color-border); backdrop-filter: saturate(1.2) blur(8px); }
 /* The landing backdrop is fixed; keep it from showing through the bar. */
 .appbar.no-chat { background: var(--color-page); backdrop-filter: none; }
 .appbar-inner { max-width: var(--content-max); margin: 0 auto; padding: var(--space-3) var(--page-padding); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
 .brand { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
-.brand-mark { display: grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: var(--radius-control); background: var(--color-accent); color: var(--color-on-accent); }
+.brand-mark { display: block; width: 32px; height: 32px; flex: none; }
 .brand-name { margin: 0; font: var(--font-section-title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .appbar-actions { display: flex; align-items: center; gap: var(--space-2); flex: none; }
 /* Recap: the one primary action. Same height as the menu button, a soft
    inner highlight and a tight icon/label pair; no gradient. */
 .recap-btn { min-height: var(--control-md); padding: 0 var(--space-4) 0 var(--space-3); gap: 6px; border-radius: var(--radius-control); font: var(--font-control); letter-spacing: .005em; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 1px 2px rgba(11, 15, 13, .12); transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .1s ease; }
-.recap-btn .icon { width: 22px; height: 22px; padding: 4px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--color-on-accent) 18%, transparent); fill: currentColor; }
+.recap-btn .lucide { width: 22px; height: 22px; padding: 4px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--color-on-accent) 18%, transparent); fill: currentColor; }
 .recap-btn:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 2px 6px color-mix(in srgb, var(--color-accent) 28%, transparent); }
 .recap-btn:active { transform: translateY(1px); box-shadow: inset 0 1px 2px rgba(11, 15, 13, .18); }
 .menu-btn { width: var(--control-md); height: var(--control-md); }
 .menu-btn { color: var(--color-text); }
+/* Overview and Ask: the two views of an open chat, centred in the bar; shaped like the grain selector. */
+.appbar-inner.with-views { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+.appbar-inner.with-views .appbar-actions { justify-self: end; }
+.view-tabs { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: var(--color-surface-subtle); }
+.view-tab { min-height: var(--control-sm); padding: 0 var(--space-4); border: 0; border-radius: calc(var(--radius-control) - 3px); background: transparent; color: var(--color-text-muted); font: var(--font-control); white-space: nowrap; cursor: pointer; transition: background-color .15s ease, color .15s ease; }
+.view-tab:hover { color: var(--color-text); }
+.view-tab[aria-current="page"] { background: var(--color-surface); color: var(--color-text); box-shadow: 0 1px 2px rgba(11, 15, 13, .1), 0 0 0 1px var(--color-border); }
 .content { max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--page-padding) var(--space-12); }
 
-/* ================= Start / loading ================= */
-/* The landing is one centred column: hero, the upload panel (with the
-   privacy note and the export guide). Depth comes from a soft accent glow and a faint grid behind it,
-   both built from tokens and faded out with a mask, so each theme keeps
-   its own page colour underneath. */
-.start { position: relative; isolation: isolate; display: grid; justify-items: center; gap: var(--space-8); max-width: 980px; margin: 0 auto; padding: clamp(24px, 6vw, 64px) 0 var(--space-6); text-align: center; }
-.start-backdrop {
-  position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background:
-    radial-gradient(ellipse 50% 42% at 50% 8%, color-mix(in srgb, var(--color-accent) var(--glow-strength), transparent), transparent 72%),
-    linear-gradient(to right, color-mix(in srgb, var(--color-border) 70%, transparent) 1px, transparent 1px) 50% 0 / 56px 56px,
-    linear-gradient(to bottom, color-mix(in srgb, var(--color-border) 70%, transparent) 1px, transparent 1px) 50% 0 / 56px 56px;
-  -webkit-mask-image: radial-gradient(ellipse 60% 55% at 50% 18%, #000 10%, transparent 70%);
-  mask-image: radial-gradient(ellipse 60% 55% at 50% 18%, #000 10%, transparent 70%);
-}
-:root { --glow-strength: 12%; }
-:root[data-theme="dark"] { --glow-strength: 20%; }
-.hero { display: grid; gap: var(--space-4); justify-items: center; }
+/* Start / loading */
 .hero-title { margin: 0; font: 700 clamp(1.875rem, 1.1rem + 3.6vw, 3.5rem)/1.08 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: -.028em; text-wrap: balance; }
 .hero-title > span { display: block; }
 .hero-highlight { color: var(--color-accent); }
-.hero-lede { margin: 0; max-width: 42ch; color: var(--color-text-secondary); font-size: clamp(1rem, .95rem + .3vw, 1.125rem); line-height: 1.55; text-wrap: balance; }
 
-.upload-panel { width: 100%; max-width: 540px; padding: var(--space-3); border: 1px solid var(--color-border); border-radius: calc(var(--radius-panel) + 4px); background: var(--color-surface); box-shadow: 0 1px 2px rgba(11, 15, 13, .04), 0 24px 48px -24px color-mix(in srgb, var(--color-accent) 30%, transparent); }
-.drop { display: grid; justify-items: center; gap: var(--space-3); padding: var(--space-6) var(--space-4) var(--space-5); border: 1.5px dashed var(--color-border-strong, var(--color-border)); border-radius: var(--radius-panel); background: var(--color-surface-subtle); transition: border-color .15s ease, background-color .15s ease; }
-.drop.drag { border-color: var(--color-accent); border-style: solid; background: var(--color-selected); }
-.drop-icon { display: grid; place-items: center; width: 52px; height: 52px; border-radius: var(--radius-card); background: var(--color-selected); color: var(--color-accent); }
-.drop-title { margin: 0; font: 600 1rem/1.4 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-.drop .btn { min-width: 140px; }
-.drop-limit { margin: 0; font: var(--font-caption); color: var(--color-text-muted); }
-.privacy-note { display: flex; justify-content: center; align-items: center; gap: var(--space-2); margin: 0; padding: var(--space-3) var(--space-2); font: var(--font-label); color: var(--color-text-secondary); }
-.privacy-note .icon { color: var(--color-accent); flex: none; }
+/* Welcome. One column: the headline, the two ways in (your export or the
+   demo) side by side, a line on where chats are processed, the chats kept
+   on this device when there are any, and the export guide. A file can be
+   dropped anywhere on the page. */
+.welcome { position: relative; isolation: isolate; display: grid; align-content: start; justify-items: center; min-height: calc(100dvh - 140px); padding: clamp(24px, 8vh, 88px) 0 var(--space-10); }
+.welcome-main { display: grid; align-content: start; justify-items: center; width: 100%; max-width: 620px; text-align: center; }
+.welcome-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); margin-top: var(--space-8); }
+.welcome-actions .btn { min-height: 48px; padding: 0 var(--space-6); font-size: .9375rem; }
+.welcome-demo .lucide { color: var(--color-accent); fill: currentColor; }
+.welcome-hint { margin-top: var(--space-3); max-width: 48ch; font: var(--font-caption); color: var(--color-text-muted); text-wrap: balance; }
+/* Three rows of one rhythm: the same height, a 16px lead (checkbox or icon), the same type. The opt-in is
+   the one control and reads in full colour; privacy and export help are quieter. */
+.welcome-more { display: grid; justify-items: center; gap: var(--space-1); margin-top: var(--space-6); width: 100%; }
+.keep-option, .welcome-private, .welcome .guide-toggle { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--control-sm); font: var(--font-label); }
+.keep-option { color: var(--color-text); }
+.keep-option input { flex: none; width: 16px; height: 16px; margin: 0; accent-color: var(--color-accent); cursor: pointer; }
+.keep-option label { cursor: pointer; }
+.welcome-private { margin: 0; color: var(--color-text-muted); }
+.welcome-private .lucide { color: var(--color-accent); }
+
+/* Saved chats: one list, each row opens its chat. */
+.saved { width: 100%; margin-top: var(--space-10); text-align: left; }
+.saved-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-2); padding: 0 var(--space-2); }
+.saved-title { margin: 0; font: var(--font-card-title); font-size: .9375rem; }
+.saved-count { font: var(--font-caption); color: var(--color-text-muted); }
+.saved-list { list-style: none; margin: 0; padding: var(--space-1); display: grid; gap: 2px; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); }
+.saved-item { display: flex; align-items: center; gap: var(--space-1); min-width: 0; }
+.saved-open { display: flex; flex: 1; align-items: center; gap: var(--space-3); min-width: 0; min-height: 56px; padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-control); background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.saved-open:hover { background: var(--color-hover); }
+.saved-open > .lucide { color: var(--color-text-muted); }
+.saved-mark { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: var(--radius-control); background: var(--color-selected); color: var(--color-accent); }
+.saved-text { display: grid; flex: 1; min-width: 0; }
+.saved-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: var(--font-control); }
+.saved-meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: var(--font-caption); color: var(--color-text-muted); }
+.saved-delete { flex: none; border-color: transparent; background: transparent; color: var(--color-text-muted); }
+.saved-delete:hover { color: var(--color-error); }
+
+/* The export guide, last and quiet. */
+.welcome .guide { width: 100%; max-width: 440px; border-top: 0; }
+.welcome .guide-toggle { display: flex; justify-content: center; width: fit-content; margin: 0 auto; padding: 0 var(--space-2); color: var(--color-text-muted); }
+.welcome .guide-toggle:hover { color: var(--color-text); }
+.welcome .guide-toggle > span { flex: none; }
+.welcome .guide-body { margin-top: var(--space-2); padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); text-align: left; }
+
+/* Dropping a file anywhere on the welcome page. */
+/* Below the app bar (65px: its padding, controls and border), which stays above the page. */
+.welcome-drop { position: fixed; inset: calc(65px + var(--space-3)) var(--space-3) var(--space-3); z-index: 60; display: grid; place-content: center; justify-items: center; gap: var(--space-3); border: 2px dashed var(--color-accent); border-radius: var(--radius-panel); background: color-mix(in srgb, var(--color-page) 96%, transparent); color: var(--color-accent); font: var(--font-section-title); pointer-events: none; }
+
+/* Wallpaper: an original tile of chat motifs (bubbles, read ticks, a bar
+   chart, typing dots, a voice note, a clock, a letter), drawn in the text
+   colour at low strength through a mask, so it follows the theme. It fades
+   out behind the content. Decorative only. */
+.wallpaper {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: var(--color-text); opacity: var(--wallpaper-strength);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='rotate(-8 40 38)'%3E%3Cpath d='M20 30a10 10 0 0 1 10-10h26a10 10 0 0 1 10 10v12a10 10 0 0 1-10 10H34l-9 7v-7.5A10 10 0 0 1 20 42z'/%3E%3C/g%3E%3Cpath d='M150 40l5 5 10-11M160 40l5 5 10-11'/%3E%3Cg transform='rotate(6 100 72)'%3E%3Ccircle cx='100' cy='72' r='11'/%3E%3Cpath d='M95 75a6 6 0 0 0 10 0M96 69h.01M104 69h.01'/%3E%3C/g%3E%3Cpath d='M204 26a5 5 0 0 1 5 5v8a5 5 0 0 1-10 0v-8a5 5 0 0 1 5-5zM195 38a9 9 0 0 0 18 0M204 47v5'/%3E%3Cpath d='M28 132v-10M36 132v-18M44 132v-26M22 132h28'/%3E%3Cg transform='rotate(-10 150 120)'%3E%3Cpath d='M150 132s-12-7-12-15a6 6 0 0 1 12-2 6 6 0 0 1 12 2c0 8-12 15-12 15z'/%3E%3C/g%3E%3Cpath d='M196 104a9 9 0 0 1 9-9h18a9 9 0 0 1 9 9v6a9 9 0 0 1-9 9h-12l-8 6v-6.5a9 9 0 0 1-7-8.5z'/%3E%3Ccircle cx='56' cy='196' r='11'/%3E%3Cpath d='M56 189v7l5 3'/%3E%3Cg transform='rotate(4 150 196)'%3E%3Cpath d='M124 196a9 9 0 0 1 9-9h34a9 9 0 0 1 9 9v0a9 9 0 0 1-9 9h-34a9 9 0 0 1-9-9z'/%3E%3Cpath d='M138 196h.01M150 196h.01M162 196h.01' stroke-width='3'/%3E%3C/g%3E%3Cpath d='M206 178l4 8 9 1-6.5 6 1.5 9-8-4.5-8 4.5 1.5-9-6.5-6 9-1z'/%3E%3Cpath d='M96 150h22a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4H96a4 4 0 0 1-4-4v-14a4 4 0 0 1 4-4zM92 156l15 8 15-8'/%3E%3C/svg%3E"), radial-gradient(ellipse 62% 72% at 50% 42%, transparent 42%, rgba(0, 0, 0, .35) 62%, #000 92%);
+  -webkit-mask-composite: source-in;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='rotate(-8 40 38)'%3E%3Cpath d='M20 30a10 10 0 0 1 10-10h26a10 10 0 0 1 10 10v12a10 10 0 0 1-10 10H34l-9 7v-7.5A10 10 0 0 1 20 42z'/%3E%3C/g%3E%3Cpath d='M150 40l5 5 10-11M160 40l5 5 10-11'/%3E%3Cg transform='rotate(6 100 72)'%3E%3Ccircle cx='100' cy='72' r='11'/%3E%3Cpath d='M95 75a6 6 0 0 0 10 0M96 69h.01M104 69h.01'/%3E%3C/g%3E%3Cpath d='M204 26a5 5 0 0 1 5 5v8a5 5 0 0 1-10 0v-8a5 5 0 0 1 5-5zM195 38a9 9 0 0 0 18 0M204 47v5'/%3E%3Cpath d='M28 132v-10M36 132v-18M44 132v-26M22 132h28'/%3E%3Cg transform='rotate(-10 150 120)'%3E%3Cpath d='M150 132s-12-7-12-15a6 6 0 0 1 12-2 6 6 0 0 1 12 2c0 8-12 15-12 15z'/%3E%3C/g%3E%3Cpath d='M196 104a9 9 0 0 1 9-9h18a9 9 0 0 1 9 9v6a9 9 0 0 1-9 9h-12l-8 6v-6.5a9 9 0 0 1-7-8.5z'/%3E%3Ccircle cx='56' cy='196' r='11'/%3E%3Cpath d='M56 189v7l5 3'/%3E%3Cg transform='rotate(4 150 196)'%3E%3Cpath d='M124 196a9 9 0 0 1 9-9h34a9 9 0 0 1 9 9v0a9 9 0 0 1-9 9h-34a9 9 0 0 1-9-9z'/%3E%3Cpath d='M138 196h.01M150 196h.01M162 196h.01' stroke-width='3'/%3E%3C/g%3E%3Cpath d='M206 178l4 8 9 1-6.5 6 1.5 9-8-4.5-8 4.5 1.5-9-6.5-6 9-1z'/%3E%3Cpath d='M96 150h22a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4H96a4 4 0 0 1-4-4v-14a4 4 0 0 1 4-4zM92 156l15 8 15-8'/%3E%3C/svg%3E"), radial-gradient(ellipse 62% 72% at 50% 42%, transparent 42%, rgba(0, 0, 0, .35) 62%, #000 92%);
+  mask-composite: intersect;
+  -webkit-mask-size: 300px 300px, 100% 100%; mask-size: 300px 300px, 100% 100%;
+  -webkit-mask-repeat: repeat, no-repeat; mask-repeat: repeat, no-repeat;
+}
+:root { --wallpaper-strength: .06; }
+:root[data-theme="dark"] { --wallpaper-strength: .08; }
+/* On phones the content covers the middle: the motifs stay fainter still. */
+@media (max-width: 640px) { .wallpaper { opacity: calc(var(--wallpaper-strength) * .6); } }
+.demo-badge { flex: none; padding: 2px var(--space-2); border-radius: var(--radius-sm); background: var(--color-selected); color: var(--color-accent); font: 650 .75rem/1.4 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: .02em; }
+
 
 .guide { border-top: 1px solid var(--color-divider); text-align: left; }
 .guide-toggle { display: flex; align-items: center; gap: var(--space-2); width: 100%; min-height: 44px; margin-top: var(--space-1); padding: 0 var(--space-2); border: 0; border-radius: var(--radius-control); background: none; color: var(--color-text); font: var(--font-label); cursor: pointer; text-align: left; }
 .guide-toggle:hover { background: var(--color-hover); }
 .guide-toggle > span { flex: 1; }
-.guide-toggle .icon { color: var(--color-text-muted); flex: none; }
-.guide-toggle .icon:last-child { transition: transform .15s ease; }
-.guide.open .guide-toggle .icon:last-child { transform: rotate(180deg); }
+.guide-toggle .lucide { color: var(--color-text-muted); flex: none; }
+.guide-toggle .lucide:last-child { transition: transform .15s ease; }
+.guide.open .guide-toggle .lucide:last-child { transform: rotate(180deg); }
 .guide-body { display: grid; gap: var(--space-3); padding: var(--space-1) var(--space-2) var(--space-2); }
 .guide-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; width: 100%; padding: 3px; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: var(--color-surface-subtle); }
 .guide-tab { min-height: var(--control-md); padding: 0 var(--space-3); border: 0; border-radius: calc(var(--radius-control) - 3px); background: transparent; color: var(--color-text-muted); font: var(--font-label); cursor: pointer; }
@@ -198,27 +247,23 @@ p { margin: 0; }
 .stages li.done .stage-mark { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-on-accent); }
 .stages li.active .stage-mark { border-color: transparent; }
 
-/* ================= Context bar ================= */
-.context { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-3) var(--space-4); margin-bottom: var(--space-6); padding: var(--space-4) var(--space-5); border-radius: var(--radius-panel); }
+/* Context bar */
+.context { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-3) var(--space-4); margin-bottom: var(--space-6); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4); border-radius: var(--radius-card); box-shadow: none; }
 .context-chat { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
-.chat-mark { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: var(--radius-pill); background: var(--color-selected); color: var(--color-accent); }
+.chat-mark { display: grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: var(--radius-pill); background: var(--color-selected); color: var(--color-accent); }
 .context-text { min-width: 0; }
-.context-title { font: var(--font-section-title); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.context-title { font: var(--font-card-title); font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .context-meta { font: var(--font-caption); color: var(--color-text-muted); }
 .context-filters { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); min-width: 0; }
 .context-filters .pop-wrap { min-width: 0; max-width: 320px; }
-.context-status[hidden] { display: none; }
-.context-status { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--color-divider); font: var(--font-label); color: var(--color-text-secondary); }
-.applied b { color: var(--color-text); }
-.updating { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-accent); }
-.link-btn.notes { margin-left: auto; color: var(--color-warning); }
+.notes-btn { color: var(--color-warning); }
 .disclaimer p { margin: 0 0 var(--space-3); font: var(--font-body); color: var(--color-text-secondary); }
 .disclaimer p:last-child { margin-bottom: 0; }
 
 /* The dashboard is never dimmed during an update; the context bar reports it. */
 .dashboard { position: relative; }
 
-/* ================= Sections & grid ================= */
+/* Sections & grid */
 .section { margin-bottom: var(--space-8); }
 .section-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); margin-bottom: var(--space-3); }
 .section-head h2 { margin: 0; font: var(--font-section-title); }
@@ -235,7 +280,7 @@ p { margin: 0; }
 .grid-people { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: stretch; }
 .stack { display: grid; gap: var(--grid-gap); min-width: 0; }
 
-/* ================= Cards ================= */
+/* Cards */
 .card { min-width: 0; padding: var(--space-4) var(--space-5); border: var(--border-thin) solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); box-shadow: 0 1px 2px rgba(24, 31, 26, .03); }
 /* Wraps on the narrowest phones (title, then controls) rather than overflowing. */
 .card-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: var(--control-sm); margin-bottom: var(--space-3); }
@@ -271,7 +316,7 @@ p { margin: 0; }
 .grid-time .stat-value { margin-top: var(--space-2); font-size: 1.5rem; line-height: 1.2; letter-spacing: -.01em; }
 .grid-time .stat-sub { margin-top: var(--space-1); font-size: .8125rem; line-height: 1.45; }
 
-/* ---- Charts and tables ---- */
+/* Charts and tables */
 .chart-wrap { position: relative; width: 100%; }
 /* Chart and table share one region of fixed height: switching views never
    resizes the card. The table scrolls inside it. */
@@ -350,7 +395,7 @@ table.heatmap tbody td { height: 24px; border-radius: 4px; padding: 0; box-shado
 .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
 .dot.all { background: var(--color-text-muted); }
 
-/* ================= Popovers / bottom sheets ================= */
+/* Popovers / bottom sheets */
 .pop-wrap { position: relative; }
 .pop-scrim { display: none; }
 .pop {
@@ -378,23 +423,23 @@ table.heatmap tbody td { height: 24px; border-radius: 4px; padding: 0; box-shado
 .menu-group { list-style: none; margin: 0; padding: 0; }
 .menu-group + .menu-group:not(.menu-sep) { margin-top: var(--space-3); }
 .menu-label { margin: 0 0 var(--space-2); padding: 0 var(--space-1); font: var(--font-caption); font-weight: 600; color: var(--color-text-muted); }
-.menu .icon { color: var(--color-text-muted); }
+.menu .lucide { color: var(--color-text-muted); }
 .menu-sep { margin-top: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--color-divider); }
 .menu li button.danger:hover { background: color-mix(in srgb, var(--color-error) 8%, transparent); }
-.menu li button.danger, .menu li button.danger .icon { color: var(--color-error); }
+.menu li button.danger, .menu li button.danger .lucide { color: var(--color-error); }
 .presets { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-bottom: var(--space-3); }
 .date-fields { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
 .date-fields label { display: grid; gap: var(--space-1); font: var(--font-label); color: var(--color-text-secondary); }
 .date-fields input { min-height: var(--control-md); font: var(--font-body); padding: 0 var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-text); min-width: 0; }
 .row-actions, .dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-4); }
 
-/* ================= Dialogs ================= */
+/* Dialogs */
 .backdrop { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: var(--space-4); background: var(--color-overlay); }
 .dialog { width: min(480px, 100%); max-height: calc(100vh - 32px); overflow: auto; padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-panel); background: var(--color-surface-elevated); box-shadow: var(--shadow-dialog); }
 .dialog h2 { margin: 0 0 var(--space-2); font: var(--font-section-title); }
 .dialog p { color: var(--color-text-secondary); }
 
-/* ================= Parse report (failed import) and Chat info ================= */
+/* Parse report (failed import) and Chat info */
 .report dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-1) var(--space-4); margin: var(--space-3) 0; font-size: .8125rem; }
 .report dd { margin: 0; overflow-wrap: anywhere; }
 .warnings { margin: var(--space-2) 0 0; padding-left: var(--space-5); color: var(--color-warning); font-size: .8125rem; }
@@ -412,9 +457,9 @@ table.heatmap tbody td { height: 24px; border-radius: 4px; padding: 0; box-shado
 .chat-info-stats .span { grid-column: 1 / -1; }
 .chat-info-stats .span dd { font: var(--font-body); }
 .chat-info-status { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-2); align-items: start; font: var(--font-body); }
-.chat-info-status > .icon { margin-top: 2px; }
-.chat-info-status.ok > .icon { color: var(--color-success); }
-.chat-info-status.notes > .icon, .chat-info-status.partial > .icon { color: var(--color-warning); }
+.chat-info-status > .lucide { margin-top: 2px; }
+.chat-info-status.ok > .lucide { color: var(--color-success); }
+.chat-info-status.notes > .lucide, .chat-info-status.partial > .lucide { color: var(--color-warning); }
 .chat-info .chat-info-title { font-weight: 600; color: var(--color-text); }
 .chat-info .chat-info-status.partial .chat-info-title { color: var(--color-warning); }
 .chat-info-status p, .chat-info-status li { color: var(--color-text-secondary); }
@@ -422,7 +467,7 @@ table.heatmap tbody td { height: 24px; border-radius: 4px; padding: 0; box-shado
 .chat-info-status li + li { margin-top: 2px; }
 .chat-info .chat-info-advice { margin-top: var(--space-2); font: var(--font-caption); }
 
-/* ================= Responsive =================
+/* Responsive
    Desktop > 1200px: the full grid. Tablet: two columns. Phone (< 640px):
    one column, KPIs two across, popovers become bottom sheets. */
 @media (max-width: 1200px) {
@@ -438,6 +483,8 @@ table.heatmap tbody td { height: 24px; border-radius: 4px; padding: 0; box-shado
   .context-filters { justify-content: flex-start; }
 }
 @media (max-width: 640px) {
+  .welcome { padding-top: var(--space-6); }
+  .welcome-actions { flex-direction: column; align-items: stretch; width: 100%; max-width: 360px; }
   :root { --page-padding: 12px; }
   /* backdrop-filter establishes a containing block for fixed descendants in
      Chromium. Disable it on phones so the header menu can use the viewport
@@ -451,15 +498,11 @@ table.heatmap tbody td { height: 24px; border-radius: 4px; padding: 0; box-shado
   .stat + .stat, .grid-time .stat + .stat { border-left: 0; border-top: 1px solid var(--color-divider); }
   .card { padding: var(--space-4); }
   .kpi-value { font-size: 1.5rem; }
-  .context { padding: var(--space-4); }
-  .context-filters { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .context { padding: var(--space-3); }
+  .context-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .context-filters .pop-wrap { max-width: none; }
   .context-filters .pill { width: 100%; }
   .context-filters .pill .pill-text { flex: 1; text-align: left; }
-  .link-btn.notes { margin-left: 0; }
-  .start { gap: var(--space-6); }
-  .upload-panel { padding: var(--space-2); }
-  .drop { padding: var(--space-5) var(--space-3) var(--space-4); }
 
   /* Bottom sheet: heading and close stay put, the body scrolls. */
   .pop-scrim { display: block; position: fixed; inset: 0; z-index: 39; background: var(--color-overlay); }
@@ -476,6 +519,10 @@ table.heatmap tbody td { height: 24px; border-radius: 4px; padding: 0; box-shado
   .theme-selector.labelled .theme-option { height: var(--control-md); }
 }
 @media (max-width: 420px) {
+  .view-tab { padding: 0 var(--space-3); }
+  .context-filters { grid-template-columns: auto minmax(0, 1fr); }
+  .recap-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .recap-btn { padding: 0 var(--space-2); }
   .brand-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   /* Without a chat there is no Recap button, so the name fits. */
   .appbar.no-chat .brand-name { position: static; width: auto; height: auto; clip: auto; }
@@ -488,8 +535,13 @@ table.heatmap tbody td { height: 24px; border-radius: 4px; padding: 0; box-shado
 }
 @media (prefers-reduced-motion: reduce) {
   .spinner { animation-duration: 3s; }
-  .btn, .pill, .icon-btn, .seg, .drop, .theme-option, .guide-toggle .icon { transition: none; }
+  .btn, .pill, .icon-btn, .seg, .theme-option, .view-tab, .guide-toggle .lucide { transition: none; }
   .recap-btn:active { transform: none; }
 }
 
 /* The Recap's styles live with it, in src/ui/recap/recap.css. */
+
+.stage-progress { margin-left: auto; font: var(--font-caption); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+
+/* Shared filter pill sizing. */
+.pill { min-height: var(--control-sm); padding: 0 var(--space-3); border-radius: var(--radius-pill); font: var(--font-label); }

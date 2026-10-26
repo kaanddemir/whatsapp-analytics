@@ -3,7 +3,8 @@
    changes; object URLs are revoked as soon as they are replaced or the scene
    unmounts. Without a 2D canvas the composition falls back to HTML. */
 import { useEffect, useState } from "react";
-import { useI18n } from "../i18n/context";
+import { Check } from "lucide-react";
+import { useI18n } from "@/ui/i18n";
 import type { FinaleScene } from "./story";
 import { downloadBlob, posterBlob } from "./poster";
 import { delay } from "./figures";
@@ -14,7 +15,7 @@ export function Finale({ scene, onReplay }: { scene: FinaleScene; onReplay: () =
   const [hideNames, setHideNames] = useState(false);
   // null while drawing; "failed" when this browser cannot draw the poster.
   const [preview, setPreview] = useState<{ blob: Blob; url: string } | "failed" | null>(null);
-  const [status, setStatus] = useState<string | null>(null);
+  const [status, setStatus] = useState<"rcSaved" | "rcSaveFailed" | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -36,7 +37,7 @@ export function Finale({ scene, onReplay }: { scene: FinaleScene; onReplay: () =
     setSaving(true);
     const blob = preview && preview !== "failed" ? preview.blob : await posterBlob(poster, hideNames);
     setSaving(false);
-    setStatus(blob && downloadBlob(blob) ? t("rcSaved") : t("rcSaveFailed"));
+    setStatus(blob && downloadBlob(blob) ? "rcSaved" : "rcSaveFailed");
   };
 
   return (
@@ -62,9 +63,9 @@ export function Finale({ scene, onReplay }: { scene: FinaleScene; onReplay: () =
         <div className="rc-actions rc-a-rise" style={delay(400)}>
           <button type="button" className="rc-button primary" onClick={() => void save()} disabled={saving}>{saving ? t("rcSaving") : t("rcSave")}</button>
           <button type="button" className="rc-button" onClick={onReplay}>{t("rcReplay")}</button>
-          <button type="button" className="rc-button" aria-pressed={hideNames} onClick={() => { setHideNames((h) => !h); setStatus(null); }}>{t("rcHideNames")}</button>
+          <button type="button" className="rc-button" aria-pressed={hideNames} onClick={() => { setHideNames((h) => !h); setStatus(null); }}>{hideNames && <Check size={15} />}{t("rcHideNames")}</button>
         </div>
-        <p className="rc-status" role="status">{status}</p>
+        <p className="rc-status" role="status">{status ? t(status) : ""}</p>
       </div>
     </div>
   );

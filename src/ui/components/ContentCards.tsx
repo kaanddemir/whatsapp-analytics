@@ -2,10 +2,11 @@
 import type { MessageKind, Stats } from "@/model";
 import { Card } from "./Card";
 import { RankedList } from "./RankedList";
-import { useI18n } from "../i18n/context";
+import type { TranslationKey } from "@/i18n/en";
+import { useI18n } from "@/ui/i18n";
 
 export function MessageKindsCard({ stats }: { stats: Stats }) {
-  const { locale, t } = useI18n();
+  const { t } = useI18n();
   const labels: Record<MessageKind, string> = { text: t("text"), media: t("media"), deleted: t("deleted"), unavailable: t("unavailable") };
   const { messagesByKind } = stats.kpis;
   const { media } = stats.content;
@@ -15,7 +16,7 @@ export function MessageKindsCard({ stats }: { stats: Stats }) {
   // A lone "Other" merely repeats the Media total. Show this secondary
   // distribution only when the export identified at least one real type.
   const hasUsefulMediaBreakdown = media.items.some((item) => item.key !== "Other");
-  const mediaItems = media.items.map((item) => ({ ...item, key: locale === "tr" ? ({ Stickers: "Çıkartmalar", GIFs: "GIF’ler", "Video notes": "Video mesajları", Videos: "Videolar", Photos: "Fotoğraflar", "Voice notes": "Sesli mesajlar", Documents: "Belgeler", Contacts: "Kişiler", Other: "Diğer" } as Record<string, string>)[item.key] ?? item.key : item.key }));
+  const mediaItems = media.items.map((item) => ({ ...item, key: t(`rcMedia.${item.key}` as TranslationKey) }));
   return (
     <Card cardKey="message-kinds" className="message-types-card">
       {/* The total is Total Messages, already in the KPI row. */}

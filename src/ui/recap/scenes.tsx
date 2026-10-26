@@ -7,15 +7,26 @@
 
    Copy rule: one insight, a kicker, at most two short supporting lines. */
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { formatCount } from "../format";
-import type { Locale } from "../i18n/types";
-import { MediaIcon } from "./mediaIcons";
+import { formatCount } from "@/i18n/format";
+import type { Locale } from "@/i18n/types";
+import { Camera, CirclePlay, Contact, FileText, ImagePlay, LayoutGrid, Mic, Sticker, Video, type LucideIcon } from "lucide-react";
+import type { MediaKind } from "@/model";
 import {
   delay, Dial, DotField, HourStrip, NightRing, OpeningFigure, PeakColumns, pColor, Ribbon, SplitRegions, StarterBubbles, StreakPath, WeekColumns,
 } from "./figures";
 import type {
   BalanceScene, BehaviorScene, ClockScene, DividerScene, HighlightScene, OpeningScene, Scene, SharedScene, TimelineScene, VolumeScene, WeekScene, WordsScene,
 } from "./story";
+
+/** One line icon per media type, inside the media tiles. */
+const MEDIA_ICONS: Record<MediaKind, LucideIcon> = {
+  Photos: Camera, Videos: Video, "Video notes": CirclePlay, "Voice notes": Mic, Stickers: Sticker,
+  GIFs: ImagePlay, Documents: FileText, Contacts: Contact, Other: LayoutGrid,
+};
+function MediaIcon({ kind }: { kind: MediaKind }) {
+  const KindIcon = MEDIA_ICONS[kind] ?? LayoutGrid;
+  return <KindIcon />;
+}
 
 /** What scenes need from the player: the clock state, never the timer. */
 export interface PlaybackState {
@@ -143,7 +154,7 @@ function Week({ s }: { s: WeekScene }) {
       layout="wide"
       figure={
         <div className="rc-week-wrap">
-          <WeekColumns totals={s.totals} labels={s.labels} peak={s.peak} />
+          <WeekColumns averages={s.averages} labels={s.labels} peak={s.peak} />
           {s.slot && (
             <div className="rc-slot rc-a-rise" style={delay(slotAt)}>
               <p className="rc-kicker">{s.slot.kicker}</p>

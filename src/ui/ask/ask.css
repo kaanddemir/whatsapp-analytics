@@ -1,0 +1,188 @@
+/* Ask: one centred reading column, the conversation above a composer docked
+   to the bottom of the window. Built only from the tokens in styles.css, so
+   both themes follow; no colours of its own. This file loads before
+   styles.css (through App), so a rule that adjusts a shared class (.btn,
+   .link-btn, .pop) is written one class more specific. */
+
+/* The page becomes a column so the composer sits at the bottom even before
+   the first question. */
+.app-ask { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+.app-ask .content { flex: 1; display: flex; flex-direction: column; width: 100%; padding-bottom: 0; }
+.ask-view { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.ask-view[hidden] { display: none; }
+
+.ask {
+  --ask-read: 400 .9375rem/1.65 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  flex: 1; display: flex; flex-direction: column; width: 100%; max-width: 760px; margin: 0 auto;
+}
+
+/* Empty conversation */
+.ask-empty { flex: 1; display: grid; align-content: center; justify-items: center; gap: var(--space-3); padding: var(--space-8) 0 var(--space-6); text-align: center; }
+.ask-title { margin: 0; font: 700 clamp(1.5rem, 1.15rem + 1.4vw, 2rem)/1.15 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: -.02em; text-wrap: balance; }
+.ask-lede { max-width: 50ch; color: var(--color-text-secondary); font: var(--ask-read); text-wrap: balance; }
+.ask-examples { list-style: none; width: 100%; margin: var(--space-5) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); text-align: left; }
+.ask-example {
+  display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 64px; padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); color: inherit; font: inherit; text-align: left; cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.ask-example:hover { border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border)); background: var(--color-hover); }
+.ask-example:active { background: var(--color-pressed); }
+.ask-example-icon { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: var(--radius-control); background: var(--color-selected); color: var(--color-accent); }
+.ask-example-text { display: grid; min-width: 0; }
+.ask-example-q { font: var(--font-control); color: var(--color-text); }
+.ask-example-hint { font: var(--font-caption); color: var(--color-text-muted); }
+
+/* Thread */
+.ask-thread { flex: 1; padding-bottom: var(--space-6); }
+.ask-thread-head { display: flex; justify-content: flex-end; margin: calc(-1 * var(--space-2)) 0 var(--space-2); }
+.ask-thread-head .link-btn { color: var(--color-text-secondary); }
+.turns { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-10); }
+/* A question scrolls to just under the app bar; the newest turn reserves the
+   rest of the window (less the bar margin, the thread's padding and the
+   composer) so it can, and so its answer grows into empty space. Earlier
+   turns stay light without content-visibility: a turn skipped while it is
+   measured would throw that scroll off. */
+.turn { scroll-margin-top: 84px; }
+.turn:last-child { min-height: calc(100vh - 260px); min-height: calc(100dvh - 260px); }
+.turn-scope { display: flex; align-items: center; gap: var(--space-3); margin: 0 0 var(--space-5); font: var(--font-caption); color: var(--color-text-muted); }
+.turn-scope::before, .turn-scope::after { content: ""; flex: 1; height: 1px; background: var(--color-divider); }
+.turn-scope span { max-width: 80%; text-align: center; overflow-wrap: anywhere; }
+.turn-q { display: flex; justify-content: flex-end; }
+.turn-bubble { max-width: min(85%, 560px); padding: 10px var(--space-4); border-radius: var(--radius-card) var(--radius-card) var(--radius-sm) var(--radius-card); background: var(--color-selected); color: var(--color-text); font: var(--ask-read); white-space: pre-wrap; overflow-wrap: anywhere; }
+.turn-a { margin-top: var(--space-5); }
+
+.ans-pending { display: flex; align-items: center; gap: var(--space-3); min-height: 28px; color: var(--color-text-muted); font: var(--font-label); }
+.dots { display: inline-flex; gap: 4px; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); animation: ask-dot 1.2s ease-in-out infinite both; }
+.dots i:nth-child(2) { animation-delay: .15s; }
+.dots i:nth-child(3) { animation-delay: .3s; }
+@keyframes ask-dot { 0%, 80%, 100% { opacity: .25; transform: scale(.8); } 40% { opacity: 1; transform: scale(1); } }
+.ans-halt { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); font: var(--font-body); color: var(--color-text-muted); }
+.ans-halt.failed p { color: var(--color-error); }
+.ans-halt .btn, .ans-action .btn { min-height: var(--control-sm); font: var(--font-label); }
+
+/* Answer */
+.ans { display: grid; gap: var(--space-4); min-width: 0; font: var(--ask-read); color: var(--color-text); }
+.ans-figure { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3); }
+.ans-figure-value { font: 700 clamp(1.75rem, 1.4rem + 1.3vw, 2.25rem)/1.1 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: -.02em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.ans-figure-caption { font: var(--font-label); color: var(--color-text-muted); }
+.ans-text { display: flex; gap: var(--space-2); overflow-wrap: anywhere; }
+.ans-text .lucide { margin-top: 3px; color: var(--color-text-muted); }
+.ans-note { padding-left: var(--space-3); border-left: 2px solid var(--color-border); font: var(--font-body); color: var(--color-text-secondary); overflow-wrap: anywhere; }
+
+/* Rows: label, bar, value. Bars are drawn to AnswerRow.magnitude; with a
+   leader only the leader is accented, as the dashboard accents its peak. */
+.ans-rows-wrap { display: grid; justify-items: start; gap: var(--space-1); }
+.ans-rows { list-style: none; width: 100%; margin: 0; padding: 0; display: grid; }
+.ans-rows li { display: grid; align-items: center; gap: var(--space-1) var(--space-4); min-height: 40px; padding: var(--space-1) 0; }
+.ans-rows.bars li { grid-template-columns: minmax(5em, 12em) minmax(0, 1fr) minmax(6em, auto); }
+.ans-rows.list li { grid-template-columns: minmax(0, 1fr) auto; }
+.ans-rows.list li + li { border-top: 1px solid var(--color-divider); }
+/* Labels wrap rather than truncate: a period or a name is part of the answer. */
+.row-label { min-width: 0; overflow-wrap: anywhere; font: var(--font-label); color: var(--color-text); }
+.ans-rows .lead .row-label { font-weight: 650; }
+.row-bar { height: 10px; border-radius: var(--radius-pill); background: var(--color-surface-subtle); box-shadow: inset 0 0 0 1px var(--color-divider); overflow: hidden; }
+.row-bar i { display: block; height: 100%; min-width: 3px; border-radius: inherit; background: var(--color-chart-bar-peak); }
+.row-bar i.zero { min-width: 0; }
+.ans-rows.led .row-bar i { background: var(--color-chart-bar); }
+.ans-rows.led .lead .row-bar i { background: var(--color-chart-bar-peak); }
+.row-value { text-align: right; font: var(--font-label); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.row-detail { display: block; font: var(--font-caption); color: var(--color-text-muted); }
+
+/* Messages: one tinted transcript block, rows split by hairlines; no card per message. */
+.msgs { display: grid; gap: var(--space-2); min-width: 0; }
+.msgs-count { font: var(--font-caption); color: var(--color-text-muted); }
+.msg-list { list-style: none; margin: 0; padding: var(--space-1) 0; border-radius: var(--radius-card); background: var(--color-surface-subtle); }
+.msg { min-width: 0; padding: var(--space-3) var(--space-4) var(--space-2); }
+.msg + .msg, .msg + .msg-day { border-top: 1px solid var(--color-border); }
+.msg-day { padding: var(--space-3) var(--space-4) 0; font: var(--font-caption); font-weight: 650; color: var(--color-text-secondary); }
+.msg-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--space-2); font: var(--font-caption); color: var(--color-text-muted); }
+.msg-dot { width: 8px; height: 8px; flex: none; border-radius: 50%; }
+.msg-sender { font-weight: 600; color: var(--color-text); }
+.msg-flag { font-style: italic; }
+.msg-tag { padding: 0 6px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-text-secondary); font-size: .6875rem; font-weight: 600; line-height: 1.5; }
+.msg-text {
+  margin-top: 2px; font: var(--ask-read); white-space: pre-wrap; overflow-wrap: anywhere;
+  /* A very long message is cut at eight lines; "Show in context" reads it whole. */
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 8; line-clamp: 8; overflow: hidden;
+}
+.msg-text.placeholder { font-style: italic; color: var(--color-text-muted); }
+.msg-text mark { padding: 0 1px; border-radius: 3px; background: color-mix(in srgb, var(--color-accent) 24%, transparent); color: inherit; }
+.msg-reply { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-2); margin-top: var(--space-3); }
+.msg-reply > .lucide { margin-top: 2px; color: var(--color-text-muted); }
+/* Quieter than the message itself: one per message adds up. */
+.msg .msg-toggle { min-height: 28px; margin: var(--space-1) 0 0 calc(-1 * var(--space-1)); color: var(--color-text-muted); font: var(--font-caption); font-weight: 600; }
+.msg .msg-toggle:hover { color: var(--color-accent); }
+.msg .msg-toggle:disabled { opacity: .6; cursor: default; }
+.msg-context { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.msg-line { min-width: 0; padding: 2px 0 2px var(--space-3); border-left: 2px solid var(--color-border); }
+.msg-line.cited { border-left-color: var(--color-accent); }
+.msg-line:not(.cited) .msg-text { color: var(--color-text-secondary); }
+.msg-context .msg-text { display: block; -webkit-line-clamp: none; line-clamp: none; overflow: visible; }
+.msg-error { font: var(--font-caption); color: var(--color-error); }
+.btn.msgs-more { justify-self: start; min-height: var(--control-sm); font: var(--font-label); }
+
+/* Plan conversations: one transcript block, each conversation under its dates. */
+.msg-note + .msg-day { border-top: 1px solid var(--color-border); }
+.msg-note { padding: 0 var(--space-4) var(--space-3); font: var(--font-caption); color: var(--color-text-muted); }
+
+.ans-foot { display: grid; gap: var(--space-3); }
+.ans-basis { display: inline-flex; align-items: center; gap: 6px; font: var(--font-caption); color: var(--color-text-muted); }
+/* Unverified: set apart from what was counted. */
+.ans-basis.basis-meaning { color: var(--color-warning); }
+.ans-action { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); font: var(--font-body); color: var(--color-text-secondary); }
+.ans-action .muted { font: var(--font-caption); }
+.ans-action-error { font: var(--font-caption); color: var(--color-error); }
+
+/* Composer, docked to the bottom of the window; the thread fades out beneath it. */
+.ask-dock { position: sticky; bottom: 0; z-index: 20; padding: var(--space-3) 0 max(var(--space-3), env(safe-area-inset-bottom)); background: linear-gradient(to bottom, transparent, var(--color-page) var(--space-4)); }
+.composer {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-1); padding: var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-panel); background: var(--color-surface);
+  box-shadow: 0 1px 2px rgba(11, 15, 13, .04), 0 16px 40px -20px rgba(11, 15, 13, .22); transition: border-color .15s ease, box-shadow .15s ease;
+}
+.composer:focus-within { border-color: var(--color-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 18%, transparent), 0 16px 40px -20px rgba(11, 15, 13, .22); }
+/* 16px text keeps phones from zooming into the field. */
+.composer textarea { display: block; width: 100%; min-height: 44px; max-height: 200px; padding: var(--space-2) var(--space-3); resize: none; border: 0; outline: none; background: transparent; color: var(--color-text); font: var(--ask-read); font-size: 1rem; }
+.composer textarea:focus-visible { outline: none; }
+.composer textarea::placeholder { color: var(--color-text-muted); }
+.composer-bar { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.composer-scope { display: flex; flex: 1; gap: var(--space-2); min-width: 0; }
+.composer-scope .pop-wrap { min-width: 0; }
+/* Short of room, the date range gives way first; a name keeps up to half. */
+.composer-scope .pop-wrap:first-child { flex-shrink: 0; max-width: 45%; }
+/* Shaped like the buttons around them, not as round pills. */
+.composer-scope .pill { max-width: 100%; border-radius: var(--radius-control); }
+.composer-send { display: grid; place-items: center; flex: none; width: 36px; height: 36px; padding: 0; border: 0; border-radius: var(--radius-control); background: var(--color-accent); color: var(--color-on-accent); cursor: pointer; transition: background-color .15s ease, color .15s ease; }
+.composer-send:hover:not(:disabled) { background: var(--color-accent-hover); }
+.composer-send:disabled { background: var(--color-surface-subtle); color: var(--color-text-disabled); box-shadow: inset 0 0 0 1px var(--color-border); cursor: default; }
+.composer-send.stop { background: var(--color-text); color: var(--color-page); }
+.composer-send.stop:hover { background: var(--color-text-secondary); }
+.composer-send.stop .lucide { fill: currentColor; }
+/* Scope pickers open upwards, out of the composer. */
+.composer .pop { top: auto; bottom: calc(100% + var(--space-3)); }
+.ask-footnote { margin-top: var(--space-2); text-align: center; font: var(--font-caption); color: var(--color-text-muted); text-wrap: balance; }
+
+@media (max-width: 640px) {
+  .ask-examples { grid-template-columns: minmax(0, 1fr); margin-top: var(--space-3); }
+  .ask-example { min-height: 56px; }
+  .ask-empty { padding-top: var(--space-4); }
+  .turns { gap: var(--space-8); }
+  .turn-bubble { max-width: 90%; }
+  .msg { padding-inline: var(--space-3); }
+  .msg-day { padding-inline: var(--space-3); }
+  /* Back to the shared bottom sheet (styles.css) on phones. */
+  .composer .pop { bottom: 0; }
+}
+@media (max-width: 560px) {
+  /* Label and value on one line, the bar beneath at full width. */
+  .ans-rows.bars li { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "label value" "bar bar"; row-gap: 6px; }
+  .ans-rows.bars .row-label { grid-area: label; }
+  .ans-rows.bars .row-value { grid-area: value; }
+  .ans-rows.bars .row-bar { grid-area: bar; }
+  .ans-rows .row-detail { display: inline; margin-left: var(--space-2); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dots i { animation: none; opacity: .6; }
+  .ask-example, .composer, .composer-send { transition: none; }
+}

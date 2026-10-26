@@ -3,10 +3,10 @@
    metrics: they always cover everyone in the selected dates, whatever the
    participant filter says. */
 import type { ParticipantId, Stats } from "@/model";
-import { formatCount, formatDateRange, formatDuration, formatHourRange, formatPercent, formatShare, plural } from "../format";
+import { formatCount, formatDateRange, formatDuration, formatHourRange, formatPercent, formatShare, plural } from "@/i18n/format";
 import { participantColor } from "../participantColors";
 import { Card, Empty, Stat } from "./Card";
-import { useI18n } from "../i18n/context";
+import { useI18n } from "@/ui/i18n";
 
 export function nameOf(stats: Stats, id: ParticipantId | null): string | null {
   if (id === null) return null;

@@ -8,7 +8,9 @@
    1. Year-first dates ("2024-01-31") are recognised on their own.
    2. Each candidate order (D/M/Y, M/D/Y) is scored over the whole file: dates
       it makes impossible count heavily, and steps backwards in time count
-      lightly, because exports are written in chronological order.
+      lightly, because exports are written in chronological order. When both
+      still tie, the order whose consecutive dates lie closer together wins:
+      read the wrong way, "1/3 -> 1/4" turns a night into a month.
    3. The winning order is applied to every line; there is no per-line
       fallback, which is what mixed calendars in the legacy parser.
    4. The report says whether the order was proven, inferred from chronology,
@@ -62,6 +64,8 @@ const dayNumber = ({ y, m, d }: Ymd) => Date.UTC(y, m - 1, d) / 86_400_000;
 function score(headers: readonly HeaderMatch[], order: "dmy" | "mdy") {
   let invalid = 0;
   let backwards = 0;
+  /** Days jumped forward between consecutive dates. */
+  let span = 0;
   let previous: number | null = null;
   for (const header of headers) {
     if (isYearFirst(header.dateParts)) continue;
@@ -72,9 +76,10 @@ function score(headers: readonly HeaderMatch[], order: "dmy" | "mdy") {
     }
     const day = dayNumber(ymd);
     if (previous !== null && day < previous) backwards++;
+    else if (previous !== null) span += day - previous;
     previous = day;
   }
-  return { invalid, backwards };
+  return { invalid, backwards, span };
 }
 
 export function decideDateOrder(headers: readonly HeaderMatch[]): DateDecision {
@@ -93,6 +98,9 @@ export function decideDateOrder(headers: readonly HeaderMatch[]): DateDecision {
   }
   if (dmy.backwards !== mdy.backwards) {
     return { order: dmy.backwards < mdy.backwards ? "dmy" : "mdy", certainty: "inferred", conflicting: dmy.invalid > 0 };
+  }
+  if (dmy.span !== mdy.span) {
+    return { order: dmy.span < mdy.span ? "dmy" : "mdy", certainty: "inferred", conflicting: dmy.invalid > 0 };
   }
   return { order: "dmy", certainty: "assumed", conflicting: dmy.invalid > 0 };
 }

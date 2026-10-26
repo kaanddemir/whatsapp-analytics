@@ -1,0 +1,1064 @@
+{
+  "version": 1,
+  "split": "dev",
+  "participants": [
+    "Ayşe Yılmaz",
+    "Can"
+  ],
+  "now": "2026-10-27T00:00:00Z",
+  "behaviour": [
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Yarın buluşsak mı?",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Bi ara görüşelim ya",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Müsaitsen sahile inebiliriz.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Bi kahve patlatalım mı?",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Yarın buluşmayalım.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Rapor için ne dersin?",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Müsaitsen dosyayı yollar mısın?",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Buluşsak mı diye sordu.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "Fancy grabbing coffee?",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "We should catch up sometime.",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "You free this weekend?",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "Let's grab lunch.",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "Let's get a refund.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "How about we fix the spreadsheet?",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "She says we should catch up.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "Let's not meet.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Olur, bana uyar.",
+      "label": true,
+      "style": "formal",
+      "prev": "Cumartesi kahve içelim mi?"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Tmm gelirim",
+      "label": true,
+      "style": "informal",
+      "prev": "Cumartesi kahve içelim mi?"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Bana da uyar",
+      "label": true,
+      "style": "formal",
+      "prev": "Cumartesi kahve içelim mi?"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Evet, iyi fikir.",
+      "label": true,
+      "style": "informal",
+      "prev": "Cumartesi kahve içelim mi?"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Tamam da kesin değil.",
+      "label": false,
+      "style": "formal",
+      "prev": "Cumartesi kahve içelim mi?"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Olur, ama işim çıkabilir.",
+      "label": false,
+      "style": "informal",
+      "prev": "Cumartesi kahve içelim mi?"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Olur mu bilmiyorum",
+      "label": false,
+      "style": "formal",
+      "prev": "Cumartesi kahve içelim mi?"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Pazar olsun, cumartesi çalışıyorum.",
+      "label": false,
+      "style": "informal",
+      "prev": "Cumartesi kahve içelim mi?"
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "I'm down.",
+      "label": true,
+      "style": "formal",
+      "prev": "Fancy grabbing coffee?"
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "Sounds good!",
+      "label": true,
+      "style": "informal",
+      "prev": "Fancy grabbing coffee?"
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "Works for me.",
+      "label": true,
+      "style": "formal",
+      "prev": "Fancy grabbing coffee?"
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "Count me in.",
+      "label": true,
+      "style": "informal",
+      "prev": "Fancy grabbing coffee?"
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "Sounds good, but not sure yet.",
+      "label": false,
+      "style": "formal",
+      "prev": "Fancy grabbing coffee?"
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "Okay, maybe.",
+      "label": false,
+      "style": "informal",
+      "prev": "Fancy grabbing coffee?"
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "Sure, I guess.",
+      "label": false,
+      "style": "formal",
+      "prev": "Fancy grabbing coffee?"
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "Saturday instead?",
+      "label": false,
+      "style": "informal",
+      "prev": "Fancy grabbing coffee?"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "Özür dilerim, kırdım seni.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "Kusra bakma geç kaldım",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "Benim hatam, affet.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "Kb, uyuyakalmışım.",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "Özür diledin mi?",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "Özür dilemem.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "O özür diliyor.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "Özür dilerim dedi.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "I'm sorry I snapped.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "My bad, forgot to reply.",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "I apologize for being late.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "Sry, overslept.",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "Did you apologize?",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "you apologize every day.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "I am not sorry.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "She said sorry.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "Yok ya, gelemicem.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "Kusura bakma, yetişemiyorum.",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "Bugün katılamayacağım.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "Gelemiyom ya.",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "Gelemiyormuş.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "Gelemem diye düşündüm.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "İptal etmeyelim.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "Biletimi iptal ettim.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "Sorry, can't make it.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "I have to bail.",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "Count me out tonight.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "I won't be able to join.",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "Might have to bail.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "She can't come.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "My subscription is cancelled.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "We aren't cancelling.",
+      "label": false,
+      "style": "informal"
+    }
+  ],
+  "router": [
+    {
+      "lang": "tr",
+      "question": "Ayşe’ye göre değil, Can’ın kaç mesajı var?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "person": 1
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Ayşe’nin mesaj sayısı kaç?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "person": 0
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Can kaç kere özür dilemiş?",
+      "expected": {
+        "type": "behaviour",
+        "behaviour": "apology",
+        "person": 1
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Hangimiz daha fazla plan yapmaya çalışıyor?",
+      "expected": {
+        "type": "behaviour",
+        "behaviour": "proposal"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Kim daha çok buluşmayı teklif ediyor?",
+      "expected": {
+        "type": "behaviour",
+        "behaviour": "proposal"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Son zamanlarda daha az mı yazışıyoruz?",
+      "expected": {
+        "type": "statistic",
+        "metric": "trend",
+        "aspect": "activity"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "İş değiştirmekten ne zaman bahsettik?",
+      "expected": {
+        "type": "recall"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Bir ara taşınmaktan konuşmuştuk, bulabilir misin?",
+      "expected": {
+        "type": "recall"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "İlişkimiz kötüye mi gidiyor?",
+      "expected": {
+        "type": "unsupported"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "2024 Martında kaç mesaj attık?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "period": {
+          "start": "2024-03-01",
+          "end": "2024-03-31"
+        }
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "12 Nisan 2024’te kaç mesaj attık?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "period": {
+          "start": "2024-04-12",
+          "end": "2024-04-12"
+        }
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "12 Nisan geçen mesajları bul",
+      "expected": {
+        "type": "temporal",
+        "which": "mentions_date"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Dün ne konuştuk?",
+      "expected": {
+        "type": "temporal",
+        "which": "in_period",
+        "period": {
+          "start": "2026-10-26",
+          "end": "2026-10-26"
+        }
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "En sık kullandığımız kelime ne?",
+      "expected": {
+        "type": "statistic",
+        "metric": "top_words"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Hangimiz daha geç cevap veriyor?",
+      "expected": {
+        "type": "statistic",
+        "metric": "response_time",
+        "slowest": true
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "En yoğun günümüz hangisi?",
+      "expected": {
+        "type": "statistic",
+        "metric": "busiest_day"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Kaç foto göndermişiz?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "kind": "Photos"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "How often did Can cancel?",
+      "expected": {
+        "type": "behaviour",
+        "behaviour": "cancellation",
+        "person": 1
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Who usually suggests meeting up?",
+      "expected": {
+        "type": "behaviour",
+        "behaviour": "proposal"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Who agrees to plans more often?",
+      "expected": {
+        "type": "behaviour",
+        "behaviour": "acceptance"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "How many msgs did Ayşe send?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "person": 0
+      }
+    },
+    {
+      "lang": "en",
+      "question": "How many messages on April 12, 2024?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "period": {
+          "start": "2024-04-12",
+          "end": "2024-04-12"
+        }
+      }
+    },
+    {
+      "lang": "en",
+      "question": "When did we talk about that new apartment?",
+      "expected": {
+        "type": "recall"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Find the conversation about changing jobs.",
+      "expected": {
+        "type": "recall"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Why were we arguing?",
+      "expected": {
+        "type": "recall",
+        "limitation": "reason"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Does she still love me?",
+      "expected": {
+        "type": "unsupported"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "What did we finally decide?",
+      "expected": {
+        "type": "recall",
+        "limitation": "decision"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "What percentage of messages are questions?",
+      "expected": {
+        "type": "unsupported"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Which month was busiest?",
+      "expected": {
+        "type": "statistic",
+        "metric": "busiest_month"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Who is the quickest to respond?",
+      "expected": {
+        "type": "statistic",
+        "metric": "response_time"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Who writes lengthier texts?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_length"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "How many deleted messages?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "kind": "deleted"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Which emoji do we use most?",
+      "expected": {
+        "type": "statistic",
+        "metric": "top_emoji"
+      }
+    },
+    {
+      "lang": "mixed",
+      "question": "Can kaç kere cancel etmiş?",
+      "expected": {
+        "type": "behaviour",
+        "behaviour": "cancellation",
+        "person": 1
+      }
+    },
+    {
+      "lang": "mixed",
+      "question": "Ayşe kaç message gönderdi?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "person": 0
+      }
+    },
+    {
+      "lang": "mixed",
+      "question": "Show messages about taşınma",
+      "expected": {
+        "type": "fact"
+      }
+    }
+  ],
+  "context": [
+    {
+      "texts": [
+        "Yarın kahve içelim mi?",
+        "Olur."
+      ],
+      "senders": [
+        0,
+        1
+      ],
+      "minutes": [
+        0,
+        2
+      ],
+      "gold": [
+        1
+      ]
+    },
+    {
+      "texts": [
+        "Yarın kahve içelim mi?",
+        "Faturayı ödedin mi?",
+        "Tamam."
+      ],
+      "senders": [
+        0,
+        1,
+        1
+      ],
+      "minutes": [
+        0,
+        2,
+        3
+      ],
+      "gold": []
+    },
+    {
+      "texts": [
+        "Yarın kahve içelim mi?",
+        "Olur."
+      ],
+      "senders": [
+        0,
+        1
+      ],
+      "minutes": [
+        0,
+        800
+      ],
+      "gold": []
+    },
+    {
+      "texts": [
+        "Kahve içelim mi?",
+        "Olur."
+      ],
+      "senders": [
+        0,
+        0
+      ],
+      "minutes": [
+        0,
+        2
+      ],
+      "gold": []
+    },
+    {
+      "texts": [
+        "Let's grab lunch.",
+        "Okay, maybe."
+      ],
+      "senders": [
+        0,
+        1
+      ],
+      "minutes": [
+        0,
+        1
+      ],
+      "gold": []
+    },
+    {
+      "texts": [
+        "Let's grab lunch.",
+        "Sure!"
+      ],
+      "senders": [
+        0,
+        1
+      ],
+      "minutes": [
+        0,
+        1
+      ],
+      "gold": [
+        1
+      ]
+    },
+    {
+      "texts": [
+        "Cumartesi kahve?",
+        "Olur.",
+        "Pazar olsun, cumartesi çalışıyorum.",
+        "Pazar daha iyi."
+      ],
+      "senders": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "minutes": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "gold": [
+        1
+      ]
+    },
+    {
+      "texts": [
+        "Are you free tomorrow?",
+        "Yes, why?",
+        "I need the report.",
+        "Okay."
+      ],
+      "senders": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "minutes": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "gold": []
+    }
+  ],
+  "retrieval": [
+    {
+      "question": "Taşınma konuşmasını bul",
+      "lang": "tr",
+      "texts": [
+        "Taşınma için nakliyeci arıyorum.",
+        "Tatil için otel baktım.",
+        "Taşınmaya hiç niyetim yok."
+      ],
+      "gold": [
+        0
+      ],
+      "factLang": "tr",
+      "answerable": true
+    },
+    {
+      "question": "Find the conversation about the rental deposit",
+      "lang": "en",
+      "texts": [
+        "The landlord returned our rental deposit.",
+        "We deposited the cake at reception.",
+        "The rent went up."
+      ],
+      "gold": [
+        0
+      ],
+      "factLang": "en",
+      "answerable": true
+    },
+    {
+      "question": "Kahvaltıdan bahsettiğimiz mesajları bul",
+      "lang": "tr",
+      "texts": [
+        "Kahvaltıyı sahilde yapalım.",
+        "Kahvaltı yapmadım.",
+        "Bilgisayar bozuldu."
+      ],
+      "gold": [
+        0,
+        1
+      ],
+      "factLang": "tr",
+      "answerable": true
+    },
+    {
+      "question": "Where did we talk about a promotion?",
+      "lang": "en",
+      "texts": [
+        "I got promoted at work today!",
+        "The shop has a promotion on soap.",
+        "My manager quit."
+      ],
+      "gold": [
+        0
+      ],
+      "factLang": "en",
+      "answerable": true
+    },
+    {
+      "question": "İşten ayrıldığını söylediği konuşmayı bul",
+      "lang": "tr",
+      "texts": [
+        "I handed in my resignation today.",
+        "My new job starts Monday.",
+        "The cake was delicious."
+      ],
+      "gold": [
+        0
+      ],
+      "factLang": "en",
+      "answerable": true
+    },
+    {
+      "question": "Find when we discussed moving house",
+      "lang": "en",
+      "texts": [
+        "Eşyaları yeni eve taşıdık.",
+        "Ev sahibi kirayı artırmış.",
+        "Otobüs geç kaldı."
+      ],
+      "gold": [
+        0
+      ],
+      "factLang": "tr",
+      "answerable": true
+    },
+    {
+      "question": "Akşam gelemeyeceğimi söylediğim konuşmayı bul",
+      "lang": "tr",
+      "texts": [
+        "Akşam gelemeyeceğim, işim çıktı.",
+        "Akşam geleceğim, bekle beni.",
+        "Yarın toplantı var."
+      ],
+      "gold": [
+        0
+      ],
+      "factLang": "tr",
+      "answerable": true
+    },
+    {
+      "question": "Find where I said I couldn't attend dinner",
+      "lang": "en",
+      "texts": [
+        "I can't attend dinner tonight.",
+        "I can attend dinner tonight.",
+        "The cinema was closed."
+      ],
+      "gold": [
+        0
+      ],
+      "factLang": "en",
+      "answerable": true
+    },
+    {
+      "question": "Who won the lunar chess tournament?",
+      "lang": "en",
+      "texts": [
+        "Coffee was nice today.",
+        "Yarın yağmur var."
+      ],
+      "gold": [],
+      "factLang": "mixed",
+      "answerable": false
+    },
+    {
+      "question": "Kara deliklerden bahsettiğimiz konuşmayı bul",
+      "lang": "tr",
+      "texts": [
+        "Marketten süt aldım.",
+        "The rent is due tomorrow."
+      ],
+      "gold": [],
+      "factLang": "mixed",
+      "answerable": false
+    }
+  ]
+}

@@ -27,6 +27,8 @@ export interface Scope {
   readonly conversation: readonly Message[];
   readonly humans: readonly Message[];
   readonly scoped: readonly Message[];
+  /** Only for checking whether the first trend-window message follows real silence. */
+  readonly precedingHuman: Message | null;
   /** Inclusive day numbers; null when the filter misses the chat entirely. */
   readonly period: { readonly start: number; readonly end: number } | null;
   readonly fullStart: number;
@@ -74,5 +76,11 @@ export function selectScope(parsed: ParseResult, filters: AnalysisFilters): Scop
   const human = parsed.participants.map((p) => !p.isMetaAI);
   const humans = conversation.filter((m) => human[m.sender]);
   const scoped = sender === null ? conversation : conversation.filter((m) => m.sender === sender);
-  return { conversation, humans, scoped, period, fullStart, fullEnd };
+  let precedingHuman: Message | null = null;
+  if (period) {
+    for (let i = lowerBound(all, period.start) - 1; i >= 0; i--) {
+      if (human[all[i]!.sender]) { precedingHuman = all[i]!; break; }
+    }
+  }
+  return { conversation, humans, scoped, period, fullStart, fullEnd, precedingHuman };
 }

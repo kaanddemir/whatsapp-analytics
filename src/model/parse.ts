@@ -6,10 +6,12 @@ export type DateOrder = "dmy" | "mdy" | "ymd";
 /**
  * How the date order was decided:
  * - proven:   the other order would produce impossible dates (e.g. day 13 as a month)
- * - inferred: only this order keeps the export in chronological order
+ * - inferred: only this order keeps the export chronological, or keeps consecutive dates closest
  * - assumed:  nothing distinguishes the orders; D/M/Y was assumed
+ * - user:     not proven, and the user chose the order
+ * Only "proven" and "user" are free of the ambiguous_date_order warning.
  */
-export type DateOrderCertainty = "proven" | "inferred" | "assumed";
+export type DateOrderCertainty = "proven" | "inferred" | "assumed" | "user";
 export type ClockFormat = "24h" | "12h" | "mixed";
 export type TextEncoding = "utf-8" | "utf-16le" | "utf-16be";
 
@@ -33,7 +35,8 @@ export type ParseWarningCode =
   | "orphan_lines"              // text before the first recognisable message
   | "unrecognized_system_lines" // sender-less timestamped lines matching no known template
   | "possible_system_event"     // looks like a group event but lacks evidence; kept as a message
-  | "ambiguous_date_order"      // nothing proved D/M/Y vs M/D/Y; D/M/Y assumed
+  | "unknown_placeholder"       // a whole "<…>" body matching no known placeholder; kept as text
+  | "ambiguous_date_order"      // nothing proved D/M/Y vs M/D/Y; the order used is inferred or assumed
   | "conflicting_date_order"    // some dates only fit one order, others only the other
   | "out_of_order"              // timestamps went backwards; records were sorted
   | "mixed_platforms";          // both Android and iOS line formats in one file

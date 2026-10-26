@@ -1,0 +1,77 @@
+/* Labelled date/time cases for the conservative extractor (src/events/dates.ts).
+   Expected: every mention as "kind:value", where value is
+     date: "D/M" or "D/M/YYYY"; time: "HH:MM"; relative and ambiguous: the folded text
+     (ambiguous also names the reason, "ambiguous:am_pm:7:30").
+   Includes the original time-normalization failure classes: week offsets ("haftaya salı" stays
+   relative), date vs time ("15.04'te"), Turkish abbreviations ("cmt", "pzt"),
+   folding ("this weekend"), and AM/PM ("salı 7'de", "saturday 7:30"). */
+export const DATE_CASES: readonly [string, readonly string[]][] = [
+  // --- absolute dates with month names
+  ["12 Nisan'da buluşalım", ["date:12/4"]],
+  ["düğün 7 Eylül 2025 cumartesi", ["date:7/9/2025", "relative:cumartesi"]],
+  ["doğum günü 3 Ocak", ["date:3/1"]],
+  ["31 Aralık gecesi ne yapıyoruz", ["date:31/12"]],
+  ["14 şubatta yemeğe çıkalım", ["date:14/2"]],
+  ["sınav 21 Haziran'da", ["date:21/6"]],
+  ["let's meet on April 12", ["date:12/4"]],
+  ["the wedding is June 7th, 2025", ["date:7/6/2025"]],
+  ["flight on the 3rd of March", ["date:3/3"]],
+  ["Dec 24 at my parents", ["date:24/12"]],
+  ["party on 5 May", ["date:5/5"]],
+  ["it's 30 february lol", []],
+  ["mart ayında taşınıyoruz", []],
+  ["you may 2 come too", []],
+  // --- numeric dates
+  ["randevu 25.12.2024", ["date:25/12/2024"]],
+  ["kayıt son gün 31/08", ["date:31/8"]],
+  ["toplantı 03.04'te", ["ambiguous:date_or_time:03.04"]],
+  ["15.04'te görüşürüz", ["ambiguous:date_or_time:15.04"]],
+  // Labels corrected after the first run: "tarihinde" (on the date) makes this a date.
+  ["ayın 20.05 tarihinde değil", ["date:20/5"]],
+  ["tarih 04/05/2025", ["ambiguous:day_month_order:04/05/2025"]],
+  ["deadline 12/25", ["date:25/12"]],
+  ["due 2/3", ["ambiguous:day_month_order:2/3"]],
+  ["skor 3-1 bitti", ["ambiguous:day_month_order:3-1"]],
+  // Label corrected after the first run: a quantity, not a date.
+  ["fiyat 2.5 milyon", []],
+  ["version 1.2.3 is out", []],
+  ["IBAN TR12 0006 4000", []],
+  // --- times
+  ["saat 19:30'da kapıdayım", ["time:19:30"]],
+  ["20:00 gibi çıkarım", ["time:20:00"]],
+  ["09:15 treni", ["time:09:15"]],
+  ["00:30 da uyudum", ["time:00:30"]],
+  ["7:30 pm works", ["time:19:30"]],
+  ["meet at 8pm", ["time:20:00"]],
+  ["10 am call", ["time:10:00"]],
+  ["12:15 am flight", ["time:00:15"]],
+  ["saat 19.30'da", ["time:19:30"]],
+  ["at 18.45 sharp", ["time:18:45"]],
+  ["7:30'da görüşelim", ["ambiguous:am_pm:7:30"]],
+  ["saturday 7:30", ["relative:saturday", "ambiguous:am_pm:7:30"]],
+  ["10:00'da toplantı", ["ambiguous:am_pm:10:00"]],
+  ["maç 2:1 bitti", []],
+  ["oran 3:45 değil", ["ambiguous:am_pm:3:45"]],
+  ["25:00 diye saat olmaz", []],
+  // --- relative (recognised, never resolved)
+  ["yarın akşam 8'de", ["relative:yarin aksam"]],
+  ["haftaya salı buluşalım", ["relative:haftaya sali"]],
+  ["gelecek cuma olur mu", ["relative:gelecek cuma"]],
+  ["bu hafta sonu müsaitim", ["relative:bu hafta sonu"]],
+  ["cmt 8de", ["relative:cmt"]],
+  ["pzt ararım", ["relative:pzt"]],
+  ["öbür gün gelirim", ["relative:obur gun"]],
+  ["bugün olmaz", ["relative:bugun"]],
+  ["pazar günü kahvaltı", ["relative:pazar"]],
+  ["pazara gidiyorum", []],
+  ["pazarda domates ucuz", []],
+  ["tomorrow at 8", ["relative:tomorrow"]],
+  ["tonight 9pm", ["relative:tonight", "time:21:00"]],
+  ["next friday", ["relative:next friday"]],
+  ["this weekend", ["relative:this weekend"]],
+  ["next week maybe", ["relative:next week"]],
+  ["tmrw 6", ["relative:tmrw"]],
+  ["I sat down", []],
+  ["dün konuştuk ya", ["relative:dun"]],
+  ["sunday noon", ["relative:sunday"]],
+];

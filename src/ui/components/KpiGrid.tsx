@@ -3,9 +3,9 @@
    least two points to mean anything. */
 import type { Stats } from "@/model";
 import { CARD_TITLE_KEYS, type CardKey } from "../cardInfo";
-import { formatCount, formatDecimal, formatHour, formatPercent } from "../format";
+import { formatCount, formatDecimal, formatHour, formatPercent } from "@/i18n/format";
 import { Sparkline } from "../charts/Sparkline";
-import { useI18n } from "../i18n/context";
+import { useI18n } from "@/ui/i18n";
 
 // Sparklines take theme tokens.
 const GREEN = "var(--color-accent)";

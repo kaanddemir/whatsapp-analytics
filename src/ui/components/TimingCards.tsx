@@ -4,11 +4,11 @@
 import { useMemo } from "react";
 import type { ChartConfiguration } from "chart.js";
 import type { Stats } from "@/model";
-import { formatCount, formatDecimal, formatHour, formatHourRange, plural, weekdays, weekdaysShort } from "../format";
+import { formatCount, formatDecimal, formatHour, formatHourRange, plural, weekdays, weekdaysShort } from "@/i18n/format";
 import { ChartCanvas, type Paint } from "../charts/ChartCanvas";
 import { DataTable } from "../charts/DataTable";
 import { Card, ChartView, Empty, ViewToggle, useView } from "./Card";
-import { useI18n } from "../i18n/context";
+import { useI18n } from "@/ui/i18n";
 
 const HEAT = ["var(--heat-0)", "var(--heat-1)", "var(--heat-2)", "var(--heat-3)", "var(--heat-4)", "var(--heat-5)"];
 

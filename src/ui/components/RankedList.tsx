@@ -3,10 +3,10 @@
    thing on every page. The page resets when the list itself changes. */
 import { useEffect, useState, type ReactNode } from "react";
 import type { RankedItem } from "@/model";
-import { formatCount } from "../format";
+import { formatCount } from "@/i18n/format";
 import { Empty } from "./Card";
-import { Icon } from "./Icon";
-import { useI18n } from "../i18n/context";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useI18n } from "@/ui/i18n";
 
 const PAGE_SIZE = 5;
 
@@ -45,13 +45,13 @@ export function RankedList({ items, label, renderKey = (k) => k, emptyText }: Pr
         <div className="card-foot">
           <nav className="pager" aria-label={t("pages", { label })}>
             <button type="button" onClick={() => setPage(current - 1)} disabled={current === 0} aria-label={t("previousPage", { label: label.toLocaleLowerCase(locale === "tr" ? "tr-TR" : "en-US") })}>
-              <Icon name="chevronLeft" size={16} />
+              <ChevronLeft size={16} />
             </button>
             <span className="pager-count" aria-live="polite">
               <span className="sr-only">{t("page")} </span>{current + 1}<span aria-hidden="true">/</span><span className="sr-only"> {t("of")} </span>{pages}
             </span>
             <button type="button" onClick={() => setPage(current + 1)} disabled={current === pages - 1} aria-label={t("nextPage", { label: label.toLocaleLowerCase(locale === "tr" ? "tr-TR" : "en-US") })}>
-              <Icon name="chevronRight" size={16} />
+              <ChevronRight size={16} />
             </button>
           </nav>
         </div>

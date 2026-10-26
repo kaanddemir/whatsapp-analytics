@@ -1,0 +1,1065 @@
+{
+  "version": 1,
+  "split": "final",
+  "participants": [
+    "Ayşe Yılmaz",
+    "Can"
+  ],
+  "now": "2026-10-27T00:00:00Z",
+  "behaviour": [
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Akşam beraber yürüyüş yapabiliriz.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Hafta sonu boşsan takılalım",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Bize uğramak ister misin?",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Sinemaya gidek mi?",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Görüşmeyelim bence.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Toplantı notu için nasıl olur?",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Müsait olduğunda faturayı öde.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "proposal",
+      "text": "Kardeşim bize gel dedi.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "Could we hang out after work?",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "Want to come over on Sunday?",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "Shall we go for a walk?",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "Let's have dinner together.",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "Let's get the password reset.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "We could do the invoices.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "He asked if we should go out.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "proposal",
+      "text": "Don't want to hang out.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Ben de varım.",
+      "label": true,
+      "style": "formal",
+      "prev": "Cuma yemeğe gidelim mi?"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Tamamdır, oradayım",
+      "label": true,
+      "style": "informal",
+      "prev": "Cuma yemeğe gidelim mi?"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Uygun, buluşuruz.",
+      "label": true,
+      "style": "formal",
+      "prev": "Cuma yemeğe gidelim mi?"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Aynen, geliyorum.",
+      "label": true,
+      "style": "informal",
+      "prev": "Cuma yemeğe gidelim mi?"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Tamam, belki gelirim.",
+      "label": false,
+      "style": "formal",
+      "prev": "Cuma yemeğe gidelim mi?"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Olur, emin değilim",
+      "label": false,
+      "style": "informal",
+      "prev": "Cuma yemeğe gidelim mi?"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Peki ama söz veremem",
+      "label": false,
+      "style": "formal",
+      "prev": "Cuma yemeğe gidelim mi?"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "acceptance",
+      "text": "Evet mi desem bilemedim",
+      "label": false,
+      "style": "informal",
+      "prev": "Cuma yemeğe gidelim mi?"
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "Yep, see you there.",
+      "label": true,
+      "style": "formal",
+      "prev": "Let's have dinner."
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "I'm in!",
+      "label": true,
+      "style": "informal",
+      "prev": "Let's have dinner."
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "That works.",
+      "label": true,
+      "style": "formal",
+      "prev": "Let's have dinner."
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "Absolutely, I will be there.",
+      "label": true,
+      "style": "informal",
+      "prev": "Let's have dinner."
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "Yes, if I can.",
+      "label": false,
+      "style": "formal",
+      "prev": "Let's have dinner."
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "Sure, not certain though.",
+      "label": false,
+      "style": "informal",
+      "prev": "Let's have dinner."
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "Okay, probably.",
+      "label": false,
+      "style": "formal",
+      "prev": "Let's have dinner."
+    },
+    {
+      "lang": "en",
+      "behaviour": "acceptance",
+      "text": "I wish I could.",
+      "label": false,
+      "style": "informal",
+      "prev": "Let's have dinner."
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "Özür diliyorum, yanlış yaptım.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "Sori ya geç gördüm",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "Affedersiniz, mesajı kaçırdım.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "Özrümü kabul et.",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "Özür dilemeyeceğim.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "Kusura bakmasın.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "Onun adına özür dilemiyorum.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "apology",
+      "text": "Kusura bakma diye yazmış.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "Please forgive me for yesterday.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "soz, missed ur call",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "My apologies for the delay.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "Sorry, I got that wrong.",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "they apologize too much.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "Sorry for your loss.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "Why should I apologize?",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "apology",
+      "text": "He wrote \"my bad\".",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "Bu akşam uğrayamayacağım.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "Yetişemicem bugün",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "Beni saymayın, gelemem.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "Gelmeyeceğim, işim çıktı.",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "Katılamayacakmış.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "Siparişi iptal ettik.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "Gelemeyeceğimi sanmış.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "tr",
+      "behaviour": "cancellation",
+      "text": "Geliyor musun?",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "I'm not coming after all.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "I need to cancel tonight.",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "Can't join you today.",
+      "label": true,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "I'll have to skip.",
+      "label": true,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "He might need to cancel.",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "Apparently I can't come.",
+      "label": false,
+      "style": "informal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "Did you cancel?",
+      "label": false,
+      "style": "formal"
+    },
+    {
+      "lang": "en",
+      "behaviour": "cancellation",
+      "text": "I can still make it.",
+      "label": false,
+      "style": "informal"
+    }
+  ],
+  "router": [
+    {
+      "lang": "tr",
+      "question": "Can’ın toplam mesajı ne kadar?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "person": 1
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Ayşe kaç defa iptal etmiş?",
+      "expected": {
+        "type": "behaviour",
+        "behaviour": "cancellation",
+        "person": 0
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Buluşma önerisini en fazla kim yapıyor?",
+      "expected": {
+        "type": "behaviour",
+        "behaviour": "proposal"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Genelde planları kim kabul ediyor?",
+      "expected": {
+        "type": "behaviour",
+        "behaviour": "acceptance"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Mesajlaşma sıklığımız eskisine göre azaldı mı?",
+      "expected": {
+        "type": "statistic",
+        "metric": "trend",
+        "aspect": "activity"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Yeni evden konuştuğumuz sohbeti bul",
+      "expected": {
+        "type": "recall"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Ben gitmek istemediğimi söyleyince ne cevap vermişti?",
+      "expected": {
+        "type": "recall",
+        "reply": true
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Bana hâlâ aşık mı?",
+      "expected": {
+        "type": "unsupported"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "2025 Şubatında toplam kaç mesaj var?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "period": {
+          "start": "2025-02-01",
+          "end": "2025-02-28"
+        }
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "25 Aralık 2024 tarihinde kaç mesaj var?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "period": {
+          "start": "2024-12-25",
+          "end": "2024-12-25"
+        }
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "25 Aralık’tan bahseden mesajları göster",
+      "expected": {
+        "type": "temporal",
+        "which": "mentions_date"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Geçen hafta neler yazdık?",
+      "expected": {
+        "type": "temporal",
+        "which": "in_period",
+        "period": {
+          "start": "2026-10-19",
+          "end": "2026-10-25"
+        }
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Haftanın hangi günü daha aktifiz?",
+      "expected": {
+        "type": "statistic",
+        "metric": "busiest_weekday"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Kim daha uzun mesaj yazmış?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_length"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Kaç tane sesli mesaj yollamışız?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "kind": "Voice notes"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Neden birbirimize küstük?",
+      "expected": {
+        "type": "recall",
+        "limitation": "reason"
+      }
+    },
+    {
+      "lang": "tr",
+      "question": "Sonunda neye karar verdik?",
+      "expected": {
+        "type": "recall",
+        "limitation": "decision"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "How often does Ayşe say sorry?",
+      "expected": {
+        "type": "behaviour",
+        "behaviour": "apology",
+        "person": 0
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Who most often invites the other out?",
+      "expected": {
+        "type": "behaviour",
+        "behaviour": "proposal"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Who tends to say yes to plans?",
+      "expected": {
+        "type": "behaviour",
+        "behaviour": "acceptance"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Total messages from Can in February 2025?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "person": 1,
+        "period": {
+          "start": "2025-02-01",
+          "end": "2025-02-28"
+        }
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Count our messages on December 25, 2024",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "period": {
+          "start": "2024-12-25",
+          "end": "2024-12-25"
+        }
+      }
+    },
+    {
+      "lang": "en",
+      "question": "I remember we mentioned a restaurant last summer.",
+      "expected": {
+        "type": "recall",
+        "period": {
+          "start": "2026-06-01",
+          "end": "2026-08-31"
+        }
+      }
+    },
+    {
+      "lang": "en",
+      "question": "What did he say after I refused to go?",
+      "expected": {
+        "type": "recall",
+        "reply": true
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Summarize the emotional evolution of our relationship.",
+      "expected": {
+        "type": "unsupported"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Who cared more?",
+      "expected": {
+        "type": "unsupported"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Compare last month with this month.",
+      "expected": {
+        "type": "statistic",
+        "metric": "compare_periods"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "When are we most active?",
+      "expected": {
+        "type": "statistic",
+        "metric": "peak_hour"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Who kicks off conversations?",
+      "expected": {
+        "type": "statistic",
+        "metric": "conversation_starter"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Who sends more stickers?",
+      "expected": {
+        "type": "statistic",
+        "metric": "kind_by_person",
+        "kind": "Stickers"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "Who has the slowest replies?",
+      "expected": {
+        "type": "statistic",
+        "metric": "response_time",
+        "slowest": true
+      }
+    },
+    {
+      "lang": "en",
+      "question": "What was our longest streak?",
+      "expected": {
+        "type": "statistic",
+        "metric": "longest_streak"
+      }
+    },
+    {
+      "lang": "en",
+      "question": "What is the average sentiment?",
+      "expected": {
+        "type": "unsupported"
+      }
+    },
+    {
+      "lang": "mixed",
+      "question": "Who özür diliyor more often?",
+      "expected": {
+        "type": "behaviour",
+        "behaviour": "apology"
+      }
+    },
+    {
+      "lang": "mixed",
+      "question": "2024 yılında kaç messages var?",
+      "expected": {
+        "type": "statistic",
+        "metric": "message_count",
+        "period": {
+          "start": "2024-01-01",
+          "end": "2024-12-31"
+        }
+      }
+    },
+    {
+      "lang": "mixed",
+      "question": "Find the messages about kahvaltı",
+      "expected": {
+        "type": "fact"
+      }
+    }
+  ],
+  "context": [
+    {
+      "texts": [
+        "Cuma yemeğe gidelim mi?",
+        "Ben de varım."
+      ],
+      "senders": [
+        0,
+        1
+      ],
+      "minutes": [
+        0,
+        1
+      ],
+      "gold": [
+        1
+      ]
+    },
+    {
+      "texts": [
+        "Cuma yemeğe gidelim mi?",
+        "Şifreyi yollar mısın?",
+        "Tamamdır."
+      ],
+      "senders": [
+        0,
+        1,
+        1
+      ],
+      "minutes": [
+        0,
+        1,
+        2
+      ],
+      "gold": []
+    },
+    {
+      "texts": [
+        "Sinemaya gidelim mi?",
+        "Tmm."
+      ],
+      "senders": [
+        0,
+        1
+      ],
+      "minutes": [
+        0,
+        1500
+      ],
+      "gold": []
+    },
+    {
+      "texts": [
+        "Sinemaya gidelim mi?",
+        "Tamamdır."
+      ],
+      "senders": [
+        0,
+        0
+      ],
+      "minutes": [
+        0,
+        1
+      ],
+      "gold": []
+    },
+    {
+      "texts": [
+        "Let's have dinner.",
+        "Yes, if I can."
+      ],
+      "senders": [
+        0,
+        1
+      ],
+      "minutes": [
+        0,
+        2
+      ],
+      "gold": []
+    },
+    {
+      "texts": [
+        "Let's have dinner.",
+        "I'm in!"
+      ],
+      "senders": [
+        0,
+        1
+      ],
+      "minutes": [
+        0,
+        2
+      ],
+      "gold": [
+        1
+      ]
+    },
+    {
+      "texts": [
+        "Hafta sonu yürüyelim mi?",
+        "Raporu gönderdin mi?",
+        "Evet."
+      ],
+      "senders": [
+        0,
+        1,
+        2
+      ],
+      "minutes": [
+        0,
+        1,
+        2
+      ],
+      "gold": []
+    },
+    {
+      "texts": [
+        "You around tonight?",
+        "Yes, what for?",
+        "Just checking."
+      ],
+      "senders": [
+        0,
+        1,
+        0
+      ],
+      "minutes": [
+        0,
+        1,
+        2
+      ],
+      "gold": []
+    }
+  ],
+  "retrieval": [
+    {
+      "question": "Nikâh tarihini konuştuğumuz mesajı bul",
+      "lang": "tr",
+      "texts": [
+        "Nikâh tarihi 25 Mayıs olarak kesinleşti.",
+        "Düğün salonu çok pahalı.",
+        "Bugün yüzmeye gittim."
+      ],
+      "gold": [
+        0
+      ],
+      "factLang": "tr",
+      "answerable": true
+    },
+    {
+      "question": "Find the message about renewing the passport",
+      "lang": "en",
+      "texts": [
+        "My passport renewal appointment is Friday.",
+        "I renewed the library card.",
+        "Dinner is ready."
+      ],
+      "gold": [
+        0
+      ],
+      "factLang": "en",
+      "answerable": true
+    },
+    {
+      "question": "Bisikleti tamir ettirdiğimiz konuşmayı bul",
+      "lang": "tr",
+      "texts": [
+        "Bisikletin frenini tamir ettirdim.",
+        "Yeni bir bisiklet almayı düşünüyorum.",
+        "Kahve bitti."
+      ],
+      "gold": [
+        0
+      ],
+      "factLang": "tr",
+      "answerable": true
+    },
+    {
+      "question": "When did we mention losing the keys?",
+      "lang": "en",
+      "texts": [
+        "I lost the house keys on the tram.",
+        "I found a key on the pavement.",
+        "The house is quiet."
+      ],
+      "gold": [
+        0
+      ],
+      "factLang": "en",
+      "answerable": true
+    },
+    {
+      "question": "Uçuşun ertelendiğini konuştuğumuz mesajı bul",
+      "lang": "tr",
+      "texts": [
+        "Our flight has been delayed until midnight.",
+        "The taxi is outside.",
+        "My meeting ended early."
+      ],
+      "gold": [
+        0
+      ],
+      "factLang": "en",
+      "answerable": true
+    },
+    {
+      "question": "Find the conversation about adopting a cat",
+      "lang": "en",
+      "texts": [
+        "Barınaktan bir kedi sahiplendik.",
+        "Köpeğe mama aldım.",
+        "Kirayı gönderdim."
+      ],
+      "gold": [
+        0
+      ],
+      "factLang": "tr",
+      "answerable": true
+    },
+    {
+      "question": "Davete gitmeyi reddettiğim mesajı bul",
+      "lang": "tr",
+      "texts": [
+        "Davete gitmek istemiyorum.",
+        "Davete gitmek istiyorum.",
+        "Sinema bileti aldım."
+      ],
+      "gold": [
+        0
+      ],
+      "factLang": "tr",
+      "answerable": true
+    },
+    {
+      "question": "Find where I refused the weekend trip",
+      "lang": "en",
+      "texts": [
+        "I don't want to join the weekend trip.",
+        "I want to join the weekend trip.",
+        "Work is busy."
+      ],
+      "gold": [
+        0
+      ],
+      "factLang": "en",
+      "answerable": true
+    },
+    {
+      "question": "Find the discussion about an Antarctic expedition",
+      "lang": "en",
+      "texts": [
+        "My phone battery died.",
+        "Akşam çay içtim."
+      ],
+      "gold": [],
+      "factLang": "mixed",
+      "answerable": false
+    },
+    {
+      "question": "Nükleer füzyondan bahsettiğimiz mesajı bul",
+      "lang": "tr",
+      "texts": [
+        "Akşam çay içtim.",
+        "My phone battery died."
+      ],
+      "gold": [],
+      "factLang": "mixed",
+      "answerable": false
+    }
+  ]
+}

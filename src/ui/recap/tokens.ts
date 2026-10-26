@@ -3,7 +3,7 @@
    One source of truth for the on-screen scenes (written onto the Recap root
    as CSS custom properties) and the canvas poster (read directly), so the two
    can never drift. Every ground lists the colours that may be drawn on it;
-   the contrast rules are asserted in tests/recap.test.ts:
+   the contrast rules are asserted in tests/recap/recap.test.ts:
    - fg and muted are text: at least 4.5:1 on the ground;
    - reveal and support mark data (peaks, night): at least 3:1 (WCAG 1.4.11),
      and reveal is only used for text at display sizes;

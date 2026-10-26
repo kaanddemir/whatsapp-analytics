@@ -10,7 +10,8 @@
    multiple of 60 s. */
 import type { AnalysisOptions, Insights, Message, ParticipantId, ParticipantStats, ParseResult } from "@/model";
 import { hourOf } from "./calendar";
-import { largestRemainder, median, percent } from "./numbers";
+import { largestRemainder, median, percent, ratio } from "./numbers";
+import { countWords } from "./volume";
 
 /** Senders of `messages` with counts, in first-seen order. */
 export function senderCounts(messages: readonly Message[]): Map<ParticipantId, number> {
@@ -40,14 +41,27 @@ export function participants(parsed: ParseResult, humans: readonly Message[], op
   const ranked = [...counts].sort((a, b) => b[1] - a[1]);
   const shares = largestRemainder(ranked.map(([, n]) => n));
   const gaps = responseGaps(humans, options.replyWindowSeconds);
+  // Only typed text has words, exactly as the KPI counts them.
+  const words = new Map<ParticipantId, { words: number; typed: number }>();
+  for (const m of humans) {
+    if (m.kind !== "text") continue;
+    const count = countWords(m.text);
+    if (count === 0) continue;
+    const w = words.get(m.sender) ?? { words: 0, typed: 0 };
+    w.words += count;
+    w.typed++;
+    words.set(m.sender, w);
+  }
   return ranked.map(([id, messages], i) => {
     const list = gaps.get(id) ?? [];
+    const w = words.get(id);
     return {
       id,
       name: parsed.participants[id]!.name,
       messages,
       share: shares[i]!,
       responseTime: { median: median(list), sampleSize: list.length },
+      wordsPerMessage: w ? ratio(w.words, w.typed, 1) : 0,
     };
   });
 }

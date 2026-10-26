@@ -1,9 +1,8 @@
 """Entrypoint: `python run.py` starts the web UI. Ctrl+C stops it.
 
 WhatsApp Analytics runs entirely in the browser, so there is only the Vite dev
-server to start. This wrapper exists for the same reasons as in the other
-projects: a missing setup step or a taken port gets one actionable message, and
-a single Ctrl+C stops everything.
+server to start. This optional wrapper reports missing setup steps or occupied ports and
+stops the development server with a single Ctrl+C.
 """
 
 import os
@@ -58,13 +57,13 @@ def _setup_problem(paint):
         return _problem(
             paint,
             "npm was not found on PATH.",
-            "Install Node.js 18 or newer: https://nodejs.org",
+            "Install Node.js 22: https://nodejs.org",
         )
     if not (ROOT / "node_modules").exists():
         return _problem(
             paint,
             "Dependencies are not installed.",
-            "npm install",
+            "npm ci --ignore-scripts",
         )
     return None
 

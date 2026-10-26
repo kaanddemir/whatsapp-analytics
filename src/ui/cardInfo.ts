@@ -1,7 +1,4 @@
-/* Dashboard card identities and their titles, kept in one place so the
-   titles can be localised without touching components. (The old "about this
-   card" explanations were removed; a new metric explanation system is
-   planned separately.) */
+/* Shared dashboard card identities and localized title keys. */
 
 export type CardKey =
   | "total-messages"

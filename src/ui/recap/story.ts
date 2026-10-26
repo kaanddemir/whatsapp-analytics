@@ -21,10 +21,10 @@
    Eligibility reflects substance, so a sparse chat gets a short story: see
    the per-scene rules below and MIN_PATTERN_MESSAGES. */
 import type { MediaKind, ParticipantId, ParticipantStats, Stats } from "@/model";
-import type { TranslationKey } from "../i18n/en";
-import type { Locale, TranslationParams } from "../i18n/types";
+import type { TranslationKey } from "@/i18n/en";
+import type { Locale, TranslationParams } from "@/i18n/types";
 import { chatTitle } from "../components/Filters";
-import { formatCount, formatDate, formatDateRange, formatDecimal, formatHourRange, formatMonth, formatPercent, formatShare, plural, weekdays, weekdaysShort } from "../format";
+import { formatCount, formatDate, formatDateRange, formatDecimal, formatHourRange, formatMonth, formatPercent, formatShare, plural, weekdays, weekdaysShort } from "@/i18n/format";
 import { participantColorIndex } from "../participantColors";
 import { DURATION, type Ground } from "./tokens";
 
@@ -115,7 +115,7 @@ export interface ClockScene extends Base<"clock"> {
 
 export interface WeekScene extends Base<"week"> {
   readonly kicker: string;
-  readonly totals: readonly number[];
+  readonly averages: readonly number[];
   readonly labels: readonly string[];
   readonly peak: number;
   readonly day: string;
@@ -334,7 +334,9 @@ export function buildStory(stats: Stats, locale: Locale, t: Translate): Story {
     const slot = h.busiestHour;
     rhythm.push({
       kind: "week", chapter: "rhythm", family: "pattern", ground: "cream", duration: DURATION.week,
-      kicker: t("rcWeekKicker"), totals: h.weekdayTotals, labels: weekdaysShort(locale), peak: d, day,
+      // Bars are the weekday averages the peak is ranked by, as on the
+      // dashboard: totals would favour a weekday the period holds twice.
+      kicker: t("rcWeekKicker"), averages: timing.weekdayAverages, labels: weekdaysShort(locale), peak: d, day,
       detail: t("rcWeekShare", { count: messages(h.weekdayTotals[d]!), share }),
       slot: slot && {
         kicker: t("rcSlotKicker"), hours: timing.heatmap[slot.weekday]!, peak: slot.hour,
@@ -357,13 +359,15 @@ export function buildStory(stats: Stats, locale: Locale, t: Translate): Story {
     const segments = people.slice(0, MAX_SEGMENTS);
     const rest = people.slice(MAX_SEGMENTS);
     const restMessages = rest.reduce((a, p) => a + p.messages, 0);
+    // The sum of their own shares, so segments and others make exactly 100%.
+    const restShare = formatShare(ranked.slice(MAX_SEGMENTS).reduce((a, p) => a + p.share, 0), restMessages, total, locale);
     scenes.push({
       kind: "balance", chapter: "people", family: "comparison", ground: "cream", duration: DURATION.balance,
       kicker: t("rcBalanceKicker"), mode: people.length === 2 ? "duo" : "group", segments,
-      others: rest.length ? { label: t("rcOthers", { count: count(rest.length) }), messages: restMessages, share: formatShare(Math.round((restMessages / total) * 100), restMessages, total, locale) } : null,
+      others: rest.length ? { label: t("rcOthers", { count: count(rest.length) }), messages: restMessages, share: restShare } : null,
       // The legend names exactly the regions drawn, so the two always agree.
       legend: segments,
-      summary: t("rcBalanceSummary", { list: segments.map((p) => `${p.name} ${p.share}`).join(", ") + (rest.length ? `, ${t("rcOthers", { count: count(rest.length) })} ${formatShare(Math.round((restMessages / total) * 100), restMessages, total, locale)}` : "") }),
+      summary: t("rcBalanceSummary", { list: segments.map((p) => `${p.name} ${p.share}`).join(", ") + (rest.length ? `, ${t("rcOthers", { count: count(rest.length) })} ${restShare}` : "") }),
     });
 
     const starterPerson = personOf(ins.conversationStarter.id);

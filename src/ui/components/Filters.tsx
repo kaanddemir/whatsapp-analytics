@@ -4,13 +4,13 @@
    always sent together, so changing one never drops the other. */
 import { useEffect, useState } from "react";
 import type { DatePreset, IsoDate, ParticipantId, ParticipantStats, Stats } from "@/model";
-import { presetRange } from "@/lib/presets";
-import { formatCount, formatDate, formatShare, initials } from "../format";
-import { Icon } from "./Icon";
+import { presetRange } from "@/analytics/presets";
+import { formatCount, formatDate, formatShare, initials } from "@/i18n/format";
+import { Calendar, ChevronDown, Users } from "lucide-react";
 import { Popover } from "./Popover";
 import { participantColor } from "../participantColors";
-import { useI18n } from "../i18n/context";
-import type { Locale } from "../i18n/types";
+import { useI18n } from "@/ui/i18n";
+import type { Locale } from "@/i18n/types";
 
 export interface DateSelection {
   /** null = a custom range typed by hand. */
@@ -53,9 +53,9 @@ export function ParticipantPicker({ stats, people, sender, onSender, disabled = 
         <>
           {selected
             ? <span className="avatar" aria-hidden="true" style={{ background: participantColor(String(selected.id)) }}>{initials(selected.name)}</span>
-            : <Icon name="users" size={16} />}
+            : <Users size={16} />}
           <span className="pill-text">{selected ? label : t("everyone")}</span>
-          <Icon name="chevron" size={14} />
+          <ChevronDown size={14} />
         </>
       }
       triggerClassName={`pill${selected ? " filtered" : ""}`}
@@ -117,9 +117,9 @@ export function DateFilter({ stats, selection, onApply, disabled = false }: Date
       title={t("dateRange")}
       trigger={
         <>
-          <Icon name="calendar" size={16} />
+          <Calendar size={16} />
           <span className="pill-text">{label}</span>
-          <Icon name="chevron" size={14} />
+          <ChevronDown size={14} />
         </>
       }
       triggerClassName={`pill${selection.preset === "all" ? "" : " filtered"}`}
@@ -135,7 +135,7 @@ function DatePanel({ stats, selection, onApply }: { stats: Stats; selection: Dat
   const { locale, t } = useI18n();
   const presets: readonly { id: DatePreset; label: string; name: string }[] = [
     { id: "7", label: locale === "tr" ? "7g" : "7d", name: locale === "tr" ? "Sohbetin son 7 günü" : "Last 7 days of the chat" }, { id: "30", label: locale === "tr" ? "30g" : "30d", name: locale === "tr" ? "Sohbetin son 30 günü" : "Last 30 days of the chat" },
-    { id: "90", label: locale === "tr" ? "3a" : "3m", name: locale === "tr" ? "Sohbetin son 3 ayı" : "Last 3 months of the chat" }, { id: "180", label: locale === "tr" ? "6a" : "6m", name: locale === "tr" ? "Sohbetin son 6 ayı" : "Last 6 months of the chat" }, { id: "365", label: "1y", name: locale === "tr" ? "Sohbetin son yılı" : "Last year of the chat" },
+    { id: "90", label: locale === "tr" ? "3a" : "3m", name: locale === "tr" ? "Sohbetin son 3 ayı" : "Last 3 months of the chat" }, { id: "180", label: locale === "tr" ? "6a" : "6m", name: locale === "tr" ? "Sohbetin son 6 ayı" : "Last 6 months of the chat" }, { id: "365", label: locale === "tr" ? "1yıl" : "1y", name: locale === "tr" ? "Sohbetin son yılı" : "Last year of the chat" },
     { id: "all", label: t("all"), name: t("wholeChat") },
   ];
   const full = stats.meta.fullRange;

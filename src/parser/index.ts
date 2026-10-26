@@ -42,6 +42,8 @@ import { cleanLine, cleanName, startsWithMark, stripMarks } from "./text";
 /** Longest plausible sender name; past this, "x: y" is text, not a sender. */
 const MAX_SENDER_LENGTH = 100;
 const SAMPLE_LINES = 5;
+/** A whole body in angle brackets, the shape of Android's placeholders ("<Media omitted>"). */
+const PLACEHOLDER_SHAPE = /^<[^<>\n]{3,80}>$/u;
 
 interface RawRecord {
   readonly line: number;
@@ -70,8 +72,7 @@ class WarningLog {
   }
 }
 
-// ---- stage 1: records -----------------------------------------------------
-
+// Records.
 function splitRecords(text: string, warnings: WarningLog) {
   const lines = text.split(/\r\n|\r|\n/);
   // A trailing newline is not an extra (blank) line.
@@ -105,8 +106,7 @@ function splitRecords(text: string, warnings: WarningLog) {
   return { records, totalLines: lines.length, blankLines, continuationLines };
 }
 
-// ---- stage 3: one record --------------------------------------------------
-
+// One record.
 type Row =
   | { kind: "skip" }
   | { kind: "system"; ts: number; template: SystemTemplate | null; line: number }
@@ -188,8 +188,7 @@ function toRow(record: RawRecord, ts: number | null, warnings: WarningLog): Row 
   };
 }
 
-// ---- stage 5: chat-level facts -------------------------------------------
-
+// Chat-level facts.
 function isMetaAI(name: string): boolean {
   const n = name.normalize("NFKC").trim().toLowerCase();
   return n === "meta ai" || n === "@meta ai";
@@ -218,15 +217,24 @@ const zeroKinds = (): Record<MessageKind, number> => ({ text: 0, media: 0, delet
 const zeroTypes = (): Record<SystemEventType, number> =>
   ({ encryption: 0, group: 0, call: 0, security: 0, disappearing: 0, unknown: 0 });
 
-// ---- entry point ----------------------------------------------------------
+// Entry point.
+export interface ParseOptions {
+  /** The user's reading of D/M vs M/D dates; used only when the file does not prove one. */
+  readonly dateOrder?: "dmy" | "mdy";
+}
 
-export function parseExport(text: string): ParseResult {
+export function parseExport(text: string, options: ParseOptions = {}): ParseResult {
   const warnings = new WarningLog();
   const { records, totalLines, blankLines, continuationLines } = splitRecords(text, warnings);
 
-  // Stage 2: date order and timestamps.
-  const decision = decideDateOrder(records.map((r) => r.header));
-  if (decision.certainty === "assumed" && records.length > 0 && decision.order !== "ymd") {
+  // Stage 2: date order and timestamps. Unless proven, the order is a guess
+  // and says so; a choice by the user replaces the guess.
+  const inferred = decideDateOrder(records.map((r) => r.header));
+  const guessed = inferred.certainty !== "proven" && inferred.order !== "ymd";
+  const decision = guessed && options.dateOrder
+    ? { ...inferred, order: options.dateOrder, certainty: "user" as const }
+    : inferred;
+  if (guessed && decision.certainty !== "user" && records.length > 0) {
     warnings.add("ambiguous_date_order", records[0]?.line, records.length);
   }
   if (decision.conflicting) warnings.add("conflicting_date_order");
@@ -290,6 +298,8 @@ export function parseExport(text: string): ParseResult {
     if (row.kind !== "sender") return;
 
     if (row.template) warnings.add("possible_system_event", row.line);
+    // An unknown variant stays text (its kind would be a guess) but is reported.
+    if (row.body.kind === "text" && PLACEHOLDER_SHAPE.test(row.text)) warnings.add("unknown_placeholder", row.line);
     let id = ids.get(row.sender);
     if (id === undefined) {
       id = participants.length;

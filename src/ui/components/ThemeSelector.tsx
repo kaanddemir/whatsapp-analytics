@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Icon, type IconName } from "./Icon";
+import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
 import {
   THEME_MODES,
   applyTheme,
@@ -7,9 +7,9 @@ import {
   storeThemePreference,
   type ThemeMode,
 } from "../theme";
-import { useI18n } from "../i18n/context";
+import { useI18n } from "@/ui/i18n";
 
-const ICONS: Record<ThemeMode, IconName> = { auto: "monitor", light: "sun", dark: "moon" };
+const ICONS: Record<ThemeMode, LucideIcon> = { auto: Monitor, light: Sun, dark: Moon };
 const mediaQuery = "(prefers-color-scheme: dark)";
 
 function browserStorage(): Storage | null {
@@ -57,19 +57,22 @@ function Selector({ mode, onChange, labelled }: { mode: ThemeMode; onChange: (mo
   return (
     <fieldset className={labelled ? "theme-selector labelled" : "theme-selector"} aria-label={t("colorTheme")}>
       <legend className="sr-only">{t("colorTheme")}</legend>
-      {THEME_MODES.map((item) => (
-        <button
-          key={item}
-          type="button"
-          className="theme-option"
-          aria-pressed={mode === item}
-          title={labelled ? undefined : labels[item]}
-          onClick={() => onChange(item)}
-        >
-          <Icon name={ICONS[item]} size={16} />
-          <span className={labelled ? "theme-label" : "sr-only"}>{labels[item]}</span>
-        </button>
-      ))}
+      {THEME_MODES.map((item) => {
+        const ModeIcon = ICONS[item];
+        return (
+          <button
+            key={item}
+            type="button"
+            className="theme-option"
+            aria-pressed={mode === item}
+            title={labelled ? undefined : labels[item]}
+            onClick={() => onChange(item)}
+          >
+            <ModeIcon size={16} />
+            <span className={labelled ? "theme-label" : "sr-only"}>{labels[item]}</span>
+          </button>
+        );
+      })}
     </fieldset>
   );
 }

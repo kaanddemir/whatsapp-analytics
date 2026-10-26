@@ -9,7 +9,7 @@ interface WorkerScope {
 }
 const scope = self as unknown as WorkerScope;
 
-const handle = createHandler();
+const handle = createHandler({ notify: (response) => scope.postMessage(response) });
 
 scope.onmessage = (event) => {
   void handle(event.data, (response) => scope.postMessage(response));

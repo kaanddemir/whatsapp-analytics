@@ -16,8 +16,7 @@
 import type { MediaKind, SystemEventType } from "@/model";
 import { LRM, stripMarks } from "./text";
 
-// ---- media placeholders ---------------------------------------------------
-
+// Media placeholders.
 /** [label, English terms, Turkish terms]. */
 const MEDIA_TERMS: readonly (readonly [MediaKind, readonly string[], readonly string[]])[] = [
   ["Stickers", ["sticker"], ["çıkartma", "sticker"]],
@@ -129,8 +128,7 @@ function markedBeforeTerm(raw: string, term: string): boolean {
   return raw.toLowerCase().includes(LRM + term.toLowerCase());
 }
 
-// ---- system events --------------------------------------------------------
-
+// System events.
 export interface SystemTemplate {
   readonly type: SystemEventType;
   /** True for wording that cannot plausibly be a typed message. */

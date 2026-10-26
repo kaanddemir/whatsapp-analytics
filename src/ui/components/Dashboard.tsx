@@ -13,13 +13,13 @@
    nothing is recomputed here. */
 import type { ReactNode } from "react";
 import type { Grain, ParticipantStats, Stats } from "@/model";
-import { formatDate } from "../format";
+import { formatDate } from "@/i18n/format";
 import { EmojiCard, KeywordCard, MessageKindsCard } from "./ContentCards";
 import { KpiGrid } from "./KpiGrid";
 import { ActivityTiles, BalanceCard, InteractionTiles, ResponseTimeCard } from "./PeopleCards";
 import { TimelineCard } from "./TimelineCard";
 import { HeatmapCard, HourlyCard, WeekdayCard } from "./TimingCards";
-import { useI18n } from "../i18n/context";
+import { useI18n } from "@/ui/i18n";
 
 interface Props {
   stats: Stats;

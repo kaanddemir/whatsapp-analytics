@@ -1,5 +1,5 @@
-import { useI18n } from "../i18n/context";
-import type { Locale } from "../i18n/types";
+import { useI18n } from "@/ui/i18n";
+import type { Locale } from "@/i18n/types";
 const OPTIONS: readonly Locale[] = ["tr", "en"];
 export function LanguageSelector() {
   const { locale, setLocale, t } = useI18n();

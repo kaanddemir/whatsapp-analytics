@@ -99,6 +99,8 @@ export interface ParticipantStats {
   /** Integer percent; all participants sum to exactly 100 (largest remainder). */
   readonly share: number;
   readonly responseTime: ResponseTime;
+  /** Words per typed text message, as the Words per message KPI counts them, over the human conversation in the date range. */
+  readonly wordsPerMessage: number;
 }
 
 export interface Insights {
@@ -166,6 +168,47 @@ export interface Highlights {
   readonly streakShare: number;
 }
 
+/** up / down: a large change unlikely to be noise; steady: enough data, no clear change; insufficient: too little data to say. */
+export type TrendDirection = "up" | "down" | "steady" | "insufficient";
+
+/**
+ * The last `days` of the period against the `days` just before (analytics/trends.ts
+ * has the windows and the tests). activity and longestSilence follow both filters;
+ * responseTime, share and starter compare people over the human conversation
+ * in the date range, one entry per person with messages in either window.
+ */
+export interface Trends {
+  /** null when the period is shorter than 60 days: nothing is compared. */
+  readonly windows: {
+    readonly days: number;
+    readonly before: { readonly start: IsoDate; readonly end: IsoDate };
+    readonly after: { readonly start: IsoDate; readonly end: IsoDate };
+  } | null;
+  readonly activity: {
+    /** Message totals per window. */
+    readonly before: number;
+    readonly after: number;
+    /** Messages per calendar day of the window, 1 decimal. */
+    readonly perDayBefore: number;
+    readonly perDayAfter: number;
+    readonly activeDaysBefore: number;
+    readonly activeDaysAfter: number;
+    readonly direction: TrendDirection;
+  } | null;
+  readonly responseTime: readonly { readonly id: ParticipantId; readonly before: ResponseTime; readonly after: ResponseTime; readonly direction: TrendDirection }[];
+  /** Percent of the human messages of each window, 1 decimal. */
+  readonly share: readonly { readonly id: ParticipantId; readonly before: number; readonly after: number; readonly direction: TrendDirection }[];
+  /** Percent of the conversations started in each window, 1 decimal. */
+  readonly starter: readonly {
+    readonly id: ParticipantId; readonly before: number; readonly after: number;
+    readonly startedBefore: number; readonly startedAfter: number;
+    readonly conversationsBefore: number; readonly conversationsAfter: number;
+    readonly direction: TrendDirection;
+  }[];
+  /** Longest run of 7+ days without a message inside the period, between two active days. */
+  readonly longestSilence: { readonly days: number; readonly lastBefore: IsoDate; readonly firstAfter: IsoDate } | null;
+}
+
 export interface StatsMeta {
   /** Decided by the parser over the whole file, independent of filters (C8). */
   readonly chatType: ChatType;
@@ -197,4 +240,5 @@ export interface Stats {
   readonly participants: readonly ParticipantStats[];
   readonly insights: Insights;
   readonly highlights: Highlights;
+  readonly trends: Trends;
 }
