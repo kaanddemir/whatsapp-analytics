@@ -43,7 +43,7 @@ export type WorkerRequest =
   | { readonly type: "ask"; readonly id: RequestId; readonly question: string; readonly locale?: "en" | "tr"; readonly filters: AnalysisFilters }
   /** Search by meaning for the open chat: start or resume indexing (downloading the model first, once), pause it, report its state,
       or forget: remove the model files and every stored index from this device. */
-  | { readonly type: "semantic"; readonly id: RequestId; readonly action: "enable" | "pause" | "status" | "forget" }
+  | { readonly type: "semantic"; readonly id: RequestId; readonly action: "enable" | "pause" | "status" | "remove" | "forget" }
   /** Stop request `target` if it is still queued or waiting; handled at once, outside the queue, and never answered.
       The cancelled request itself replies with the error "cancelled". */
   | { readonly type: "cancel"; readonly id: RequestId; readonly target: RequestId };
@@ -139,7 +139,7 @@ export function validRequest(value: unknown): value is WorkerRequest {
     case "behaviourEvidence": return filters() && page() && sender(r.sender) && ["proposal", "acceptance", "apology", "cancellation"].includes(String(r.behaviour));
     case "timeline": return filters() && page() && ["newest", "oldest"].includes(String(r.order));
     case "dateEvidence": return filters() && page() && integer(r.day) && r.day >= 1 && r.day <= 31 && integer(r.month) && r.month >= 1 && r.month <= 12 && (r.year === null || integer(r.year) && r.year >= 1 && r.year <= 9999);
-    case "semantic": return ["enable", "pause", "status", "forget"].includes(String(r.action));
+    case "semantic": return ["enable", "pause", "status", "remove", "forget"].includes(String(r.action));
     case "cancel": return integer(r.target);
     default: return false;
   }

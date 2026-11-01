@@ -287,7 +287,7 @@ describe("edge cases", () => {
     rows.push(android("02/01/2024", "02:00", "B", "night"), android("02/01/2024", "03:00", "B", "night"));
     // B: 100% at night but only 2 messages; A is the only one with >= 20.
     const { parsed, stats } = run(lines(...rows));
-    expect(stats.insights.nightOwl).toEqual({ id: idOf(parsed, "A"), count: 1, share: 4.8 });
+    expect(stats.insights.nightOwl).toEqual({ id: idOf(parsed, "A"), count: 1, share: 4.8, tied: 0 });
   });
 
   it("emojis: sequences, flags, keycaps; skin tones folded", () => {

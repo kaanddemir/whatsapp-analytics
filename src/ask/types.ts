@@ -92,9 +92,6 @@ export interface AnswerRow {
     none   nothing was computed (unsupported). */
 export type Basis = "count" | "match" | "rule" | "meaning" | "none";
 
-/** Something the user can do to improve this answer. */
-export type AnswerAction = "enable_semantic";
-
 /** The primary answer value and its caption. */
 export interface AnswerFigure { readonly value: string; readonly caption: string }
 
@@ -116,5 +113,6 @@ export interface Answer {
   /** Total messages behind the answer when `evidence` shows only some. */
   readonly evidenceTotal: number;
   readonly result: ChatResult | null;
-  readonly action: AnswerAction | null;
+  /** A recall answer that used only words says why, apart from `note`, so the thread need not repeat it. */
+  readonly meaningNote: string | null;
 }

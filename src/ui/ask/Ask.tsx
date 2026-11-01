@@ -13,11 +13,11 @@
 
    The view stays mounted while Overview shows, so the conversation and its
    scroll position survive switching; a new chat remounts it. */
+import { createPortal } from "react-dom";
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import type { AnalysisFilters, ParticipantId, ParticipantStats, Stats } from "@/model";
 import type { Answer } from "@/ask/types";
 import type { Stage } from "@/worker/protocol";
-import type { SemanticState } from "@/semantic/indexer";
 import { WorkerRequestError, type AnalysisClient } from "@/worker/client";
 import { formatDate } from "@/i18n/format";
 import { useI18n } from "@/ui/i18n";
@@ -27,7 +27,7 @@ import { AnswerView } from "./Answer";
 import { scopeKey } from "./present";
 import "./ask.css";
 
-export type AskPort = Pick<AnalysisClient, "ask" | "context" | "search" | "behaviourEvidence" | "dateEvidence" | "timeline" | "semantic" | "onSemantic">;
+export type AskPort = Pick<AnalysisClient, "ask" | "context" | "search" | "behaviourEvidence" | "dateEvidence" | "timeline">;
 
 type TurnState =
   | { readonly status: "pending"; readonly stage: Stage | null }
@@ -56,6 +56,8 @@ interface Props {
   onLost: (error: unknown) => void;
   /** Ask is the view on screen. */
   active: boolean;
+  /** Where the New conversation button goes in the app bar. */
+  headerActions: HTMLElement | null;
 }
 
 const SUGGESTIONS = [["ask.s1", "ask.s1Hint", Users], ["ask.s2", "ask.s2Hint", Calendar], ["ask.s3", "ask.s3Hint", ChartColumn], ["ask.s4", "ask.s4Hint", Search]] as const;
@@ -64,11 +66,10 @@ const MAX_QUESTION = 500; // the worker reads no more than this (worker/handler.
 const reducedMotion = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 const finePointer = () => typeof window !== "undefined" && window.matchMedia?.("(pointer: fine)").matches === true;
 
-export function Ask({ client, stats, people, dates, sender, onFilters, onLost, active }: Props) {
+export function Ask({ client, stats, people, dates, sender, onFilters, onLost, active, headerActions }: Props) {
   const { locale, t } = useI18n();
   const [turns, setTurns] = useState<readonly Turn[]>([]);
   const [draft, setDraft] = useState("");
-  const [semantic, setSemantic] = useState<SemanticState>({ status: "off" });
   const [announcement, setAnnouncement] = useState("");
   const input = useRef<HTMLTextAreaElement>(null);
   const thread = useRef<HTMLOListElement>(null);
@@ -91,13 +92,6 @@ export function Ask({ client, stats, people, dates, sender, onFilters, onLost, a
   const when = dates.preset === "all" || !dates.start || !dates.end ? t("ask.scopeAllDates") : `${formatDate(dates.start, locale)} – ${formatDate(dates.end, locale)}`;
   const scope = `${who} · ${when}`;
   const pending = turns.some((turn) => turn.state.status === "pending");
-
-  // Search by meaning: its state now, then every change while it prepares.
-  useEffect(() => {
-    const off = client.onSemantic((s) => live.current && setSemantic(s));
-    client.semantic("status").then((s) => live.current && setSemantic(s), () => {});
-    return off;
-  }, [client]);
 
   // Arriving in Ask puts the cursor in the composer, where a keyboard is at hand (not on touch screens).
   useEffect(() => {
@@ -179,13 +173,19 @@ export function Ask({ client, stats, people, dates, sender, onFilters, onLost, a
     }
   }
 
-  // Its state then comes only from the indexer’s updates (onSemantic, above), which arrive in order; the reply to
-  // "enable" is a snapshot that can arrive after a later update (a fast failure) and would undo it.
-  const enableMeaning = () => { client.semantic("enable").catch(() => {}); };
+  // Why only words were searched is said once, and again only when the reason changes.
+  let meaningNoted: string | null = null;
 
   return (
     <div className="ask">
       <p className="sr-only" aria-live="polite">{announcement}</p>
+      {/* Lives in the app bar's actions, but the conversation it clears is here. */}
+      {active && turns.length > 0 && headerActions && createPortal(
+        <button type="button" className="btn ghost ask-new" title={t("ask.newConversation")} onClick={() => { inFlight.current?.abort(); setTurns([]); setAnnouncement(""); input.current?.focus(); }}>
+          <SquarePen size={16} /><span>{t("ask.newConversation")}</span>
+        </button>,
+        headerActions,
+      )}
       {turns.length === 0 ? (
         <section className="ask-empty" aria-labelledby="ask-title">
           <h2 id="ask-title" className="ask-title">{t("ask.title")}</h2>
@@ -206,11 +206,6 @@ export function Ask({ client, stats, people, dates, sender, onFilters, onLost, a
         </section>
       ) : (
         <section className="ask-thread" aria-label={t("ask.conversation")}>
-          <div className="ask-thread-head">
-            <button type="button" className="link-btn" onClick={() => { inFlight.current?.abort(); setTurns([]); setAnnouncement(""); input.current?.focus(); }}>
-              <SquarePen size={16} />{t("ask.newConversation")}
-            </button>
-          </div>
           <ol className="turns" ref={thread}>
             {turns.map((turn, i) => {
               const before = i > 0 ? turns[i - 1]!.filters : null;
@@ -229,9 +224,12 @@ export function Ask({ client, stats, people, dates, sender, onFilters, onLost, a
                         {turn.state.stage === "indexing" ? t("x_indexing") : t("ask.working")}
                       </p>
                     )}
-                    {turn.state.status === "done" && (
-                      <AnswerView answer={turn.state.answer} client={client} semantic={semantic} onEnableMeaning={enableMeaning} onAskAgain={() => send(turn.question)} />
-                    )}
+                    {turn.state.status === "done" && (() => {
+                      const meaningNote = turn.state.answer.meaningNote;
+                      const showMeaningNote = meaningNote !== null && meaningNote !== meaningNoted;
+                      if (showMeaningNote) meaningNoted = meaningNote;
+                      return <AnswerView answer={turn.state.answer} client={client} showMeaningNote={showMeaningNote} />;
+                    })()}
                     {(turn.state.status === "stopped" || turn.state.status === "failed") && (
                       <div className={`ans-halt ${turn.state.status}`} role={turn.state.status === "failed" ? "alert" : undefined}>
                         <p>{t(turn.state.status === "failed" ? "ask.failed" : "ask.stopped")}</p>

@@ -83,8 +83,9 @@ export function conversationStarter(humans: readonly Message[], gapSeconds: numb
     total += entry[1];
     if (!best || entry[1] > best[1]) best = entry;
   }
-  if (!best) return { id: null, share: 0, count: 0, conversations: 0 };
-  return { id: best[0], share: percent(best[1], total), count: best[1], conversations: total };
+  if (!best) return { id: null, share: 0, count: 0, conversations: 0, tied: 0 };
+  const tied = [...starts.values()].filter((n) => n === best![1]).length - 1;
+  return { id: best[0], share: percent(best[1], total), count: best[1], conversations: total, tied };
 }
 
 /**
@@ -114,6 +115,8 @@ export function nightOwl(humans: readonly Message[], options: AnalysisOptions): 
     if (cmp > 0 || (cmp === 0 && a > b)) best = id;
   }
   const count = best === null ? 0 : night.get(best) ?? 0;
-  if (best === null || count === 0) return { id: null, count: 0, share: 0 };
-  return { id: best, count, share: percent(count, totals.get(best)!, 1) };
+  if (best === null || count === 0) return { id: null, count: 0, share: 0, tied: 0 };
+  const top = totals.get(best)!;
+  const tied = eligible.filter((id) => id !== best && night.get(id) === count && totals.get(id) === top).length;
+  return { id: best, count, share: percent(count, top, 1), tied };
 }

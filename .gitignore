@@ -16,6 +16,8 @@ node_modules/
 dist/
 *.tsbuildinfo
 coverage/
+test-results/
+playwright-report/
 
 # Chat exports. Real WhatsApp exports are .txt or .zip and must never be
 # committed; synthetic test fixtures use the .chat extension instead.

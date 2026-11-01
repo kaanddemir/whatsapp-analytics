@@ -28,6 +28,8 @@ export interface IndexManifest {
   /** Vectors in those segments. */
   readonly vectors: number;
   readonly complete: boolean;
+  /** The user paused indexing: a later visit waits for Resume. Absent otherwise. */
+  readonly paused?: boolean;
 }
 
 export interface SemanticStore {

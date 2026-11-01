@@ -35,8 +35,12 @@
 
 /* Thread */
 .ask-thread { flex: 1; padding-bottom: var(--space-6); }
-.ask-thread-head { display: flex; justify-content: flex-end; margin: calc(-1 * var(--space-2)) 0 var(--space-2); }
-.ask-thread-head .link-btn { color: var(--color-text-secondary); }
+.ask-new { min-height: var(--control-md); padding: 0 var(--space-3); gap: 6px; color: var(--color-text-secondary); }
+/* Three actions would run into the view tabs: icon only, its name kept for assistive tech. */
+@media (max-width: 1023px) {
+  .ask-new { width: var(--control-md); padding: 0; justify-content: center; }
+  .ask-new span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
 .turns { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-10); }
 /* A question scrolls to just under the app bar; the newest turn reserves the
    rest of the window (less the bar margin, the thread's padding and the
@@ -60,7 +64,7 @@
 @keyframes ask-dot { 0%, 80%, 100% { opacity: .25; transform: scale(.8); } 40% { opacity: 1; transform: scale(1); } }
 .ans-halt { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); font: var(--font-body); color: var(--color-text-muted); }
 .ans-halt.failed p { color: var(--color-error); }
-.ans-halt .btn, .ans-action .btn { min-height: var(--control-sm); font: var(--font-label); }
+.ans-halt .btn { min-height: var(--control-sm); font: var(--font-label); }
 
 /* Answer */
 .ans { display: grid; gap: var(--space-4); min-width: 0; font: var(--ask-read); color: var(--color-text); }
@@ -131,9 +135,6 @@
 .ans-basis { display: inline-flex; align-items: center; gap: 6px; font: var(--font-caption); color: var(--color-text-muted); }
 /* Unverified: set apart from what was counted. */
 .ans-basis.basis-meaning { color: var(--color-warning); }
-.ans-action { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); font: var(--font-body); color: var(--color-text-secondary); }
-.ans-action .muted { font: var(--font-caption); }
-.ans-action-error { font: var(--font-caption); color: var(--color-error); }
 
 /* Composer, docked to the bottom of the window; the thread fades out beneath it. */
 .ask-dock { position: sticky; bottom: 0; z-index: 20; padding: var(--space-3) 0 max(var(--space-3), env(safe-area-inset-bottom)); background: linear-gradient(to bottom, transparent, var(--color-page) var(--space-4)); }

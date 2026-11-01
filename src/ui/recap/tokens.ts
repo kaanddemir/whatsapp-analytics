@@ -7,7 +7,8 @@
    - fg and muted are text: at least 4.5:1 on the ground;
    - reveal and support mark data (peaks, night): at least 3:1 (WCAG 1.4.11),
      and reveal is only used for text at display sizes;
-   - participant colours are data marks: at least 3:1.
+   - participant colours are data marks: at least 3:1;
+   - onParticipant is text drawn on a participant colour: at least 4.5:1.
    Orange (#E8743B) is only 2.6:1 on cream, so cream scenes reveal with a
    deeper burnt orange of the same hue. */
 
@@ -40,12 +41,14 @@ export interface GroundTokens {
   /** Restrained secondary data colour (night). */
   readonly support: string;
   readonly participants: readonly string[];
+  /** Text drawn on a participant-coloured fill. */
+  readonly onParticipant: string;
 }
 
 export const GROUNDS: Readonly<Record<Ground, GroundTokens>> = {
-  cream: { bg: PALETTE.cream, fg: PALETTE.ink, muted: "#5C574C", reveal: PALETTE.burnt, onReveal: PALETTE.cream, support: PALETTE.plum, participants: PARTICIPANT_LIGHT },
-  forest: { bg: PALETTE.forest, fg: PALETTE.cream, muted: "#BFCBBF", reveal: PALETTE.orange, onReveal: PALETTE.ink, support: PALETTE.lilac, participants: PARTICIPANT_DARK },
-  ink: { bg: PALETTE.ink, fg: PALETTE.cream, muted: "#B9B3A6", reveal: PALETTE.orange, onReveal: PALETTE.ink, support: PALETTE.lilac, participants: PARTICIPANT_DARK },
+  cream: { bg: PALETTE.cream, fg: PALETTE.ink, muted: "#5C574C", reveal: PALETTE.burnt, onReveal: PALETTE.cream, support: PALETTE.plum, participants: PARTICIPANT_LIGHT, onParticipant: "#FFFFFF" },
+  forest: { bg: PALETTE.forest, fg: PALETTE.cream, muted: "#BFCBBF", reveal: PALETTE.orange, onReveal: PALETTE.ink, support: PALETTE.lilac, participants: PARTICIPANT_DARK, onParticipant: PALETTE.forest },
+  ink: { bg: PALETTE.ink, fg: PALETTE.cream, muted: "#B9B3A6", reveal: PALETTE.orange, onReveal: PALETTE.ink, support: PALETTE.lilac, participants: PARTICIPANT_DARK, onParticipant: PALETTE.ink },
 };
 
 /** The ground's tokens as the CSS custom properties recap.css reads. */
@@ -53,7 +56,7 @@ export function groundVars(ground: Ground): Record<string, string> {
   const g = GROUNDS[ground];
   const vars: Record<string, string> = {
     "--rc-bg": g.bg, "--rc-fg": g.fg, "--rc-muted": g.muted,
-    "--rc-reveal": g.reveal, "--rc-on-reveal": g.onReveal, "--rc-support": g.support,
+    "--rc-reveal": g.reveal, "--rc-on-reveal": g.onReveal, "--rc-support": g.support, "--rc-on-participant": g.onParticipant,
   };
   g.participants.forEach((c, i) => (vars[`--rc-p${i}`] = c));
   return vars;

@@ -74,7 +74,7 @@ describe("landing screen", () => {
     const file = new File(["15/01/24, 10:00 - A: hi"], "chat.txt", { type: "text/plain" });
     fireEvent.change(screen.getByLabelText("Choose file"), { target: { files: [file] } });
     // false: "keep on this device" is off unless the user ticks it.
-    expect(onFile).toHaveBeenCalledWith(file, false);
+    expect(onFile).toHaveBeenCalledWith(file, false, false);
 
     // A file can be dropped anywhere on the page; while it is held over it, the page says what dropping does.
     const page = document.querySelector(".welcome")!;
@@ -109,21 +109,21 @@ it("updates storage copy and saved dates on language changes while preserving th
   const checkbox = screen.getByRole("checkbox", { name: en.x_keepOnDevice }) as HTMLInputElement;
   expect(checkbox.checked).toBe(false);
   fireEvent.change(screen.getByLabelText(en.chooseFile), { target: { files: [file] } });
-  expect(onFile).toHaveBeenLastCalledWith(file, false);
+  expect(onFile).toHaveBeenLastCalledWith(file, false, false);
   fireEvent.click(checkbox);
   fireEvent.change(screen.getByLabelText(en.chooseFile), { target: { files: [file] } });
-  expect(onFile).toHaveBeenLastCalledWith(file, true);
+  expect(onFile).toHaveBeenLastCalledWith(file, true, false);
   for (const locale of ["tr", "en"] as const) {
     const d = locale === "tr" ? tr : en;
     fireEvent.click(screen.getByRole("button", { name: locale === "tr" ? "Türkçe" : "English" }));
     expect((screen.getByRole("checkbox", { name: d.x_keepOnDevice }) as HTMLInputElement).checked).toBe(true);
     expect(document.querySelector(".saved-meta")?.textContent).toBe(`${formatCount(chat.messageCount, locale)} ${locale === "tr" ? "mesaj" : "messages"} · ${formatBytes(chat.storedBytes, locale)} · ${formatDate("2026-10-24", locale)}`);
     fireEvent.click(screen.getByRole("button", { name: d["start.openSavedLabel"].replace("{name}", chat.fileName) }));
-    expect(onOpen).toHaveBeenLastCalledWith(chat);
+    expect(onOpen).toHaveBeenLastCalledWith(chat, false);
     fireEvent.click(screen.getByRole("button", { name: d.x_deleteSavedLabel.replace("{name}", chat.fileName) }));
     expect(onDelete).toHaveBeenLastCalledWith(chat);
     fireEvent.change(screen.getByLabelText(d.chooseFile), { target: { files: [file] } });
-    expect(onFile).toHaveBeenLastCalledWith(file, true);
+    expect(onFile).toHaveBeenLastCalledWith(file, true, false);
     expect(document.querySelector(".privacy-note")).toBeNull();
   }
   expect(chat).toEqual(original);

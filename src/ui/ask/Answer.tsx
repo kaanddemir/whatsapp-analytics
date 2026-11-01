@@ -3,19 +3,19 @@
      figure    the headline value, when the question asks for one number or date
      text      the engine's sentence(s), unchanged
      rows      bars when the rows are one measure on one scale, else a list
-     note      what the figures do not establish; before any messages, so it is read first
+     note      what the figures do not establish, and why only words were searched when the thread
+               has not said so yet; before any messages, so it is read first
      messages  the cited evidence, or plan conversations
-     footer    how the result was obtained (basis), and enabling search by meaning when it would help
+     footer    how the result was obtained (basis)
 
    Every part is optional; a plain count is a figure and a sentence. */
 import { useState } from "react";
 import type { Answer, AnswerRow, Basis } from "@/ask/types";
 import type { AnalysisClient } from "@/worker/client";
-import type { SemanticState } from "@/semantic/indexer";
 import type { TranslationKey } from "@/i18n/en";
 import { formatCount } from "@/i18n/format";
 import { useI18n } from "@/ui/i18n";
-import { ChartColumn, EqualApproximately, Info, List, RotateCcw, Search, type LucideIcon } from "lucide-react";
+import { ChartColumn, EqualApproximately, Info, List, Search, type LucideIcon } from "lucide-react";
 import { MessageList, Plans, type LoadMessages } from "./Messages";
 import { ROW_LIMIT, barWidths, isTranscript, messageGroups, pageable, rowsView } from "./present";
 
@@ -57,56 +57,16 @@ function Rows({ rows, bars }: { rows: readonly AnswerRow[]; bars: boolean }) {
   );
 }
 
-function percent(state: SemanticState): number | null {
-  if (state.status === "indexing" || state.status === "paused") return state.total ? Math.floor((state.done / state.total) * 100) : 0;
-  return null;
-}
-
-/** Offered when only the question's words were searched and search by meaning could still be prepared. */
-function MeaningAction({ semantic, onEnable, onAskAgain }: { semantic: SemanticState; onEnable: () => void; onAskAgain: () => void }) {
-  const { t } = useI18n();
-  switch (semantic.status) {
-    case "preparing":
-      return <p className="ans-action" role="status"><span className="spinner" aria-hidden="true" />{t("ask.meaningPreparing")}</p>;
-    case "indexing":
-      return <p className="ans-action" role="status"><span className="spinner" aria-hidden="true" />{t("ask.meaningIndexing", { percent: percent(semantic) ?? 0 })}</p>;
-    case "ready":
-      return (
-        <div className="ans-action">
-          <p>{t("ask.meaningReady")}</p>
-          <button type="button" className="btn ghost" onClick={onAskAgain}><RotateCcw size={16} />{t("ask.retry")}</button>
-        </div>
-      );
-    case "failed":
-      if (semantic.reason === "too_large" || semantic.reason === "unsupported") return <p className="ans-action muted">{t("ask.meaningFailed")}</p>;
-      break;
-    default:
-  }
-  // A failure that trying again may fix (a file that did not load, memory, storage) is said, not hidden behind the same button.
-  const retry = semantic.status === "failed";
-  return (
-    <div className="ans-action">
-      <button type="button" className="btn ghost" onClick={onEnable}>
-        {retry ? <RotateCcw size={16} /> : <EqualApproximately size={16} />}
-        {retry ? t("ask.meaningTryAgain") : semantic.status === "paused" ? t("ask.meaningResume") : t("ask.enableMeaning")}
-      </button>
-      <p className={retry ? "ans-action-error" : "muted"} role={retry ? "alert" : undefined}>
-        {retry ? t("ask.meaningCouldNot") : semantic.status === "paused" ? t("ask.meaningPaused", { percent: percent(semantic) ?? 0 }) : t("ask.meaningHint")}
-      </p>
-    </div>
-  );
-}
-
 interface Props {
   answer: Answer;
   client: AnswerPort;
-  semantic: SemanticState;
-  onEnableMeaning: () => void;
-  onAskAgain: () => void;
+  /** Show `answer.meaningNote`; the thread says it once, not under every answer. */
+  showMeaningNote: boolean;
 }
 
-export function AnswerView({ answer, client, semantic, onEnableMeaning, onAskAgain }: Props) {
+export function AnswerView({ answer, client, showMeaningNote }: Props) {
   const { t } = useI18n();
+  const note = [answer.note, showMeaningNote ? answer.meaningNote : null].filter(Boolean).join(" ");
   const view = rowsView(answer.rows);
   const result = answer.result;
   const groups = messageGroups(answer);
@@ -130,20 +90,17 @@ export function AnswerView({ answer, client, semantic, onEnableMeaning, onAskAga
         <span>{answer.text}</span>
       </p>
       {view && <Rows rows={answer.rows} bars={view === "bars"} />}
-      {answer.note && <p className="ans-note">{answer.note}</p>}
+      {note && <p className="ans-note">{note}</p>}
       {result?.kind === "timeline" && result.page && result.page.threads.length > 0 && <Plans result={result} client={client} />}
       {groups.length > 0 && (
         <MessageList groups={groups} total={load ? answer.evidenceTotal : groups.length} load={load} transcript={isTranscript(answer)} client={client} label={t("ask.messages")} />
       )}
-      {(answer.basis !== "none" || answer.action) && (
+      {answer.basis !== "none" && (
         <div className="ans-foot">
-          {answer.basis !== "none" && (
-            <p className={`ans-basis basis-${answer.basis}`}>
-              {BasisIcon && <BasisIcon size={14} />}
-              {t(`ask.basis.${answer.basis}` as TranslationKey)}
-            </p>
-          )}
-          {answer.action === "enable_semantic" && <MeaningAction semantic={semantic} onEnable={onEnableMeaning} onAskAgain={onAskAgain} />}
+          <p className={`ans-basis basis-${answer.basis}`}>
+            {BasisIcon && <BasisIcon size={14} />}
+            {t(`ask.basis.${answer.basis}` as TranslationKey)}
+          </p>
         </div>
       )}
     </div>

@@ -130,26 +130,42 @@ export function DotField({ dots, partial }: { dots: number; partial: number }) {
   );
 }
 
-/** Monthly columns; the peak month is revealed. */
-export function Ribbon({ bars, peak }: { bars: readonly number[]; peak: number }) {
+/** Monthly columns; the peak month is revealed. When months are folded a bar is
+    their sum, so only the peak month's own share of its bar lights up, on the
+    same scale as every other bar. */
+export function Ribbon({ bars, peak, peakValue }: { bars: readonly number[]; peak: number; peakValue: number }) {
   const max = Math.max(1, ...bars);
   const W = bars.length * 10;
   const H = 100;
   const top = (v: number) => H - (v / max) * (H - 8);
   return (
     <Svg viewBox={`0 0 ${W} ${H}`} className="rc-fig-ribbon">
-      {bars.map((v, i) => (
+      {bars.map((v, i) => {
+        const whole = i === peak && peakValue === v;
+        return (
+          <rect
+            key={i}
+            className={`rc-a-grow-y${whole ? " is-peak" : ""}`}
+            x={i * 10 + 1.5}
+            y={fmt(top(v))}
+            width={7}
+            height={fmt(Math.max(v ? 1.5 : 0.6, H - top(v)))}
+            rx={1.5}
+            style={delay(stagger(i, bars.length, 900, 250))}
+          />
+        );
+      })}
+      {bars[peak] !== peakValue && (
         <rect
-          key={i}
-          className={`rc-a-grow-y${i === peak ? " is-peak" : ""}`}
-          x={i * 10 + 1.5}
-          y={fmt(top(v))}
+          className="rc-a-grow-y is-peak"
+          x={peak * 10 + 1.5}
+          y={fmt(top(peakValue))}
           width={7}
-          height={fmt(Math.max(v ? 1.5 : 0.6, H - top(v)))}
+          height={fmt(Math.max(1.5, H - top(peakValue)))}
           rx={1.5}
-          style={delay(stagger(i, bars.length, 900, 250))}
+          style={delay(stagger(peak, bars.length, 900, 250))}
         />
-      ))}
+      )}
     </Svg>
   );
 }
@@ -214,12 +230,13 @@ export function SplitRegions({ segments, others, showLabels }: {
   others: { label: string; messages: number; share: string } | null;
   showLabels: boolean;
 }) {
-  const all = [...segments.map((p) => ({ key: String(p.id), messages: p.messages, color: pColor(p), name: p.name, share: p.share })), ...(others ? [{ key: "others", messages: others.messages, color: "var(--rc-muted)", name: others.label, share: others.share }] : [])];
+  const all = [...segments.map((p, i) => ({ key: String(p.id), messages: p.messages, color: pColor(p), name: p.name, share: p.share, rank: showLabels ? null : i + 1 })), ...(others ? [{ key: "others", messages: others.messages, color: "var(--rc-muted)", name: others.label, share: others.share, rank: null }] : [])];
   const total = all.reduce((a, s) => a + s.messages, 0) || 1;
   return (
     <div className="rc-split rc-a-wipe" style={delay(250)} aria-hidden="true">
       {all.map((s) => (
         <div key={s.key} className="rc-split-region" style={{ flexGrow: s.messages, background: s.color }}>
+          {s.rank && s.messages / total >= 0.06 && <span className="rc-split-rank rc-a-rise" style={delay(1150)}>{s.rank}</span>}
           {showLabels && s.messages / total >= 0.14 && (
             <span className="rc-split-label rc-a-rise" style={delay(1150)}>
               <span className="rc-split-share">{s.share}</span>
@@ -233,7 +250,7 @@ export function SplitRegions({ segments, others, showLabels }: {
 }
 
 /** Conversations as bubbles; the ones the starter opened are filled. */
-export function StarterBubbles({ bubbles, filled, person, start }: { bubbles: number; filled: number; person: Person; start: number }) {
+export function StarterBubbles({ bubbles, filled, person, start }: { bubbles: number; filled: number; person: Person | null; start: number }) {
   const cols = Math.min(bubbles, bubbles > 24 ? 8 : 6);
   const rows = Math.ceil(bubbles / cols);
   return (
@@ -243,7 +260,7 @@ export function StarterBubbles({ bubbles, filled, person, start }: { bubbles: nu
           key={i}
           className={`rc-a-pop${i < filled ? " is-filled" : ""}`}
           d={bubblePath((i % cols) * 12 + 1, Math.floor(i / cols) * 10 + 1, 10, 7.4, 2.6, i % 2 ? "right" : "left")}
-          style={{ ...(i < filled ? { fill: pColor(person) } : {}), ...delay(stagger(i, bubbles, 700, start)) }}
+          style={{ ...(i < filled ? { fill: person ? pColor(person) : "var(--rc-support)" } : {}), ...delay(stagger(i, bubbles, 700, start)) }}
         />
       ))}
     </Svg>

@@ -16,8 +16,17 @@
 
    Controls: arrows, tap (left third back, elsewhere forward), horizontal
    swipe, Space or a long press to pause, Escape or the close button to
-   leave. Focus is trapped inside and returns to the trigger on close. */
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+   leave. The rest of the page is inert while open, so focus cannot leave; a
+   focused control that gets disabled or removed hands focus to the dialog, and
+   focus returns to the trigger on close.
+
+   A press captures its pointer, so releasing anywhere ends the gesture; blur
+   and pointer cancel end it too, so a hold can never outlive the press.
+
+   Scenes fit the stage. When a scene cannot (400% zoom, a very short window,
+   large text) the stage scrolls instead of clipping, and autoplay stops there
+   so the viewer has time to read. */
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type RefObject } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play, X } from "lucide-react";
 import type { Stats } from "@/model";
 import { useI18n } from "@/ui/i18n";
@@ -51,9 +60,24 @@ function useReducedMotion(): boolean {
 interface Props {
   stats: Stats;
   onClose: () => void;
+  /** Where focus goes on close; defaults to whatever had focus on open. */
+  returnFocusTo?: RefObject<HTMLElement>;
 }
 
-export function Recap({ stats, onClose }: Props) {
+/** Makes everything outside `root` inert; returns the undo. Only touches what it changed. */
+function inertOutside(root: HTMLElement): () => void {
+  const changed: Element[] = [];
+  for (let node: Element = root; node.parentElement; node = node.parentElement) {
+    for (const sibling of node.parentElement.children) {
+      if (sibling === node || sibling.hasAttribute("inert")) continue;
+      sibling.setAttribute("inert", "");
+      changed.push(sibling);
+    }
+  }
+  return () => changed.forEach((el) => el.removeAttribute("inert"));
+}
+
+export function Recap({ stats, onClose, returnFocusTo }: Props) {
   const { locale, t } = useI18n();
   const story = useMemo(() => buildStory(stats, locale, t), [stats, locale, t]);
   const scenes = story.scenes;
@@ -63,7 +87,14 @@ export function Recap({ stats, onClose }: Props) {
   const [held, setHeld] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [run, setRun] = useState(0);
+  // Lives here, not in the finale, so leaving that scene and coming back cannot turn it off.
+  const [hideNames, setHideNames] = useState(false);
+  const [overflowing, setOverflowing] = useState(false);
   const overlay = useRef<HTMLDivElement>(null);
+  // Read while rendering: the effects below move focus into the dialog.
+  const opener = useRef(document.activeElement);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const slideRef = useRef<HTMLDivElement>(null);
   const gesture = useRef<{ x: number; y: number; at: number; moved: boolean; held: boolean } | null>(null);
   const holdTimer = useRef<ReturnType<typeof setTimeout>>();
 
@@ -71,6 +102,7 @@ export function Recap({ stats, onClose }: Props) {
   const at = Math.min(index, last);
   const scene = scenes[at]!;
   const paused = userPaused || held || hidden;
+  const playable = scene.duration > 0;
 
   const setIndex = useCallback((fn: (i: number) => number) => setIndexState((i) => Math.max(0, Math.min(fn(i), last))), [last]);
   const next = useCallback(() => setIndex((i) => i + 1), [setIndex]);
@@ -86,17 +118,67 @@ export function Recap({ stats, onClose }: Props) {
     if (reduced) setUserPaused(true);
   }, [reduced]);
 
+  // Ends a press without acting on it: nothing may stay held once it is over.
+  const endGesture = useCallback(() => {
+    clearTimeout(holdTimer.current);
+    gesture.current = null;
+    setHeld(false);
+  }, []);
+
   useEffect(() => {
-    overlay.current?.focus();
+    const root = overlay.current!;
+    const restore = inertOutside(root);
+    root.focus();
     document.body.classList.add("sheet-open");
-    const onVisibility = () => setHidden(document.visibilityState === "hidden");
+    const onVisibility = () => {
+      setHidden(document.visibilityState === "hidden");
+      if (document.visibilityState === "hidden") endGesture();
+    };
+    // Anything that still takes focus outside (a new sibling) is sent back.
+    const onFocusIn = (e: FocusEvent) => {
+      if (e.target instanceof Node && !root.contains(e.target)) root.focus();
+    };
     document.addEventListener("visibilitychange", onVisibility);
+    document.addEventListener("focusin", onFocusIn);
+    window.addEventListener("blur", endGesture);
     return () => {
       document.body.classList.remove("sheet-open");
       document.removeEventListener("visibilitychange", onVisibility);
+      document.removeEventListener("focusin", onFocusIn);
+      window.removeEventListener("blur", endGesture);
       clearTimeout(holdTimer.current);
+      restore();
+      // After the page is interactive again: an inert element cannot take focus.
+      const back = returnFocusTo?.current ?? opener.current;
+      if (back instanceof HTMLElement && back.isConnected) back.focus({ preventScroll: true });
     };
-  }, []);
+  }, [endGesture, returnFocusTo]);
+
+  // A focused control can be disabled (Next on the last scene) or removed
+  // (Pause on the finale, Watch again on replay) by the scene change itself.
+  useLayoutEffect(() => {
+    const root = overlay.current!;
+    const active = document.activeElement;
+    if (!active || !root.contains(active) || (active as HTMLButtonElement).disabled) root.focus({ preventScroll: true });
+    if (stageRef.current) stageRef.current.scrollTop = 0;
+  }, [at, run]);
+
+  // Layout heights, not scrollHeight: an entrance transform must not read as overflow.
+  useEffect(() => {
+    const stage = stageRef.current;
+    const slide = slideRef.current;
+    if (!stage || !slide || typeof ResizeObserver !== "function") return;
+    const measure = () => setOverflowing(slide.offsetHeight > stage.clientHeight + 1);
+    const observer = new ResizeObserver(measure);
+    observer.observe(stage);
+    observer.observe(slide);
+    measure();
+    return () => observer.disconnect();
+  }, [at, run]);
+
+  useEffect(() => {
+    if (overflowing) setUserPaused(true);
+  }, [overflowing, at]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -110,27 +192,26 @@ export function Recap({ stats, onClose }: Props) {
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
         prev();
+      } else if ((e.key === "ArrowDown" || e.key === "ArrowUp") && stageRef.current?.classList.contains("is-scroll")) {
+        e.preventDefault();
+        stageRef.current.scrollBy({ top: e.key === "ArrowDown" ? 64 : -64 });
       } else if (e.key === " " && !control) {
         e.preventDefault();
-        setUserPaused((p) => !p);
+        // Nothing plays on the finale: a silent toggle there would surface later.
+        if (playable) setUserPaused((p) => !p);
       } else if (e.key === "Tab" && overlay.current) {
-        const items = [...overlay.current.querySelectorAll<HTMLElement>("button:not([disabled]), input:not([disabled])")];
+        const items = [...overlay.current.querySelectorAll<HTMLElement>("button:not([disabled]), input:not([disabled]), .rc-stage[tabindex='0']")];
         if (items.length === 0) return;
-        const first = items[0]!;
-        const end = items[items.length - 1]!;
-        const active = document.activeElement;
-        if (e.shiftKey && (active === first || !overlay.current.contains(active) || active === overlay.current)) {
-          e.preventDefault();
-          end.focus();
-        } else if (!e.shiftKey && active === end) {
-          e.preventDefault();
-          first.focus();
-        }
+        // One cycle everywhere: Safari's own Tab skips buttons unless the system says otherwise.
+        e.preventDefault();
+        const from = items.indexOf(document.activeElement as HTMLElement);
+        const to = from < 0 ? (e.shiftKey ? items.length - 1 : 0) : (from + (e.shiftKey ? -1 : 1) + items.length) % items.length;
+        items[to]!.focus();
       }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [next, prev, onClose]);
+  }, [next, prev, onClose, playable]);
 
   // Gestures on the stage: a press that stays put long enough pauses until
   // release; a horizontal drag past the threshold swipes; a short still press
@@ -138,6 +219,14 @@ export function Recap({ stats, onClose }: Props) {
   const interactive = (target: EventTarget | null) => target instanceof Element && Boolean(target.closest("button, input, label, a"));
   const pointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (interactive(e.target) || (e.pointerType === "mouse" && e.button !== 0)) return;
+    // The stage's own scrollbar is not the story.
+    const box = e.currentTarget;
+    if (box.classList.contains("is-scroll") && e.clientX > box.getBoundingClientRect().left + box.clientWidth) return;
+    try {
+      box.setPointerCapture?.(e.pointerId);
+    } catch {
+      // Not a live pointer (synthetic events); blur and cancel still end the gesture.
+    }
     gesture.current = { x: e.clientX, y: e.clientY, at: e.timeStamp, moved: false, held: false };
     clearTimeout(holdTimer.current);
     holdTimer.current = setTimeout(() => {
@@ -154,16 +243,10 @@ export function Recap({ stats, onClose }: Props) {
       clearTimeout(holdTimer.current);
     }
   };
-  const pointerEnd = (e: ReactPointerEvent<HTMLDivElement>, cancelled = false) => {
-    clearTimeout(holdTimer.current);
+  const pointerEnd = (e: ReactPointerEvent<HTMLDivElement>) => {
     const g = gesture.current;
-    gesture.current = null;
-    if (!g) return;
-    if (g.held) {
-      setHeld(false);
-      return;
-    }
-    if (cancelled) return;
+    endGesture();
+    if (!g || g.held) return;
     const dx = e.clientX - g.x;
     const dy = e.clientY - g.y;
     if (Math.abs(dx) > SWIPE_PX && Math.abs(dx) > Math.abs(dy) * 1.5) {
@@ -179,7 +262,6 @@ export function Recap({ stats, onClose }: Props) {
   };
 
   const chapters = useMemo(() => [...new Set(scenes.map((s) => s.chapter))], [scenes]);
-  const playable = scene.duration > 0;
   const style = { ...groundVars(scene.ground) } as CSSProperties;
 
   return (
@@ -187,12 +269,12 @@ export function Recap({ stats, onClose }: Props) {
       ref={overlay}
       className={`rc${paused ? " is-paused" : ""}${reduced ? " is-reduced" : ""}`}
       style={style}
-      data-ground={scene.ground}
       role="dialog"
       aria-modal="true"
-      aria-label={t("rcDialog")}
+      aria-labelledby="rc-title"
       tabIndex={-1}
     >
+      <h1 id="rc-title" className="sr-only">{t("rcDialog")}</h1>
       <div className="rc-top">
         <div className="rc-progress" aria-hidden="true">
           {scenes.map((s, i) => (
@@ -208,11 +290,11 @@ export function Recap({ stats, onClose }: Props) {
         <div className="rc-bar">
           <p className="rc-chapter">
             <span className="rc-chapter-n" aria-hidden="true">{String(chapters.indexOf(scene.chapter) + 1).padStart(2, "0")}</span>
-            {t(`rcChapter.${scene.chapter}` as TranslationKey)}
+            <span className="rc-chapter-name">{t(`rcChapter.${scene.chapter}` as TranslationKey)}</span>
           </p>
           <div className="rc-tools">
             {playable && (
-              <button type="button" className="rc-btn" onClick={() => setUserPaused((p) => !p)} aria-label={userPaused ? t("rcPlay") : t("rcPause")} aria-pressed={userPaused}>
+              <button type="button" className="rc-btn rc-btn-play" onClick={() => setUserPaused((p) => !p)} aria-label={userPaused ? t("rcPlay") : t("rcPause")}>
                 {userPaused ? <Play size={20} /> : <Pause size={20} />}
               </button>
             )}
@@ -224,15 +306,18 @@ export function Recap({ stats, onClose }: Props) {
       </div>
 
       <div
-        className="rc-stage"
+        ref={stageRef}
+        className={`rc-stage${overflowing ? " is-scroll" : ""}`}
+        tabIndex={overflowing ? 0 : undefined}
         onPointerDown={pointerDown}
         onPointerMove={pointerMove}
-        onPointerUp={(e) => pointerEnd(e)}
-        onPointerCancel={(e) => pointerEnd(e, true)}
+        onPointerUp={pointerEnd}
+        onPointerCancel={endGesture}
+        onLostPointerCapture={endGesture}
       >
         <Playback.Provider value={{ paused, reduced, locale }}>
-          <div key={`${at}-${run}`} className="rc-slide" role="group" aria-label={t("rcSceneOf", { n: at + 1, total: scenes.length })}>
-            {scene.kind === "finale" ? <Finale scene={scene} onReplay={replay} /> : <SceneView scene={scene as Exclude<Scene, { kind: "finale" }>} />}
+          <div ref={slideRef} key={`${at}-${run}`} className="rc-slide" role="group" aria-label={t("rcSceneOf", { n: at + 1, total: scenes.length })}>
+            {scene.kind === "finale" ? <Finale scene={scene} hideNames={hideNames} onHideNames={setHideNames} onReplay={replay} /> : <SceneView scene={scene as Exclude<Scene, { kind: "finale" }>} />}
           </div>
         </Playback.Provider>
       </div>
@@ -241,17 +326,21 @@ export function Recap({ stats, onClose }: Props) {
         <button type="button" className="rc-btn rc-nav-prev" onClick={prev} disabled={at === 0} aria-label={t("rcPrev")}>
           <ChevronLeft size={20} />
         </button>
-        {/* With reduced motion the first scene explains why nothing advances. */}
+        {/* The status takes the counter's place: chrome, never over the scene.
+            With reduced motion the first scene explains why nothing advances. */}
         {reduced && userPaused && at === 0
           ? <p className="rc-hint">{t("rcManual")}</p>
-          : <p className="rc-counter" aria-hidden="true">{at + 1} / {scenes.length}</p>}
+          : paused && playable && !reduced
+            ? <p className="rc-pip" aria-hidden="true">{t("rcPaused")}</p>
+            : <p className="rc-counter" aria-hidden="true">{at + 1} / {scenes.length}</p>}
         <button type="button" className="rc-btn rc-nav-next" onClick={next} disabled={at === last} aria-label={t("rcNext")}>
           <ChevronRight size={20} />
         </button>
       </div>
 
-      {paused && playable && !reduced && <span className="rc-pip" aria-hidden="true">{t("rcPaused")}</span>}
-      <p className="sr-only" aria-live="polite" aria-atomic="true">{`${t("rcSceneOf", { n: at + 1, total: scenes.length })}. ${scene.summary}`}</p>
+      <p className="sr-only" aria-live="polite" aria-atomic="true">{`${t("rcSceneOf", { n: at + 1, total: scenes.length })}. ${scene.kind === "finale" && hideNames ? scene.summaryHidden : scene.summary}`}</p>
+      {/* Always mounted, so the change is what gets announced. */}
+      <p className="sr-only" role="status">{userPaused && playable && !reduced ? t("rcPausedStatus") : ""}</p>
     </div>
   );
 }

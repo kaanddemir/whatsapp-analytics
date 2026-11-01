@@ -319,6 +319,25 @@ describe("app shell", () => {
 });
 
 describe("recap", () => {
+  it("is one history entry: Back closes it and keeps the chat, closing steps back over it", async () => {
+    await loaded();
+    const trigger = screen.getByRole("button", { name: "Recap" });
+    const before = history.length;
+    fireEvent.click(trigger);
+    expect(history.state?.recap).toBe(true);
+    expect(history.length).toBe(before + 1);
+    act(() => void window.dispatchEvent(new PopStateEvent("popstate", { state: null })));
+    expect(screen.queryByRole("dialog", { name: "Recap" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Recap" })).toBe(trigger);
+    expect(document.activeElement).toBe(trigger);
+    // Forward, while the chat is open, brings it back.
+    act(() => void window.dispatchEvent(new PopStateEvent("popstate", { state: { recap: true } })));
+    expect(screen.getByRole("dialog", { name: "Recap" })).toBeTruthy();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: "Recap" })).toBeNull();
+    await waitFor(() => expect(history.state?.recap ?? false).toBe(false));
+  });
+
   it("tells the whole-chat story even when the dashboard is filtered, and is keyboard operable", async () => {
     const client = await loaded();
     fireEvent.click(screen.getByRole("button", { name: /Participant filter/ }));

@@ -3,7 +3,7 @@
    failures, budget), verified model files, routing and recall answers.
    Real-model behaviour is tested in semanticModel.test.ts. */
 import { createHash } from "node:crypto";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { parseExport } from "@/parser";
 import { NO_FILTERS, type Message } from "@/model";
 import { ChatSession } from "@/conversation/session";
@@ -19,7 +19,7 @@ import { meaningText } from "@/semantic/query";
 import { SemanticIndexer, WINDOW, type SemanticState } from "@/semantic/indexer";
 import { MemorySemanticStore, INDEX_SCHEMA } from "@/semantic/store";
 import { ensureModelFiles } from "@/semantic/modelFiles";
-import { ModelError } from "@/semantic/embedder";
+import { ModelError, type EmbedderFactory } from "@/semantic/embedder";
 import { buildKeywordIndex } from "@/search/keywordIndex";
 import { fakeModel, fakeVector } from "../support/fakeEmbedder";
 import { FakeFs } from "../support/fakeOpfs";
@@ -225,6 +225,80 @@ describe("semantic indexing", () => {
     expect([...ix.index.tail()!.ids]).toEqual([0, 1, 2, 3, 4]);
     expect(WINDOW).toBeGreaterThan(16);
   });
+  it("keeps an explicit pause across visits, and resumes an interrupted run", async () => {
+    const big = lines(...Array.from({ length: SEGMENT_SIZE + 300 }, (_, i) => android("13/01/25", "09:00", i % 2 ? "Can" : "Ayşe", `mesaj numarası ${i} hakkında bir şey`)));
+    const p = parseExport(big), store = new MemorySemanticStore();
+    const open = () => new SemanticIndexer(p, { factory: fakeModel().factory, store, chatId: "c", budgetBytes: Infinity });
+    const ix = open();
+    const run = ix.start();
+    while (ix.done < SEGMENT_SIZE) await new Promise((r) => setTimeout(r, 0));
+    await ix.pause();
+    await run;
+    expect(await store.manifest("c")).toMatchObject({ paused: true, segments: 1 });
+    const later = open();
+    await later.restore();
+    expect(later.pausedByUser).toBe(true);
+    expect(later.state).toMatchObject({ status: "paused", done: SEGMENT_SIZE });
+    // Resuming clears the pause on the device as well.
+    await later.start();
+    expect(later.state.status).toBe("ready");
+    const stored = await store.manifest("c");
+    expect(stored?.complete).toBe(true);
+    expect(stored?.paused).toBeUndefined();
+  });
+  it("records that indexing was enabled before any segment is sealed", async () => {
+    const store = new MemorySemanticStore(), model = fakeModel();
+    let release!: () => void;
+    model.gate = new Promise<void>((r) => (release = r));
+    const ix = new SemanticIndexer(parsed(), { factory: model.factory, store, chatId: "c", budgetBytes: Infinity });
+    const run = ix.start();
+    await vi.waitFor(async () => expect(await store.manifest("c")).toMatchObject({ segments: 0, vectors: 0, complete: false }));
+    const later = new SemanticIndexer(parsed(), { factory: fakeModel().factory, store, chatId: "c", budgetBytes: Infinity });
+    expect(await later.restore()).toBe(true);
+    expect(later.pausedByUser).toBe(false);
+    release();
+    await run;
+  });
+  it("survives Pause and Resume in quick succession, with one run and one model", async () => {
+    const model = fakeModel();
+    let release!: () => void;
+    model.gate = new Promise<void>((r) => (release = r));
+    const ix = new SemanticIndexer(parsed(), { factory: model.factory, store: null, chatId: null, budgetBytes: Infinity });
+    const first = ix.start();
+    await vi.waitFor(() => expect(ix.state.status).toBe("indexing"));
+    void ix.pause();
+    expect(ix.state.status).toBe("paused");
+    void ix.start();
+    void ix.pause();
+    void ix.start();
+    void ix.start();
+    release();
+    model.gate = null;
+    await first;
+    expect(ix.state.status).toBe("ready");
+    expect(model.loads).toBe(1);
+  });
+  it("stops a model still loading when paused, without calling it a failure", async () => {
+    const factory: EmbedderFactory = (_p, signal) => new Promise((_resolve, reject) => signal?.addEventListener("abort", () => reject(new ModelError("failed", "stopped"))));
+    const ix = new SemanticIndexer(parsed(), { factory, store: null, chatId: null, budgetBytes: Infinity });
+    const run = ix.start();
+    await vi.waitFor(async () => { await new Promise((r) => setTimeout(r, 0)); expect(ix.state.status).toBe("preparing"); });
+    await new Promise((r) => setTimeout(r, 0));
+    await ix.pause();
+    await run;
+    expect(ix.state).toMatchObject({ status: "paused", done: 0 });
+  });
+  it("leaves the state alone when a query loads the model for a restored index", async () => {
+    const store = new MemorySemanticStore();
+    await built(store, "chat-1");
+    const second = await built(store, "chat-1");
+    const states: SemanticState[] = [];
+    const ix = new SemanticIndexer(second.p, { factory: fakeModel().factory, store, chatId: "chat-1", onState: (s) => states.push(s), budgetBytes: Infinity });
+    await ix.restore();
+    await ix.queryVector("merhaba");
+    expect(ix.state.status).toBe("ready");
+    expect(states.map((s) => s.status)).toEqual(["ready"]);
+  });
   it("persists a saved chat's vectors and reopens them without embedding again", async () => {
     const store = new MemorySemanticStore();
     const first = await built(store, "chat-1");
@@ -421,12 +495,11 @@ describe("recall answers", () => {
   it("finds a paraphrase by meaning that the words alone miss, and says what it is", async () => {
     const q = "Onu özlediğimi söylediğim konuşmayı bul";
     const words = answer(q, session, NO_FILTERS, undefined, "tr", null, NOW);
-    expect(words).toMatchObject({ basis: "match", action: "enable_semantic" });
-    expect(words.note).toContain("Yalnızca sorunuzdaki kelimelerle arandı");
+    expect(words).toMatchObject({ basis: "match", meaningNote: "Yalnızca eşleşen kelimeler arandı. Anlamca arama kapalı." });
     const sem = await withMeaning();
     const a = answer(q, session, NO_FILTERS, undefined, "tr", sem(q), NOW);
     expect(a.basis).toBe("meaning");
-    expect(a.action).toBeNull();
+    expect(a.meaningNote).toBeNull();
     expect(a.text).toMatch(/ilgili olabilecek mesajlar buldum/);
     expect(a.evidence.slice(0, 2).map((e) => e.message.text)).toEqual(expect.arrayContaining(["keşke şu an yanımda olsaydın", "ben de seni çok özledim"]));
     // Every item is a real message, shown as written.
@@ -504,7 +577,6 @@ describe("recall answers", () => {
   it("tells a chat too large for this device apart from one that can be enabled", () => {
     const q = "taşınma fikrini konuştuğumuz mesajlar";
     const a = answer(q, session, NO_FILTERS, undefined, "tr", { search: null, coverage: 0, status: "failed", failure: "too_large" }, NOW);
-    expect(a.action).toBeNull();
-    expect(a.note).toContain("bu cihazda anlamsal arama kullanılamıyor");
+    expect(a.meaningNote).toContain("bu cihazda anlamca arama kullanılamıyor");
   });
 });

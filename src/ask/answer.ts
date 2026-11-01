@@ -55,7 +55,7 @@ export function replyTo(messages: ParseResult["messages"], id: number): number |
   return null;
 }
 
-export const base = (plan: Plan, scope: string) => ({ plan, scope, figure: null, rows: [], note: null, evidence: [], evidenceTotal: 0, result: null, action: null }) as const;
+export const base = (plan: Plan, scope: string) => ({ plan, scope, figure: null, rows: [], note: null, evidence: [], evidenceTotal: 0, result: null, meaningNote: null }) as const;
 /** Search terms as written, without the quotes that mark a phrase search. */
 const shown = (query: string) => query.replace(/^"(.+)"$/u, "$1");
 
@@ -145,7 +145,6 @@ export function answer(question: string, session: ChatSession, filters: Analysis
     }
     const evidence = pairs.flatMap((p) => [session.evidence(p.match, terms), ...(p.reply !== null ? [session.evidence(p.reply)] : [])]);
     const usedMeaning = !!hits;
-    const fixable = !semantic || (semantic.status !== "ready" && semantic.status !== "indexing" && semantic.status !== "preparing" && semantic.failure !== "too_large" && semantic.failure !== "unsupported");
     const coverage = semantic && usedMeaning && semantic.coverage < 1 ? t("r_partial", { percent: Math.max(1, Math.floor(semantic.coverage * 100)) }) : null;
     const text = !pairs.length ? (noExact ? t("r_noExactNone", { query: shown(topicOf ?? plan.topic) }) : t("r_none")) : noExact ? t("r_noExact", { query: shown(topicOf ?? plan.topic) }) : plan.limitation ? t(plan.limitation === "reason" ? "r_reason" : plan.limitation === "summary" ? "r_summary" : "r_decision")
       : plan.reply ? (pairs.some((p) => p.reply !== null) ? t("r_replies") : t("r_noReply")) : t("r_found");
@@ -153,8 +152,9 @@ export function answer(question: string, session: ChatSession, filters: Analysis
       result: { kind: "recall", filters: scoped, pairs },
       // Ranked by meaning alone, with no question word anywhere: possibly unrelated, and said so.
       note: joined(usedMeaning && pairs.length && !anyWord ? t("r_meaningOnly") : null, onlySender(filtered), plan.speakerWords && scoped.sender === null ? t("r_speaker") : null, plan.reply && pairs.length ? t("r_replyNote") : null,
-        usedMeaning ? coverage : t(semantic?.failure === "too_large" ? "r_tooLarge" : "r_keywordOnly")),
-      action: !usedMeaning && fixable ? "enable_semantic" : null };
+        usedMeaning ? coverage : null),
+      meaningNote: usedMeaning ? null : t(semantic?.failure === "too_large" ? "r_tooLarge" : !semantic || semantic.status === "off" ? "r_keywordOff"
+        : semantic.status === "preparing" || semantic.status === "indexing" || semantic.status === "paused" ? "r_keywordPending" : "r_keywordFailed") };
   };
   /** Recent weeks against the weeks before, from the shared Stats.trends calculations. */
   const trendAnswer = (plan: Extract<Plan, { type: "statistic" }>, f: AnalysisFilters): Answer => {

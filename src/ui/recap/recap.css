@@ -7,7 +7,9 @@
    Layout: the stage is a size container. Scenes place two regions, figure
    and copy, by data-layout; @container (orientation) re-composes them for
    landscape rather than letterboxing a portrait card. Type sizes use
-   container units with rem floors, so nothing needs to scroll.
+   container units with rem floors. Rows give the figure what the copy leaves,
+   down to --rc-fig-min; a scene that still does not fit (400% zoom, large text)
+   grows past the stage, which then scrolls (.is-scroll) instead of clipping.
 
    Motion: rc-a-* classes animate *from* a hidden state with a --d delay (ms);
    the resting style is the final state. .is-paused freezes every scene
@@ -45,6 +47,7 @@
   --rc-bottom: calc(env(safe-area-inset-bottom, 0px) + 72px);
   --rc-side: var(--rc-gutter);
   --rc-radius: clamp(10px, 2.4cqmin, 22px);
+  --rc-fig-min: 72px;
 
   position: fixed;
   inset: 0;
@@ -74,7 +77,8 @@
 @keyframes rc-fill { to { transform: scaleX(1); } }
 
 .rc-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; }
-.rc-chapter { margin: 0; display: flex; align-items: baseline; gap: 8px; min-width: 0; font: 700 .75rem/1.2 var(--rc-font-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--rc-muted); }
+.rc-chapter { margin: 0; display: flex; align-items: baseline; gap: 8px; min-width: 0; white-space: nowrap; overflow: hidden; font: 700 .75rem/1.2 var(--rc-font-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--rc-muted); }
+.rc-chapter-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .rc-chapter-n { font-family: var(--rc-font-display); font-size: 1rem; letter-spacing: 0; color: var(--rc-fg); }
 .rc-tools { display: flex; gap: 8px; }
 
@@ -85,7 +89,7 @@
   transition: background-color var(--rc-micro) ease, border-color var(--rc-micro) ease, transform var(--rc-micro) ease;
 }
 /* Play and pause read as solid shapes. */
-.rc-btn[aria-pressed] .lucide { fill: currentColor; }
+.rc-btn-play .lucide { fill: currentColor; }
 .rc-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--rc-fg) 12%, var(--rc-bg)); border-color: var(--rc-fg); }
 .rc-btn:active:not(:disabled) { transform: scale(.94); }
 .rc-btn:disabled { opacity: .3; cursor: default; }
@@ -100,13 +104,14 @@
 .rc-nav .rc-btn { pointer-events: auto; }
 .rc-counter { margin: 0; font: 700 .8125rem/1 var(--rc-font-ui); letter-spacing: .08em; color: var(--rc-muted); font-variant-numeric: tabular-nums; }
 
+/* Status text is chrome: in portrait it shares the nav row with back and
+   forward, in the counter's place; landscape has no such row, so it sits
+   centred in the top bar. It is never placed over a scene. */
 .rc-pip {
-  position: absolute; z-index: 3; left: 50%; transform: translateX(-50%);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 72px); margin: 0; padding: 4px 12px;
+  margin: 0; padding: 4px 12px; white-space: nowrap;
   border: 1.5px solid currentColor; border-radius: 999px;
   font: 700 .75rem/1.3 var(--rc-font-ui); letter-spacing: .16em; text-transform: uppercase; color: var(--rc-muted);
 }
-/* Shares the nav row with back and forward, in the counter's place. */
 .rc-hint { flex: 1; margin: 0 12px; max-width: 30rem; text-align: center; font: 600 .75rem/1.3 var(--rc-font-ui); color: var(--rc-muted); }
 
 /* Landscape viewports: back and forward sit at the sides, so the stage keeps
@@ -115,12 +120,27 @@
   .rc { --rc-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); --rc-side: calc(max(var(--rc-gutter), env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px)) + var(--rc-target) + 16px); }
   .rc-nav { top: 0; padding-bottom: 0; }
   .rc-counter { display: none; }
-  .rc-pip { bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
-  .rc-hint { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 2px); width: min(30rem, 60%); margin: 0; }
+  .rc-pip, .rc-hint { position: absolute; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 40px); transform: translate(-50%, -50%); margin: 0; }
+  .rc-hint { width: min(30rem, 100% - 2 * var(--rc-gutter) - 2 * 136px); }
 }
 @media (orientation: landscape) and (max-height: 520px) {
   .rc { --rc-top: calc(env(safe-area-inset-top, 0px) + 60px); }
   .rc-bar { min-height: 46px; }
+  .rc-pip, .rc-hint { top: calc(env(safe-area-inset-top, 0px) + 37px); }
+}
+/* Too small for controls at the sides (400% zoom and the like): back and
+   forward join the top row, and the stage takes the rest. */
+@media (max-height: 300px), (orientation: landscape) and (max-width: 520px) {
+  .rc {
+    --rc-top: calc(env(safe-area-inset-top, 0px) + 62px);
+    --rc-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+    --rc-side: max(var(--rc-gutter), env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+  }
+  .rc-bar { padding-left: calc(2 * var(--rc-target) + 16px); min-height: 46px; }
+  .rc-nav { top: calc(env(safe-area-inset-top, 0px) + 15px); bottom: auto; justify-content: flex-start; gap: 8px; }
+  .rc-hint { display: none; }
+  .rc-pip { top: 22px; left: calc(50% + 0px); padding: 0; border: 0; font-size: .6875rem; letter-spacing: 0; }
+  .rc.is-paused:not(.is-reduced) .rc-chapter { visibility: hidden; }
 }
 
 /* Stage and scene families */
@@ -128,64 +148,96 @@
   position: absolute; z-index: 2;
   top: var(--rc-top); bottom: var(--rc-bottom); left: var(--rc-side); right: var(--rc-side);
   container: stage / size;
+  display: grid;
   touch-action: pan-y pinch-zoom;
   user-select: none; -webkit-user-select: none;
   /* A long press pauses the story; it must not open the system callout. */
   -webkit-touch-callout: none;
 }
-.rc-slide { width: 100%; height: 100%; animation: rc-scene-in var(--rc-text) var(--rc-ease) both; }
+/* Only while a scene is really taller than the stage: entrance animations and
+   figures drawn past their box must not turn into scrollbars or clipping. */
+.rc-stage.is-scroll { overflow: hidden auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.rc-slide { display: grid; min-width: 0; animation: rc-scene-in var(--rc-text) var(--rc-ease) both; }
 @keyframes rc-scene-in { from { opacity: 0; transform: scale(.985); } }
 
-.rc-scene { width: 100%; height: 100%; display: grid; gap: var(--rc-gap); min-height: 0; }
+.rc-scene { min-width: 0; display: grid; gap: var(--rc-gap); }
 /* Figures size to their own box (a size container), never to their content,
    so a figure can never push past the stage. Copy is an inline-size
    container so display type can be bounded by the column it sits in. */
-.rc-figure { grid-area: figure; min-width: 0; min-height: 0; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; container: figure / size; }
+.rc-figure { grid-area: figure; min-width: 0; min-height: var(--rc-fig-min); display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; container: figure / size; }
 .rc-copy { grid-area: copy; min-width: 0; align-self: center; display: flex; flex-direction: column; gap: clamp(4px, 1.2cqmin, 10px); container: copy / inline-size; }
 .rc-svg { display: block; width: 100%; height: 100%; max-width: 100%; max-height: 100%; overflow: visible; }
 
+/* What a figure must keep when the copy is tall: these hold data and text. */
+.rc-scene[data-kind="week"] { --rc-fig-min: 210px; }
+.rc-scene[data-kind="words"] { --rc-fig-min: 190px; }
+.rc-scene[data-kind="shared"] { --rc-fig-min: 110px; }
+.rc-scene[data-kind="balance"] { --rc-fig-min: 120px; }
+.rc-scene[data-kind="finale"] { --rc-fig-min: 150px; }
+
 /* Portrait (the default composition). */
 .rc-scene[data-layout="hero"], .rc-scene[data-layout="spot"], .rc-scene[data-layout="finale"] {
-  grid-template: "figure" minmax(0, 1fr) "copy" auto / minmax(0, 1fr);
+  grid-template: "figure" minmax(min-content, 1fr) "copy" auto / minmax(0, 1fr);
 }
 .rc-scene[data-layout="wide"], .rc-scene[data-layout="compare"] {
-  grid-template: "copy" auto "figure" minmax(0, 1fr) / minmax(0, 1fr);
+  grid-template: "copy" auto "figure" minmax(min-content, 1fr) / minmax(0, 1fr);
 }
-.rc-scene[data-layout="beats"] { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
-.rc-scene[data-layout="beats"][data-beats="2"] { grid-template: minmax(0, 1fr) minmax(0, 1fr) / minmax(0, 1fr); }
-.rc-beat { min-height: 0; display: grid; gap: var(--rc-gap); grid-template: "figure" minmax(0, 1fr) "copy" auto / minmax(0, 1fr); }
-.rc-scene[data-beats="2"] .rc-beat { grid-template: "figure copy" minmax(0, 1fr) / minmax(0, .85fr) minmax(0, 1.15fr); }
+.rc-scene[data-layout="beats"] { grid-template: minmax(min-content, 1fr) / minmax(0, 1fr); }
+.rc-scene[data-layout="beats"][data-beats="2"] { grid-template: minmax(min-content, 1fr) minmax(min-content, 1fr) / minmax(0, 1fr); }
+.rc-beat { min-width: 0; display: grid; gap: var(--rc-gap); grid-template: "figure" minmax(min-content, 1fr) "copy" auto / minmax(0, 1fr); }
+.rc-scene[data-beats="2"] .rc-beat { grid-template: "figure copy" minmax(min-content, 1fr) / minmax(0, .85fr) minmax(0, 1.15fr); }
 /* Emoji and media rows need the full width; their beats stack instead. */
-.rc-scene[data-kind="shared"][data-beats="2"] .rc-beat { grid-template: "figure" minmax(0, 1fr) "copy" auto / minmax(0, 1fr); gap: clamp(6px, 1.5cqmin, 16px); }
+.rc-scene[data-kind="shared"][data-beats="2"] .rc-beat { grid-template: "figure" minmax(min-content, 1fr) "copy" auto / minmax(0, 1fr); gap: clamp(6px, 1.5cqmin, 16px); }
+/* A tall phone has the height to give each behaviour figure a row of its own. */
+@container stage (orientation: portrait) and (min-height: 560px) {
+  .rc-scene[data-kind="behavior"][data-beats="2"] .rc-beat { grid-template: "figure" minmax(min-content, 1fr) "copy" auto / minmax(0, 1fr); }
+}
 
-/* Landscape stages: figure and copy side by side, the figure given the width. */
-@container stage (orientation: landscape) {
+/* Landscape stages: figure and copy side by side, the figure given the width.
+   Narrower than this there is no width to share, so it stays one column. */
+@container stage (orientation: landscape) and (min-width: 380px) {
   .rc-scene[data-layout="hero"], .rc-scene[data-layout="spot"] {
-    grid-template: "figure copy" minmax(0, 1fr) / minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template: "figure copy" minmax(min-content, 1fr) / minmax(0, 1.15fr) minmax(0, 1fr);
   }
   .rc-scene[data-flip] { grid-template-areas: "copy figure"; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); }
-  .rc-scene[data-layout="wide"] { grid-template: "copy figure" minmax(0, 1fr) / minmax(0, .8fr) minmax(0, 1.7fr); }
-  .rc-scene[data-layout="compare"] { grid-template: "figure copy" minmax(0, 1fr) / minmax(0, 1.6fr) minmax(0, 1fr); }
-  .rc-scene[data-layout="beats"][data-beats="2"] { grid-template: minmax(0, 1fr) / minmax(0, 1fr) minmax(0, 1fr); }
-  .rc-scene[data-beats="2"] .rc-beat { grid-template: "figure" minmax(0, 1fr) "copy" auto / minmax(0, 1fr); }
-  .rc-scene[data-layout="beats"][data-beats="1"] .rc-beat { grid-template: "figure copy" minmax(0, 1fr) / minmax(0, 1.15fr) minmax(0, 1fr); }
-  .rc-scene[data-layout="finale"] { grid-template: "figure copy" minmax(0, 1fr) / minmax(0, 1fr) minmax(0, 1fr); column-gap: clamp(20px, 6cqw, 96px); }
+  .rc-scene[data-layout="wide"] { grid-template: "copy figure" minmax(min-content, 1fr) / minmax(0, .8fr) minmax(0, 1.7fr); }
+  .rc-scene[data-layout="compare"] { grid-template: "figure copy" minmax(min-content, 1fr) / minmax(0, 1.6fr) minmax(0, 1fr); }
+  .rc-scene[data-layout="beats"][data-beats="2"] { grid-template: minmax(min-content, 1fr) / minmax(0, 1fr) minmax(0, 1fr); }
+  .rc-scene[data-beats="2"] .rc-beat { grid-template: "figure" minmax(min-content, 1fr) "copy" auto / minmax(0, 1fr); }
+  .rc-scene[data-layout="beats"][data-beats="1"] .rc-beat { grid-template: "figure copy" minmax(min-content, 1fr) / minmax(0, 1.15fr) minmax(0, 1fr); }
+  .rc-scene[data-layout="finale"] { grid-template: "figure copy" minmax(min-content, 1fr) / minmax(0, 1fr) minmax(0, 1fr); column-gap: clamp(20px, 6cqw, 96px); }
+  /* The figure's row stops growing, so the copy stays beside what it describes. */
+  .rc-scene[data-kind="shared"] .rc-beat, .rc-scene[data-kind="shared"][data-beats="2"] .rc-beat { align-content: center; grid-template-rows: minmax(var(--rc-fig-min), 42cqb) auto; }
+}
+/* A short stage: the poster keeps its height and needs little width, and the
+   chapter label already says what the kicker would. */
+@container stage (orientation: landscape) and (max-height: 300px) {
+  .rc-scene[data-layout="finale"] { grid-template-columns: minmax(0, .6fr) minmax(0, 1fr); column-gap: 16px; }
+  .rc-scene[data-layout="finale"] .rc-kicker { display: none; }
+  .rc-scene[data-layout="finale"] .rc-actions { gap: 6px; margin-top: 2px; }
+  .rc-scene[data-layout="finale"] .rc-button { padding: 0 14px; }
+  .rc-scene[data-layout="finale"] .rc-status:empty { display: none; }
 }
 
 /* Type */
-/* Display type is never clipped (no line clamp): Turkish capitals carry marks
-   above the cap height. Sizes are bounded by both the stage height (cqb) and
-   the copy column's width (cqi) instead. */
+/* Display type is bounded by both the stage height (cqb) and the copy column's
+   width (cqi). --word is a name's longest word, so it fits its column whole;
+   only names are ever clamped, with room for Turkish capitals' marks. */
 .rc-display {
   margin: 0; padding-block: .04em .1em; font-family: var(--rc-font-display); font-weight: 800; line-height: 1.02; letter-spacing: -.02em;
-  overflow-wrap: anywhere; text-wrap: balance;
+  overflow-wrap: break-word; text-wrap: balance;
 }
+.rc-name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; padding-block: .14em .08em; margin-block: -.14em -.08em; }
+.rc-person { display: flex; align-items: baseline; gap: .2em; }
+.rc-person .rc-swatch.big { margin: 0; }
+.rc-person .rc-name { min-width: 0; }
 /* --chars is the formatted number's length: digits are about .6em wide. */
 .rc-number { font-size: clamp(2.5rem, min(20cqb, calc(150cqi / var(--chars, 4))), 15rem); line-height: .92; font-variant-numeric: tabular-nums lining-nums; letter-spacing: -.035em; }
-.rc-title { font-size: clamp(2rem, min(10cqb, 15cqi), 8rem); }
-.rc-headline { font-size: clamp(1.75rem, min(8cqb, 13cqi), 6.5rem); }
+.rc-title { font-size: clamp(var(--rc-floor, 2rem), min(10cqb, 15cqi, 165cqi / var(--word, 1)), 8rem); }
+.rc-headline { font-size: clamp(var(--rc-floor, 1.75rem), min(8cqb, 13cqi, 165cqi / var(--word, 1)), 6.5rem); }
 .rc-kicker { margin: 0; font: 700 clamp(.75rem, min(2cqb, 3.6cqi), 1rem)/1.25 var(--rc-font-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--rc-muted); }
-.rc-line { margin: 0; font: 500 clamp(.9375rem, min(2.8cqb, 5cqi), 1.5rem)/1.35 var(--rc-font-ui); overflow-wrap: anywhere; }
+.rc-line { margin: 0; font: 500 clamp(.9375rem, min(2.8cqb, 5cqi), 1.5rem)/1.35 var(--rc-font-ui); overflow-wrap: break-word; }
+.rc-note { font-size: clamp(.8125rem, min(2.2cqb, 4cqi), 1.0625rem); }
 .rc-strong { font-weight: 650; }
 .rc-muted { color: var(--rc-muted); }
 /* The reveal accent is only ever display-size text (WCAG large text). */
@@ -206,7 +258,9 @@
 .rc-fig-dots circle { fill: var(--rc-fg); }
 .rc-fig-dots circle.partial { fill: var(--rc-reveal); }
 
-.rc-figure:has(.rc-fig-ribbon) { grid-template-rows: minmax(0, 1fr) auto; place-items: stretch; }
+/* The chart at its own proportions, as large as fits, with the axis right under it. */
+.rc-timeline { --w: min(100cqw, calc((100cqh - 1.5rem) * var(--ar))); display: grid; width: max(var(--w), min(100cqw, 180px)); }
+.rc-timeline .rc-fig-ribbon { justify-self: center; width: var(--w); height: auto; aspect-ratio: var(--ar); }
 .rc-fig-ribbon rect { fill: var(--rc-fg); opacity: .88; }
 .rc-fig-ribbon rect.is-peak, .rc-fig-ribbon circle.is-peak { fill: var(--rc-reveal); opacity: 1; }
 
@@ -227,7 +281,8 @@
 .rc-strip-axis { display: flex; justify-content: space-between; margin: 4px 0 0; font: 600 .6875rem/1 var(--rc-font-ui); color: var(--rc-muted); }
 
 .rc-split { display: flex; flex-direction: column; gap: 4px; width: 100%; height: 100%; min-height: 120px; border-radius: var(--rc-radius); overflow: hidden; }
-.rc-split-region { flex-basis: 0; flex-shrink: 1; min-width: 3px; min-height: 3px; position: relative; display: flex; align-items: flex-end; padding: clamp(10px, 3cqmin, 28px); color: var(--rc-bg); }
+.rc-split-region { flex-basis: 0; flex-shrink: 1; min-width: 3px; min-height: 3px; position: relative; display: flex; align-items: flex-end; padding: clamp(10px, 3cqmin, 28px); color: var(--rc-on-participant); }
+.rc-split-rank { position: absolute; top: clamp(2px, 1.2cqmin, 12px); left: clamp(4px, 1.6cqmin, 14px); font: 800 clamp(.75rem, 3cqmin, 1.25rem)/1 var(--rc-font-display); }
 .rc-split-label { display: flex; flex-direction: column; min-width: 0; }
 .rc-split-share { font: 800 clamp(1.75rem, 9cqmin, 5.5rem)/.9 var(--rc-font-display); letter-spacing: -.03em; }
 .rc-split-name { font: 700 clamp(.875rem, 2.6cqmin, 1.25rem)/1.2 var(--rc-font-ui); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -236,10 +291,12 @@
 }
 .rc-legend-list { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: clamp(4px, 1.4cqmin, 10px); }
 .rc-legend-list li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; font: 650 clamp(.9375rem, min(3cqb, 6cqi), 1.625rem)/1.25 var(--rc-font-ui); }
-.rc-legend-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Left-aligned whatever the script, so a right-to-left name stays by its swatch. */
+.rc-legend-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; justify-self: start; max-width: 100%; text-align: left; }
 .rc-legend-value { font-variant-numeric: tabular-nums; }
 .rc-swatch { display: inline-block; width: 14px; height: 14px; border-radius: 50%; flex: none; }
 .rc-swatch.big { width: .55em; height: .55em; margin-right: .2em; vertical-align: .08em; }
+.rc-swatch.rank { display: grid; place-items: center; width: 1.25em; height: 1.25em; font: 800 .75em/1 var(--rc-font-ui); color: var(--rc-on-participant); }
 .rc-scene[data-layout="compare"] .rc-legend-list:only-child, .rc-scene[data-layout="compare"] .rc-copy > .rc-legend-list:last-child { max-height: 100%; }
 
 .rc-fig-bubbles path { fill: none; stroke: var(--rc-muted); stroke-width: .9; }
@@ -250,10 +307,10 @@
 
 /* One row; --sum is the sum of the circles' relative sizes, so the row fits its box exactly. */
 .rc-emoji { --gap: 3cqw; --big: min(calc((100cqw - 4 * var(--gap)) / var(--sum, 1)), calc(100cqh - 2.5rem), 240px); list-style: none; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; gap: var(--gap); width: 100%; }
-.rc-emoji li { display: grid; justify-items: center; gap: 6px; }
-.rc-emoji-glyph { display: grid; place-items: center; width: calc(var(--s) * var(--big)); aspect-ratio: 1; border-radius: 50%; background: color-mix(in srgb, var(--rc-fg) 12%, transparent); font-size: max(14px, calc(var(--s) * var(--big) * .52)); line-height: 1; }
+.rc-emoji li { display: grid; justify-items: center; gap: 6px; width: calc(var(--s) * var(--big)); }
+.rc-emoji-glyph { display: grid; place-items: center; width: calc(var(--s) * var(--big)); aspect-ratio: 1; border-radius: 50%; background: color-mix(in srgb, var(--rc-fg) 12%, transparent); overflow: hidden; font-size: calc(var(--s) * var(--big) * .5); line-height: 1; }
 .rc-emoji li.is-peak .rc-emoji-glyph { background: var(--rc-reveal); }
-.rc-emoji-count { font: 700 clamp(.75rem, 2.2cqmin, 1rem)/1 var(--rc-font-ui); color: var(--rc-muted); font-variant-numeric: tabular-nums; }
+.rc-emoji-count { font: 700 clamp(.75rem, 2.2cqmin, 1rem)/1 var(--rc-font-ui); color: var(--rc-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 /* One row per media type: a square whose area is proportional to the count. */
 .rc-media { --tile: min(calc((100cqh - 3 * 10px) / 4), 34cqw, 140px); list-style: none; margin: 0; padding: 0; display: grid; align-content: center; gap: 10px; width: 100%; height: 100%; }
 .rc-media li { display: grid; grid-template-columns: var(--tile) minmax(0, 1fr); align-items: center; gap: 14px; }
@@ -261,10 +318,13 @@
 .rc-media-tile .lucide { width: 56%; height: 56%; stroke-width: 1.8; }
 .rc-media li:first-child .rc-media-tile { background: var(--rc-reveal); }
 .rc-media-text { font: 600 clamp(.8125rem, 2.4cqmin, 1rem)/1.2 var(--rc-font-ui); }
+/* One tile for files the export does not type: the total beside it says the rest. */
+.rc-media.is-untyped { --tile: min(100cqh, 28cqw, 88px); }
+.rc-media.is-untyped li { grid-template-columns: var(--tile); }
 
 .rc-words { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: center; gap: clamp(2px, 1cqmin, 10px); width: 100%; height: 100%; min-height: 0; overflow: hidden; }
 .rc-words li { display: flex; align-items: baseline; gap: .4em; min-width: 0; }
-.rc-word { font: 800 calc(var(--w) * clamp(2rem, 13cqmin, 8.5rem))/1 var(--rc-font-display); letter-spacing: -.025em; overflow-wrap: anywhere; min-width: 0; }
+.rc-word { font: 800 calc(var(--w) * clamp(2rem, 13cqmin, 8.5rem))/1.1 var(--rc-font-display); letter-spacing: -.025em; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rc-words li.is-peak .rc-word { color: var(--rc-reveal); }
 .rc-word-count { font: 700 clamp(.75rem, 2.4cqmin, 1.125rem)/1 var(--rc-font-ui); color: var(--rc-muted); font-variant-numeric: tabular-nums; flex: none; }
 
@@ -285,6 +345,8 @@
 .rc-poster-html { box-sizing: border-box; aspect-ratio: 9 / 16; height: 100cqh; max-width: 100cqw; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; padding: 8%; background: #12382B; color: #F4EEE1; }
 .rc-poster-title { font-size: clamp(1.25rem, 6cqmin, 2.5rem); }
 .rc-poster-total { font-size: clamp(2rem, 12cqmin, 5rem); }
+.rc-failed { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 12px; padding: var(--rc-gutter); overflow-y: auto; }
+.rc-failed .rc-headline { font-size: clamp(1.75rem, 6vw, 3.5rem); }
 .rc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
 .rc-button {
   min-height: var(--rc-target); padding: 0 20px; border-radius: 999px; border: 1.5px solid var(--rc-fg);
@@ -297,7 +359,7 @@
 .rc-button .lucide { margin-right: 6px; vertical-align: -2px; }
 .rc-button.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--rc-fg) 86%, var(--rc-bg)); color: var(--rc-bg); }
 .rc-button:active:not(:disabled) { transform: scale(.97); }
-.rc-button:disabled { opacity: .6; cursor: progress; }
+.rc-button[aria-disabled="true"] { opacity: .6; cursor: progress; }
 .rc-status { margin: 0; min-height: 1.35em; font: 600 .875rem/1.35 var(--rc-font-ui); color: var(--rc-muted); }
 @container stage (orientation: portrait) {
   .rc-scene[data-layout="finale"] .rc-copy { gap: 4px; }

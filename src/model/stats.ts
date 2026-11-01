@@ -120,6 +120,8 @@ export interface Insights {
     readonly share: number;
     readonly count: number;
     readonly conversations: number;
+    /** How many other people started exactly as many conversations. */
+    readonly tied: number;
   };
   readonly nightOwl: {
     /** null when nobody wrote in the night window. */
@@ -127,6 +129,8 @@ export interface Insights {
     readonly count: number;
     /** Percent of that person's own messages, 1 decimal. */
     readonly share: number;
+    /** How many other people have exactly the same night and total counts. */
+    readonly tied: number;
   };
 }
 

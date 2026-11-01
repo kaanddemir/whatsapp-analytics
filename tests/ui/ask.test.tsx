@@ -22,7 +22,6 @@ import { tr } from "@/i18n/tr";
 import type { Locale } from "@/i18n/types";
 import { FakeClient } from "../support/uiClient";
 import { fakeModel } from "../support/fakeEmbedder";
-import { ModelError } from "@/semantic/embedder";
 import { ASK_CHAT } from "../fixtures/askChat";
 
 const parsed = parseExport(ASK_CHAT);
@@ -44,6 +43,15 @@ async function openAsk({ locale = "en" as Locale, client = new FakeClient(), str
   const tab = await screen.findByRole("button", { name: locale === "tr" ? tr["ask.nav"] : en["ask.nav"] });
   fireEvent.click(tab);
   return client;
+}
+
+/** Turns on search by meaning from the menu, and waits for the index. */
+async function enableInSettings() {
+  fireEvent.click(screen.getByRole("button", { name: en.chatActions }));
+  fireEvent.click(screen.getByRole("button", { name: en["search.settings"] }));
+  fireEvent.click(await screen.findByRole("button", { name: en["search.enable"] }));
+  await screen.findByText(en["search.ready"], {}, { timeout: 4000 });
+  fireEvent.click(screen.getByRole("button", { name: en.close }));
 }
 
 const composer = () => screen.getByRole("textbox", { name: en["ask.input"] });
@@ -193,40 +201,32 @@ describe("Ask view", () => {
     expect(a.querySelector(".ans-basis")).toBeNull();
   });
 
-  it("offers search by meaning when only words were searched, prepares it on the device, then asks again", async () => {
+  it("says once that only words were searched, with no way to turn anything on inside an answer", async () => {
+    await openAsk();
+    const q = "Where did we talk about moving?";
+    ask(q);
+    const a = await lastAnswer(engine(q).text);
+    expect(a.querySelector(".ans-note")!.textContent).toContain(en.r_keywordOff);
+    expect(within(a).queryByRole("button", { name: /search by meaning/i })).toBeNull();
+    ask(q);
+    await waitFor(() => expect(answers()).toHaveLength(2));
+    const b = await lastAnswer(engine(q).text);
+    expect(b.textContent).not.toContain(en.r_keywordOff);
+  });
+
+  it("searches by meaning once it is on, says so, and needs nothing from the answer", async () => {
     const model = fakeModel();
     const client = await openAsk({ client: new FakeClient(model.factory) });
+    await enableInSettings();
     ask("Where did we talk about moving?");
-    const a = await lastAnswer(engine("Where did we talk about moving?").text);
-    expect(within(a).getByText(en.r_keywordOnly)).toBeTruthy();
-    fireEvent.click(within(a).getByRole("button", { name: en["ask.enableMeaning"] }));
-    await within(a).findByText(en["ask.meaningReady"], {}, { timeout: 4000 });
-    fireEvent.click(within(a).getByRole("button", { name: en["ask.retry"] }));
-    await waitFor(() => expect(answers()).toHaveLength(2));
+    await waitFor(() => expect(answers()).toHaveLength(1));
     const b = answers().at(-1)!;
     await waitFor(() => expect(within(b).getByText(en["ask.basis.meaning"])).toBeTruthy());
     // Found by meaning alone, and said to be possibly unrelated.
     expect(within(b).getByText("yeni eve geçsek mi diye düşünüyorum")).toBeTruthy();
     expect(b.textContent).toContain(en.r_meaningOnly);
     expect(model.loads).toBe(1);
-    expect(client.asks.map((x) => x.question)).toEqual(["Where did we talk about moving?", "Where did we talk about moving?"]);
-  });
-});
-
-describe("Ask search by meaning failures", () => {
-  it("says when the model could not be prepared, and recovers on Try again", async () => {
-    const model = fakeModel();
-    let loads = 0;
-    // The first load fails (as a model file that did not arrive would); the next succeeds.
-    const factory: typeof model.factory = (progress, signal) => (++loads === 1 ? Promise.reject(new ModelError("failed", "fake load failure")) : model.factory(progress, signal));
-    await openAsk({ client: new FakeClient(factory) });
-    ask("Where did we talk about moving?");
-    const a = await lastAnswer(engine("Where did we talk about moving?").text);
-    fireEvent.click(within(a).getByRole("button", { name: en["ask.enableMeaning"] }));
-    expect((await within(a).findByRole("alert")).textContent).toBe(en["ask.meaningCouldNot"]);
-    fireEvent.click(within(a).getByRole("button", { name: en["ask.meaningTryAgain"] }));
-    await within(a).findByText(en["ask.meaningReady"], {}, { timeout: 4000 });
-    expect(loads).toBe(2);
+    expect(client.asks.map((x) => x.question)).toEqual(["Where did we talk about moving?"]);
   });
 });
 
@@ -322,10 +322,9 @@ describe("Ask conversation", () => {
   it("cancels a question in the worker: the next one is answered while the model is still busy, and the chat stays", async () => {
     const model = fakeModel();
     const client = await openAsk({ client: new FakeClient(model.factory) });
+    await enableInSettings();
     ask("Where did we talk about moving?");
-    const first = await lastAnswer(engine("Where did we talk about moving?").text);
-    fireEvent.click(within(first).getByRole("button", { name: en["ask.enableMeaning"] }));
-    await within(first).findByText(en["ask.meaningReady"], {}, { timeout: 4000 });
+    await waitFor(() => expect(answers()[0]?.querySelector(".ans")).toBeTruthy());
     // Hold the model: the next search by meaning waits in the worker for its query.
     let release!: () => void;
     model.gate = new Promise<void>((r) => (release = r));

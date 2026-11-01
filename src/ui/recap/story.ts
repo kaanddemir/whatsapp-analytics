@@ -25,17 +25,25 @@ import type { TranslationKey } from "@/i18n/en";
 import type { Locale, TranslationParams } from "@/i18n/types";
 import { chatTitle } from "../components/Filters";
 import { formatCount, formatDate, formatDateRange, formatDecimal, formatHourRange, formatMonth, formatPercent, formatShare, plural, weekdays, weekdaysShort } from "@/i18n/format";
-import { participantColorIndex } from "../participantColors";
+import { distinctColorIndexes, participantColorIndex } from "../participantColors";
 import { DURATION, type Ground } from "./tokens";
 
 export type Translate = (key: TranslationKey, params?: TranslationParams) => string;
 
 export type Chapter = "scale" | "rhythm" | "people" | "signature" | "finale";
-export type Family = "hero" | "spotlight" | "comparison" | "pattern" | "finale";
 
 /** Patterns (hour, weekday, month) need this many messages before their
     shape says something about the chat rather than about chance. */
 export const MIN_PATTERN_MESSAGES = 10;
+/** Below this many conversations "who writes first" is chance, not a habit. */
+export const MIN_STARTER_CONVERSATIONS = 5;
+/** "Usually" means a clear majority; less than this is only "most often". */
+export const USUAL_SHARE = 0.6;
+/** A night owl needs more than a stray late message. */
+export const MIN_OWL_MESSAGES = 2;
+export const MIN_OWL_SHARE = 5;
+/** A shorter run of days is not worth a poster fact. */
+export const MIN_POSTER_STREAK = 3;
 /** Shape-count caps: a figure never draws one element per message. */
 export const MAX_DOTS = 200;
 export const MAX_MONTH_BARS = 36;
@@ -58,7 +66,6 @@ export interface Person {
 interface Base<K extends string> {
   readonly kind: K;
   readonly chapter: Chapter;
-  readonly family: Family;
   readonly ground: Ground;
   /** Autoplay hold in ms; 0 holds until the viewer acts (the finale). */
   readonly duration: number;
@@ -96,7 +103,14 @@ export interface TimelineScene extends Base<"timeline"> {
   readonly count: string;
   readonly of: string;
   readonly bars: readonly number[];
+  /** The bar holding the peak month. */
   readonly peak: number;
+  /** The peak month's own count. In a folded chart its bar sums several months,
+      so another bar can be taller and only this part of the bar is the month. */
+  readonly peakValue: number;
+  /** Says what a bar holds when months are folded; null when a bar is one month. */
+  readonly fold: string | null;
+  readonly tied: string | null;
   readonly axis: readonly [string, string];
 }
 
@@ -111,6 +125,7 @@ export interface ClockScene extends Base<"clock"> {
   readonly peak: number;
   readonly range: string;
   readonly share: string;
+  readonly tied: string | null;
 }
 
 export interface WeekScene extends Base<"week"> {
@@ -119,7 +134,12 @@ export interface WeekScene extends Base<"week"> {
   readonly labels: readonly string[];
   readonly peak: number;
   readonly day: string;
-  readonly detail: string;
+  /** The metric the peak is ranked by: messages per calendar weekday. */
+  readonly average: string;
+  readonly total: string;
+  /** Names the weekday with the larger raw total when it is a different one. */
+  readonly note: string | null;
+  readonly tied: string | null;
   /** Second beat: the 24 hours of the busiest weekday-hour slot's weekday. */
   readonly slot: { readonly kicker: string; readonly hours: readonly number[]; readonly peak: number; readonly text: string } | null;
 }
@@ -133,8 +153,10 @@ export interface BalanceScene extends Base<"balance"> {
 }
 
 export interface BehaviorScene extends Base<"behavior"> {
+  readonly kicker: string;
   readonly starter: {
-    readonly kicker: string; readonly person: Person; readonly text: string;
+    /** null when several people share the top count: nobody is singled out. */
+    readonly kicker: string; readonly person: Person | null; readonly headline: string; readonly text: string;
     readonly bubbles: number; readonly filled: number; readonly legend: string | null;
   } | null;
   readonly owl: { readonly kicker: string; readonly person: Person; readonly text: string; readonly share: number } | null;
@@ -143,7 +165,9 @@ export interface BehaviorScene extends Base<"behavior"> {
 export interface SharedScene extends Base<"shared"> {
   readonly kicker: string;
   readonly emoji: { readonly kicker: string; readonly items: readonly { readonly glyph: string; readonly count: number; readonly label: string }[] } | null;
-  readonly media: { readonly kicker: string; readonly total: string; readonly items: readonly { readonly kind: MediaKind; readonly label: string; readonly count: number; readonly text: string }[] } | null;
+  readonly media: { readonly kicker: string; readonly total: string; readonly items: readonly { readonly kind: MediaKind; readonly label: string; readonly count: number; readonly text: string }[];
+    /** Android exports only say "media omitted": a note instead of a category nobody chose. */
+    readonly untyped: boolean } | null;
 }
 
 export interface WordsScene extends Base<"words"> {
@@ -175,6 +199,11 @@ export interface PeakDayHighlight extends Base<"highlight"> {
 
 export type HighlightScene = StreakHighlight | PeakDayHighlight;
 
+export interface PosterCell {
+  readonly label: string;
+  readonly value: string;
+}
+
 export interface Poster {
   readonly locale: Locale;
   readonly kicker: string;
@@ -189,13 +218,18 @@ export interface Poster {
   readonly peakHour: number | null;
   readonly people: readonly Person[];
   readonly othersShare: number;
-  readonly cells: readonly { readonly label: string; readonly value: string }[];
+  readonly cells: readonly PosterCell[];
+  /** The facts when names are hidden: free text (a top word is often someone's
+      name, or part of it) can't be proven anonymous, so it is left out. */
+  readonly cellsHidden: readonly PosterCell[];
   readonly footer: string;
 }
 
 export interface FinaleScene extends Base<"finale"> {
   readonly kicker: string;
   readonly poster: Poster;
+  /** The summary without names or free text, for hide-names mode. */
+  readonly summaryHidden: string;
 }
 
 export type Scene = OpeningScene | VolumeScene | TimelineScene | DividerScene | ClockScene | WeekScene | BalanceScene | BehaviorScene | SharedScene | WordsScene | HighlightScene | FinaleScene;
@@ -205,16 +239,21 @@ export interface Story {
   readonly poster: Poster;
 }
 
+/** How many months one folded bar holds. */
+export const bucketSize = (length: number, limit: number) => Math.max(1, Math.ceil(length / limit));
+
 /** Folds a long run of months into at most `limit` equal buckets without losing messages. */
 export function bucketed(values: readonly number[], limit: number): number[] {
   if (values.length <= limit) return [...values];
-  const per = Math.ceil(values.length / limit);
+  const per = bucketSize(values.length, limit);
   const out: number[] = [];
   for (let i = 0; i < values.length; i += per) out.push(values.slice(i, i + per).reduce((a, b) => a + b, 0));
   return out;
 }
 
 const firstMax = (values: readonly number[]) => values.indexOf(Math.max(...values));
+/** How many other values equal the one at `peak`. */
+const tiesOf = (values: readonly number[], peak: number) => values.filter((v) => v === values[peak]).length - 1;
 
 /** The smallest 1-2-5 unit that keeps the dot field at or under `cap` dots. */
 export function dotUnit(total: number, cap = MAX_DOTS): number {
@@ -258,8 +297,11 @@ export function buildStory(stats: Stats, locale: Locale, t: Translate): Story {
   const messages = (n: number) => plural(n, t("rcMessageOne"), t("rcMessageMany"), locale);
   const activeDays = (n: number) => plural(n, t("rcDayOne"), t("rcDayMany"), locale);
   const persons = new Map<ParticipantId, Person>();
+  // Everyone a figure can draw at once gets a colour of their own; beyond them
+  // the stable hash stands, as nobody is drawn beside them.
+  const colors = distinctColorIndexes(ranked.slice(0, MAX_OPENING_PEOPLE).map((p) => String(p.id)));
   ranked.forEach((p: ParticipantStats, i) => persons.set(p.id, {
-    id: p.id, name: p.name, alias: t("rcPerson", { n: i + 1 }), color: participantColorIndex(String(p.id)),
+    id: p.id, name: p.name, alias: t("rcPerson", { n: i + 1 }), color: colors.get(String(p.id)) ?? participantColorIndex(String(p.id)),
     messages: p.messages, share: formatShare(p.share, p.messages, total, locale),
   }));
   const people = [...persons.values()];
@@ -269,12 +311,16 @@ export function buildStory(stats: Stats, locale: Locale, t: Translate): Story {
   const isGroup = meta.chatType.kind === "group";
   const enoughForPatterns = k.totalMessages >= MIN_PATTERN_MESSAGES;
   const scenes: Scene[] = [];
+  const tiedNote = (values: readonly number[], peak: number) => {
+    const others = tiesOf(values, peak);
+    return others > 0 ? t("rcTied", { count: count(others) }) : null;
+  };
 
   // Chapter 1 - Scale.
   const mode = isGroup ? "group" : people.length >= 2 ? "direct" : "solo";
   const participantsLabel = people.length === 1 ? t("rcParticipantOne") : t("rcParticipantMany", { count: count(people.length) });
   scenes.push({
-    kind: "opening", chapter: "scale", family: "hero", ground: "forest", duration: DURATION.opening,
+    kind: "opening", chapter: "scale", ground: "forest", duration: DURATION.opening,
     mode, kicker: t("rcOpenKicker"),
     title: isGroup ? t("rcGroupChat") : title,
     subtitle: isGroup ? participantsLabel : mode === "direct" ? t("rcDirectChat") : t("rcChat"),
@@ -287,7 +333,7 @@ export function buildStory(stats: Stats, locale: Locale, t: Translate): Story {
   const remainder = k.totalMessages % unit;
   const perDay = k.activeDays >= 2 ? t("rcPerDay", { value: formatDecimal(k.messagesPerActiveDay, locale) }) : null;
   scenes.push({
-    kind: "volume", chapter: "scale", family: "spotlight", ground: "cream", duration: DURATION.volume,
+    kind: "volume", chapter: "scale", ground: "cream", duration: DURATION.volume,
     kicker: t("rcVolumeKicker"), total: k.totalMessages,
     unitLabel: k.totalMessages === 1 ? t("rcMessageOne") : t("rcMessageMany"),
     days: t("rcVolumeDays", { days: activeDays(k.activeDays) }), perDay,
@@ -301,17 +347,20 @@ export function buildStory(stats: Stats, locale: Locale, t: Translate): Story {
   if (months.values.length >= 2 && enoughForPatterns) {
     const peak = firstMax(months.values);
     const bars = bucketed(months.values, MAX_MONTH_BARS);
-    const per = Math.ceil(months.values.length / bars.length);
+    const per = bucketSize(months.values.length, MAX_MONTH_BARS);
     const monthsText = plural(months.values.length, t("rcMonthOne"), t("rcMonthMany"), locale);
     const month = formatMonth(months.buckets[peak]!, locale);
     scenes.push({
-      kind: "timeline", chapter: "scale", family: "pattern", ground: "ink", duration: DURATION.timeline,
+      kind: "timeline", chapter: "scale", ground: "ink", duration: DURATION.timeline,
       kicker: t("rcTimelineKicker"), month, count: t("rcTimelineCount", { count: messages(months.values[peak]!) }),
       of: t("rcTimelineOf", { months: monthsText }),
-      // A folded bar holds the peak month, so that is the one that lights up.
-      bars, peak: Math.floor(peak / per),
+      // A folded bar sums its months, so the bar holding the peak month is not
+      // always the tallest: only the month's own part lights up, and fold says why.
+      bars, peak: Math.floor(peak / per), peakValue: months.values[peak]!,
+      fold: per > 1 ? t("rcTimelineFold", { months: plural(per, t("rcMonthOne"), t("rcMonthMany"), locale), month }) : null,
+      tied: tiedNote(months.values, peak),
       axis: [formatMonth(months.buckets[0]!, locale), formatMonth(months.buckets[months.buckets.length - 1]!, locale)],
-      summary: t("rcTimelineSummary", { months: monthsText, month, count: messages(months.values[peak]!) }),
+      summary: t("rcTimelineSummary", { months: monthsText, month, count: messages(months.values[peak]!) }) + (per > 1 ? ` ${t("rcTimelineFold", { months: plural(per, t("rcMonthOne"), t("rcMonthMany"), locale), month })}.` : ""),
     });
   }
 
@@ -321,8 +370,8 @@ export function buildStory(stats: Stats, locale: Locale, t: Translate): Story {
     const range = formatHourRange(k.peakHour, 1, locale);
     const share = formatPercent(k.peakHourShare, locale);
     rhythm.push({
-      kind: "clock", chapter: "rhythm", family: "pattern", ground: "forest", duration: DURATION.clock,
-      kicker: t("rcClockKicker"), hours: timing.hours, peak: k.peakHour, range, share: t("rcClockShare", { share }),
+      kind: "clock", chapter: "rhythm", ground: "forest", duration: DURATION.clock,
+      kicker: t("rcClockKicker"), hours: timing.hours, peak: k.peakHour, range, share: t("rcClockShare", { share }), tied: tiedNote(timing.hours, k.peakHour),
       summary: t("rcClockSummary", { range, share }),
     });
   }
@@ -332,23 +381,27 @@ export function buildStory(stats: Stats, locale: Locale, t: Translate): Story {
     const day = weekdays(locale)[d]!;
     const share = formatPercent(h.weekdayShares[d]!, locale);
     const slot = h.busiestHour;
+    const average = t("rcWeekAverage", { value: messages(timing.weekdayAverages[d]!), day });
+    const byTotal = h.busiestWeekdayByTotal;
     rhythm.push({
-      kind: "week", chapter: "rhythm", family: "pattern", ground: "cream", duration: DURATION.week,
+      kind: "week", chapter: "rhythm", ground: "cream", duration: DURATION.week,
       // Bars are the weekday averages the peak is ranked by, as on the
       // dashboard: totals would favour a weekday the period holds twice.
       kicker: t("rcWeekKicker"), averages: timing.weekdayAverages, labels: weekdaysShort(locale), peak: d, day,
-      detail: t("rcWeekShare", { count: messages(h.weekdayTotals[d]!), share }),
+      average, total: t("rcWeekShare", { count: messages(h.weekdayTotals[d]!), share }),
+      note: byTotal !== null && byTotal !== d ? t("rcWeekTopTotal", { day: weekdays(locale)[byTotal]!, count: messages(h.weekdayTotals[byTotal]!) }) : null,
+      tied: tiedNote(timing.weekdayAverages, d),
       slot: slot && {
         kicker: t("rcSlotKicker"), hours: timing.heatmap[slot.weekday]!, peak: slot.hour,
         text: t("rcSlotText", { day: weekdays(locale)[slot.weekday]!, range: formatHourRange(slot.hour, 1, locale), count: messages(slot.count) }),
       },
-      summary: t("rcWeekSummary", { day, share }) + (slot ? ` ${t("rcSlotKicker")}: ${t("rcSlotText", { day: weekdays(locale)[slot.weekday]!, range: formatHourRange(slot.hour, 1, locale), count: messages(slot.count) })}.` : ""),
+      summary: t("rcWeekSummary", { day, average, share }) + (slot ? ` ${t("rcSlotKicker")}: ${t("rcSlotText", { day: weekdays(locale)[slot.weekday]!, range: formatHourRange(slot.hour, 1, locale), count: messages(slot.count) })}.` : ""),
     });
   }
   // A divider earns its place only in front of a chapter with two scenes.
   if (rhythm.length >= 2) {
     scenes.push({
-      kind: "divider", chapter: "rhythm", family: "hero", ground: "ink", duration: DURATION.divider,
+      kind: "divider", chapter: "rhythm", ground: "ink", duration: DURATION.divider,
       title: t("rcRhythmTitle"), subtitle: t("rcRhythmSub"), summary: `${t("rcRhythmTitle")}. ${t("rcRhythmSub")}.`,
     });
   }
@@ -362,7 +415,7 @@ export function buildStory(stats: Stats, locale: Locale, t: Translate): Story {
     // The sum of their own shares, so segments and others make exactly 100%.
     const restShare = formatShare(ranked.slice(MAX_SEGMENTS).reduce((a, p) => a + p.share, 0), restMessages, total, locale);
     scenes.push({
-      kind: "balance", chapter: "people", family: "comparison", ground: "cream", duration: DURATION.balance,
+      kind: "balance", chapter: "people", ground: "cream", duration: DURATION.balance,
       kicker: t("rcBalanceKicker"), mode: people.length === 2 ? "duo" : "group", segments,
       others: rest.length ? { label: t("rcOthers", { count: count(rest.length) }), messages: restMessages, share: restShare } : null,
       // The legend names exactly the regions drawn, so the two always agree.
@@ -370,31 +423,44 @@ export function buildStory(stats: Stats, locale: Locale, t: Translate): Story {
       summary: t("rcBalanceSummary", { list: segments.map((p) => `${p.name} ${p.share}`).join(", ") + (rest.length ? `, ${t("rcOthers", { count: count(rest.length) })} ${restShare}` : "") }),
     });
 
-    const starterPerson = personOf(ins.conversationStarter.id);
-    const starter = starterPerson && ins.conversationStarter.conversations >= 2 ? (() => {
-      const { count: started, conversations } = ins.conversationStarter;
+    const started = ins.conversationStarter;
+    const starterPerson = personOf(started.id);
+    const starter = starterPerson && started.conversations >= MIN_STARTER_CONVERSATIONS ? (() => {
+      const { count: opened, conversations, tied } = started;
       const bubbles = Math.min(conversations, MAX_BUBBLES);
       const scaled = bubbles < conversations;
       const conv = plural(conversations, t("rcConversationOne"), t("rcConversationMany"), locale);
+      const legend = scaled ? t("rcBubbleUnit", { value: plural(Math.round(conversations / bubbles), t("rcConversationOne"), t("rcConversationMany"), locale) }) : null;
+      const filled = Math.round((bubbles * opened) / conversations);
+      if (tied > 0) {
+        const n = count(tied + 1);
+        return {
+          kicker: t("rcStarterTieKicker"), person: null, headline: t("rcStarterTie", { n }),
+          text: t("rcStarterTieText", { count: count(opened), total: conv }), bubbles, filled, legend,
+          summary: t("rcBehaviorSummaryTie", { n, count: count(opened), total: conv }),
+        };
+      }
       return {
-        kicker: t("rcStarterKicker"), person: starterPerson,
-        text: t("rcStarterText", { count: count(started), total: conv }),
-        bubbles, filled: Math.round((bubbles * started) / conversations),
-        legend: scaled ? t("rcBubbleUnit", { value: plural(Math.round(conversations / bubbles), t("rcConversationOne"), t("rcConversationMany"), locale) }) : null,
-        summary: t("rcBehaviorSummaryStarter", { name: starterPerson.name, count: count(started), total: conv }),
+        // "Usually" is a claim about a majority of the conversations, not the largest slice.
+        kicker: opened / conversations >= USUAL_SHARE ? t("rcStarterKicker") : t("rcStarterMostKicker"),
+        person: starterPerson, headline: starterPerson.name,
+        text: t("rcStarterText", { count: count(opened), total: conv }), bubbles, filled, legend,
+        summary: t("rcBehaviorSummaryStarter", { name: starterPerson.name, count: count(opened), total: conv }),
       };
     })() : null;
     const owlPerson = personOf(ins.nightOwl.id);
-    const owl = owlPerson && ins.nightOwl.count > 0 ? {
+    // A tie for night owl has no one owl; a stray late message makes nobody one.
+    const owl = owlPerson && ins.nightOwl.tied === 0 && ins.nightOwl.count >= MIN_OWL_MESSAGES && ins.nightOwl.share >= MIN_OWL_SHARE ? {
       kicker: t("rcOwlKicker"), person: owlPerson, share: ins.nightOwl.share,
       text: t("rcOwlText", { share: formatPercent(ins.nightOwl.share, locale) }),
       summary: t("rcBehaviorSummaryOwl", { name: owlPerson.name, share: formatPercent(ins.nightOwl.share, locale) }),
     } : null;
     if (starter || owl) {
       scenes.push({
-        kind: "behavior", chapter: "people", family: "comparison", ground: "ink",
+        kind: "behavior", chapter: "people", ground: "ink",
         duration: starter && owl ? DURATION.behaviorTwo : DURATION.behaviorOne,
-        starter: starter && { kicker: starter.kicker, person: starter.person, text: starter.text, bubbles: starter.bubbles, filled: starter.filled, legend: starter.legend },
+        kicker: t("rcBehaviorKicker"),
+        starter: starter && { kicker: starter.kicker, person: starter.person, headline: starter.headline, text: starter.text, bubbles: starter.bubbles, filled: starter.filled, legend: starter.legend },
         owl: owl && { kicker: owl.kicker, person: owl.person, text: owl.text, share: owl.share },
         summary: [starter?.summary, owl?.summary].filter(Boolean).join(" "),
       });
@@ -407,14 +473,15 @@ export function buildStory(stats: Stats, locale: Locale, t: Translate): Story {
   if (emojis.length || content.media.total > 0) {
     const mediaTotal = plural(content.media.total, t("rcMediaOne"), t("rcMediaMany"), locale);
     const mediaItems = media.map((m) => ({ kind: m.key, label: t(`rcMedia.${m.key}` as TranslationKey), count: m.count, text: count(m.count) }));
+    const untyped = media.length === 1 && media[0]!.key === "Other";
     scenes.push({
-      kind: "shared", chapter: "signature", family: "spotlight", ground: "forest", duration: DURATION.shared,
+      kind: "shared", chapter: "signature", ground: "forest", duration: DURATION.shared,
       kicker: t("rcSharedKicker"),
       emoji: emojis.length ? { kicker: t("rcEmojiKicker"), items: emojis.map((e) => ({ glyph: e.key, count: e.count, label: `${count(e.count)}×` })) } : null,
-      media: content.media.total > 0 ? { kicker: t("rcMediaKicker"), total: mediaTotal, items: mediaItems } : null,
+      media: content.media.total > 0 ? { kicker: t("rcMediaKicker"), total: mediaTotal, items: mediaItems, untyped } : null,
       summary: [
         emojis.length ? t("rcSharedSummaryEmoji", { list: emojis.map((e) => `${e.key} ${count(e.count)}`).join(", ") }) : "",
-        content.media.total > 0 ? t("rcSharedSummaryMedia", { total: mediaTotal, list: mediaItems.map((m) => `${m.label} ${m.text}`).join(", ") }) : "",
+        content.media.total > 0 ? (untyped ? t("rcSharedSummaryUntyped", { total: mediaTotal }) : t("rcSharedSummaryMedia", { total: mediaTotal, list: mediaItems.map((m) => `${m.label} ${m.text}`).join(", ") })) : "",
       ].filter(Boolean).join(" "),
     });
   }
@@ -424,7 +491,7 @@ export function buildStory(stats: Stats, locale: Locale, t: Translate): Story {
   if (words.length) {
     const max = words[0]!.count;
     scenes.push({
-      kind: "words", chapter: "signature", family: "pattern", ground: "cream", duration: DURATION.words,
+      kind: "words", chapter: "signature", ground: "cream", duration: DURATION.words,
       kicker: t("rcWordsKicker"),
       words: words.map((w) => ({ word: w.key, count: w.count, label: count(w.count), weight: w.count / max })),
       summary: t("rcWordsSummary", { list: words.map((w) => `${w.key} ${count(w.count)}`).join(", ") }),
@@ -438,7 +505,7 @@ export function buildStory(stats: Stats, locale: Locale, t: Translate): Story {
     const per = Math.ceil(streak.days / MAX_STREAK_DOTS);
     const range = formatDateRange(streak.start, streak.end, locale);
     scenes.push({
-      kind: "highlight", pick: "streak", chapter: "signature", family: "spotlight", ground: "ink", duration: DURATION.highlight,
+      kind: "highlight", pick: "streak", chapter: "signature", ground: "ink", duration: DURATION.highlight,
       kicker: t("rcStreakKicker"), days: streak.days, unit: t("rcStreakUnit"), range,
       dots: Math.ceil(streak.days / per), legend: per > 1 ? t("rcStreakDots", { value: streakDays(per) }) : null,
       summary: t("rcStreakSummary", { days: streakDays(streak.days), range }),
@@ -448,22 +515,29 @@ export function buildStory(stats: Stats, locale: Locale, t: Translate): Story {
     const date = formatDate(d.date, locale);
     const times = formatDecimal(d.timesAverage, locale);
     scenes.push({
-      kind: "highlight", pick: "peakDay", chapter: "signature", family: "spotlight", ground: "ink", duration: DURATION.highlight,
+      kind: "highlight", pick: "peakDay", chapter: "signature", ground: "ink", duration: DURATION.highlight,
       kicker: t("rcPeakDayKicker"), date, count: d.count, countText: messages(d.count),
       average: k.messagesPerActiveDay, averageLabel: t("rcAverageDay"), times: t("rcPeakDayTimes", { times }),
-      streak: streak.days >= 2 ? t("rcStreakAlso", { days: streakDays(streak.days) }) : null,
+      streak: streak.days >= MIN_POSTER_STREAK ? t("rcStreakAlso", { days: streakDays(streak.days) }) : null,
       summary: t("rcPeakDaySummary", { date, count: messages(d.count), times }),
     });
   }
 
   // Finale: the poster.
-  const cells: { label: string; value: string }[] = [];
-  if (k.peakHour !== null) cells.push({ label: t("rcCellHour"), value: formatHourRange(k.peakHour, 1, locale) });
-  if (ins.busiestWeekday !== null && k.activeDays >= 2) cells.push({ label: t("rcCellDay"), value: weekdays(locale)[ins.busiestWeekday]! });
-  if (streak.days >= 2) cells.push({ label: t("rcCellStreak"), value: streakDays(streak.days) });
-  if (emojis[0]) cells.push({ label: t("rcCellEmoji"), value: `${emojis[0].key} ${count(emojis[0].count)}×` });
-  if (words[0]) cells.push({ label: t("rcCellWord"), value: words[0].key });
-  if (months.values.length >= 2) cells.push({ label: t("rcCellMonth"), value: formatMonth(months.buckets[firstMax(months.values)]!, locale) });
+  // The same bar as the scenes: a fact with too little behind it, or a shared
+  // first place, is not a poster fact. Each entry keeps whether it is free text.
+  const facts: (PosterCell & { readonly freeText?: boolean })[] = [];
+  const emojiTop = emojis[0] && emojis[0].count >= 2 && emojis[0].count !== emojis[1]?.count;
+  const wordTop = words[0] && words[0].count !== words[1]?.count;
+  if (k.peakHour !== null && enoughForPatterns && tiesOf(timing.hours, k.peakHour) === 0) facts.push({ label: t("rcCellHour"), value: formatHourRange(k.peakHour, 1, locale) });
+  if (ins.busiestWeekday !== null && k.activeDays >= 2 && enoughForPatterns && tiesOf(timing.weekdayAverages, ins.busiestWeekday) === 0) facts.push({ label: t("rcCellDay"), value: weekdays(locale)[ins.busiestWeekday]! });
+  if (streak.days >= MIN_POSTER_STREAK) facts.push({ label: t("rcCellStreak"), value: streakDays(streak.days) });
+  if (emojiTop) facts.push({ label: t("rcCellEmoji"), value: `${emojis[0]!.key} ${count(emojis[0]!.count)}×` });
+  if (wordTop) facts.push({ label: t("rcCellWord"), value: words[0]!.key, freeText: true });
+  if (months.values.length >= 2 && enoughForPatterns && tiesOf(months.values, firstMax(months.values)) === 0) facts.push({ label: t("rcCellMonth"), value: formatMonth(months.buckets[firstMax(months.values)]!, locale) });
+  const toCell = ({ label, value }: PosterCell): PosterCell => ({ label, value });
+  const cells = facts.slice(0, 4).map(toCell);
+  const cellsHidden = facts.filter((f) => !f.freeText).slice(0, 4).map(toCell);
   const posterPeople = people.length >= 2 ? people.slice(0, MAX_SEGMENTS) : [];
   const poster: Poster = {
     locale,
@@ -478,13 +552,17 @@ export function buildStory(stats: Stats, locale: Locale, t: Translate): Story {
     peakHour: k.peakHour,
     people: posterPeople,
     othersShare: posterPeople.length ? Math.max(0, total - posterPeople.reduce((a, p) => a + p.messages, 0)) / Math.max(1, total) : 0,
-    cells: cells.slice(0, 4),
+    cells,
+    cellsHidden,
     footer: t("rcPosterFooter"),
   };
+  const posterSummary = (heading: string, facts: readonly PosterCell[]) =>
+    [heading, poster.span, `${poster.total} ${poster.totalUnit}`, poster.detail, ...facts.map((c) => `${c.label}: ${c.value}`)].join(". ") + ".";
   scenes.push({
-    kind: "finale", chapter: "finale", family: "finale", ground: "cream", duration: 0,
+    kind: "finale", chapter: "finale", ground: "cream", duration: 0,
     kicker: t("rcFinaleKicker"), poster,
-    summary: [poster.title, poster.span, `${poster.total} ${poster.totalUnit}`, poster.detail, ...poster.cells.map((c) => `${c.label}: ${c.value}`)].join(". ") + ".",
+    summary: posterSummary(poster.title, poster.cells),
+    summaryHidden: posterSummary(poster.titleHidden, poster.cellsHidden),
   });
 
   return { scenes, poster };

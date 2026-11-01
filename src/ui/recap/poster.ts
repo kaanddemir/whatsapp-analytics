@@ -6,7 +6,8 @@
    Privacy: everything stays on the device. Drawing is local; saving is an
    explicit user action that hands a blob: URL to the browser's download
    (allowed by the CSP). With hideNames, people appear only as neutral rank
-   aliases and a one-to-one chat is titled generically.
+   aliases, a one-to-one chat is titled generically, and free text (the top
+   word) is left out, since it cannot be proven not to be someone's name.
 
    Composition (top to bottom): a forest band with the kicker, the chat title
    and the 24-hour dial; the total as the one dominant number; the balance
@@ -200,7 +201,7 @@ export function drawPoster(poster: Poster, hideNames: boolean): HTMLCanvasElemen
 
   // Facts: two columns, an accent rule over each.
   const colW = (inner - L.cells.gap) / 2;
-  poster.cells.forEach((c, i) => {
+  (hideNames ? poster.cellsHidden : poster.cells).forEach((c, i) => {
     const x = M + (i % 2) * (colW + L.cells.gap);
     const y = cellsTop + Math.floor(i / 2) * (L.cells.rowHeight + L.cells.gap);
     ctx.fillStyle = cream.reveal;

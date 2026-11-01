@@ -169,8 +169,8 @@ export class AnalysisClient {
     return (await this.call({ type: "ask", question, filters, locale }, "answer", onProgress, signal)).answer;
   }
 
-  /** Search by meaning: start or resume ("enable"), pause, read its state, or remove its data ("forget"). */
-  async semantic(action: "enable" | "pause" | "status" | "forget"): Promise<SemanticState> {
+  /** Search by meaning: start or resume ("enable"), pause, read its state, remove this chat's index ("remove"), or remove every index and the model ("forget"). */
+  async semantic(action: "enable" | "pause" | "status" | "remove" | "forget"): Promise<SemanticState> {
     return (await this.call({ type: "semantic", action }, "semanticStatus")).state;
   }
 

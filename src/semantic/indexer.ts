@@ -15,7 +15,9 @@
    crash loses at most one unsealed segment, and reopening resumes from the
    last commit. A storage failure (full quota) stops persisting but not
    indexing; a model failure stops indexing but never touches the chat or
-   the keyword search.
+   the keyword search. A saved chat's manifest is written as indexing starts,
+   so a later visit knows the user enabled it, and records an explicit pause,
+   so a later visit does not resume what the user stopped.
 
    Memory: vectors take dim + 8 bytes per message. Before starting, the total
    is checked against a share of device memory; above it, the chat is too
@@ -77,7 +79,10 @@ export class SemanticIndexer {
   private pendingWrite: Promise<void> | null = null;
   private cancelled = false;
   private disposed = false;
-  private readonly modelAbort = new AbortController();
+  /** Resume arrived while the paused run was still winding down: start again when it ends. */
+  private restart = false;
+  private userPaused = false;
+  private modelAbort = new AbortController();
   private stateValue: SemanticState = { status: "off" };
   /** Set when a commit failed: vectors stay in memory only for this visit. */
   persistFailed = false;
@@ -96,6 +101,8 @@ export class SemanticIndexer {
   get total(): number { return this.ids.length; }
   /** Fraction of indexable messages already searchable. */
   get coverage(): number { return this.total ? this.done / this.total : 1; }
+  /** The user paused this index, on this visit or an earlier one. */
+  get pausedByUser(): boolean { return this.userPaused; }
 
   private set(state: SemanticState) {
     this.stateValue = state;
@@ -103,7 +110,7 @@ export class SemanticIndexer {
   }
 
   private manifest(complete: boolean): IndexManifest {
-    return { schema: INDEX_SCHEMA, model: this.key, fingerprint: this.print, dim: this.spec.dim, planned: this.total, segments: this.index.sealed.length, vectors: this.index.size, complete };
+    return { schema: INDEX_SCHEMA, model: this.key, fingerprint: this.print, dim: this.spec.dim, planned: this.total, segments: this.index.sealed.length, vectors: this.index.size, complete, ...(this.userPaused ? { paused: true } : {}) };
   }
 
   /** Reads a stored index back, when one exists for exactly this chat and model. True if indexing had been enabled. */
@@ -112,6 +119,7 @@ export class SemanticIndexer {
     if (!store || !id) return false;
     const m = await store.manifest(id).catch(() => null);
     if (!m) return false;
+    this.userPaused = m.paused === true;
     const budget = this.options.budgetBytes ?? vectorBudgetBytes();
     if (this.total * (this.spec.dim + 8) > budget) {
       this.set({ status: "failed", reason: "too_large", done: 0, total: this.total });
@@ -142,7 +150,8 @@ export class SemanticIndexer {
   private async model(): Promise<Embedder> {
     if (this.disposed) throw new ModelError("failed", "The model was closed.");
     if (this.embedder) return this.embedder;
-    this.loading ??= this.options.factory((p) => this.set({ status: "preparing", ...p }), this.modelAbort.signal).then(async (e) => {
+    // Only indexing reports the model's progress: a query loading it for a restored index changes no state.
+    this.loading ??= this.options.factory((p) => { if (this.running && !this.cancelled) this.set({ status: "preparing", ...p }); }, this.modelAbort.signal).then(async (e) => {
       if (this.disposed) { await e.dispose(); throw new ModelError("failed", "The model was closed."); }
       return (this.embedder = e);
     }).finally(() => { this.loading = null; });
@@ -152,7 +161,10 @@ export class SemanticIndexer {
   /** Starts or resumes indexing; resolves when it stops (finished, cancelled or failed). */
   start(): Promise<void> {
     if (this.disposed) return Promise.resolve();
-    if (this.running) return this.running;
+    if (this.running) {
+      if (this.cancelled) this.restart = true;
+      return this.running;
+    }
     if (this.done >= this.total && this.total > 0) { this.set({ status: "ready", done: this.done, total: this.total, device: this.embedder?.device ?? null }); return Promise.resolve(); }
     const budget = this.options.budgetBytes ?? vectorBudgetBytes();
     if (this.total * (this.spec.dim + 8) > budget) {
@@ -160,12 +172,31 @@ export class SemanticIndexer {
       return Promise.resolve();
     }
     this.cancelled = false;
-    this.running = this.run().finally(() => { this.running = null; });
+    this.userPaused = false;
+    if (!this.embedder) this.set({ status: "preparing", phase: "load", loaded: 0, total: 0 });
+    this.running = this.run().finally(() => {
+      this.running = null;
+      if (!this.restart) return;
+      this.restart = false;
+      return this.start();
+    });
     return this.running;
   }
 
   cancel(): void {
     this.cancelled = true;
+  }
+
+  /** The user's pause: at once on screen, kept across visits, and a model still loading stops loading. */
+  async pause(): Promise<void> {
+    if (!this.running) return;
+    this.restart = false;
+    this.userPaused = true;
+    this.cancel();
+    if (this.loading) { this.modelAbort.abort(); this.modelAbort = new AbortController(); }
+    this.set({ status: "paused", done: this.done, total: this.total });
+    await this.running.catch(() => {});
+    if (this.userPaused && !this.disposed) await this.persist(this.index.sealed.length, null, false);
   }
 
   /** The saved copy was deleted: keep the vectors in memory, store nothing more. */
@@ -177,7 +208,9 @@ export class SemanticIndexer {
 
   private async run(): Promise<void> {
     try {
+      await this.persist(this.index.sealed.length, null, false);
       const embedder = await this.model();
+      if (this.cancelled || this.disposed) { this.set({ status: "paused", done: this.done, total: this.total }); return; }
       let last = 0;
       this.set({ status: "indexing", done: this.done, total: this.total, device: embedder.device });
       const dim = this.spec.dim;
@@ -208,12 +241,13 @@ export class SemanticIndexer {
         const sealed = this.index.add(window, vectors);
         for (const s of sealed) await this.persist(this.index.sealed.indexOf(s), s, false);
         const now = Date.now();
-        if (now - last > 250) { last = now; this.set({ status: "indexing", done: this.done, total: this.total, device: embedder.device }); }
+        if (now - last > 250 && !this.cancelled) { last = now; this.set({ status: "indexing", done: this.done, total: this.total, device: embedder.device }); }
         await nextTick();
       }
       await this.persist(this.index.sealed.length, this.index.tail(), true);
       this.set({ status: "ready", done: this.done, total: this.total, device: embedder.device });
     } catch (error) {
+      if (this.cancelled && !this.disposed) { this.set({ status: "paused", done: this.done, total: this.total }); return; }
       const reason: SemanticFailure = error instanceof ModelError ? error.code : error instanceof RangeError ? "memory" : "failed";
       this.set({ status: "failed", reason, done: this.done, total: this.total });
     }
@@ -244,12 +278,14 @@ export class SemanticIndexer {
   async dispose(): Promise<void> {
     this.disposed = true;
     this.cancelled = true;
+    this.restart = false;
     this.modelAbort.abort();
     // Terminate inference first: waiting for it before termination can make closing hang.
     const e = this.embedder;
     this.embedder = null;
     await e?.dispose().catch(() => {});
     await this.running?.catch(() => {});
+    await this.pendingWrite?.catch(() => {});
     const loading = await this.loading?.catch(() => null);
     if (loading && loading !== e) await loading.dispose().catch(() => {});
   }

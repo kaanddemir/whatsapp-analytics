@@ -86,7 +86,8 @@ describe("recap player", () => {
     fireEvent.keyDown(document, { key: " " });
     expect(dialog.classList.contains("is-paused")).toBe(true);
     const play = within(dialog).getByRole("button", { name: "Play" });
-    expect(play.getAttribute("aria-pressed")).toBe("true");
+    // The label alone carries the state: "Play, pressed" would contradict it.
+    expect(play.hasAttribute("aria-pressed")).toBe(false);
     expect(within(dialog).getByText("Paused")).toBeTruthy();
     fireEvent.click(play);
     expect(dialog.classList.contains("is-paused")).toBe(false);

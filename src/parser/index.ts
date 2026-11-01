@@ -39,8 +39,12 @@ import { decideDateOrder, toTimestamp } from "./dates";
 import { matchHeader, type HeaderMatch } from "./header";
 import { cleanLine, cleanName, startsWithMark, stripMarks } from "./text";
 
-/** Longest plausible sender name; past this, "x: y" is text, not a sender. */
+/** Longest plausible sender name; past this, one "x: y" line alone is text, not a sender. */
 const MAX_SENDER_LENGTH = 100;
+/** A longer "x" can still be a real name, shown by writing more than once under
+    exactly the same one: a stray sentence does not repeat itself. Never past this. */
+const MAX_REPEATED_SENDER_LENGTH = 256;
+const MIN_LONG_SENDER_ROWS = 2;
 const SAMPLE_LINES = 5;
 /** A whole body in angle brackets, the shape of Android's placeholders ("<Media omitted>"). */
 const PLACEHOLDER_SHAPE = /^<[^<>\n]{3,80}>$/u;
@@ -129,7 +133,7 @@ type Row =
 const QUOTES = /["“”«»]/;
 
 /** Split "Sender: text". Null when the record has no sender (a system line). */
-function splitSender(rest: string): { sender: string; body: string } | null {
+function splitSender(rest: string, longSenders: ReadonlySet<string>): { sender: string; body: string } | null {
   const at = rest.indexOf(": ");
   if (at === -1) {
     // "Alice:" with an empty message.
@@ -142,16 +146,32 @@ function splitSender(rest: string): { sender: string; body: string } | null {
   const sender = rest.slice(0, at);
   // A quote before the first ": " means a system line about a quoted group
   // subject ('Alice changed the subject to "a: b"'), not a sender.
-  if (sender.length > MAX_SENDER_LENGTH || QUOTES.test(sender)) return null;
+  if ((sender.length > MAX_SENDER_LENGTH && !longSenders.has(sender)) || QUOTES.test(sender)) return null;
   return { sender, body: rest.slice(at + 2) };
 }
 
-function toRow(record: RawRecord, ts: number | null, warnings: WarningLog): Row {
+/** Over-long "x" prefixes that repeat and are not system wording. Only lines past
+    the normal limit reach the map, so ordinary files pay one indexOf per record. */
+function repeatedLongSenders(records: readonly RawRecord[]): ReadonlySet<string> {
+  const seen = new Map<string, number>();
+  for (const record of records) {
+    // Cleaning only removes characters, so a raw position within the limit stays within it.
+    if (record.header.rest.indexOf(": ") <= MAX_SENDER_LENGTH) continue;
+    const rest = cleanLine(record.header.rest);
+    const at = rest.indexOf(": ");
+    if (at <= MAX_SENDER_LENGTH || at > MAX_REPEATED_SENDER_LENGTH) continue;
+    const sender = rest.slice(0, at);
+    if (!QUOTES.test(sender) && !matchSystem(rest)) seen.set(sender, (seen.get(sender) ?? 0) + 1);
+  }
+  return new Set([...seen].filter(([, rows]) => rows >= MIN_LONG_SENDER_ROWS).map(([sender]) => sender));
+}
+
+function toRow(record: RawRecord, ts: number | null, warnings: WarningLog, longSenders: ReadonlySet<string>): Row {
   if (ts === null) {
     warnings.add("invalid_timestamp", record.line);
     return { kind: "skip" };
   }
-  const split = splitSender(cleanLine(record.header.rest));
+  const split = splitSender(cleanLine(record.header.rest), longSenders);
   const rawContinuation = record.continuation.length ? "\n" + record.continuation.join("\n") : "";
 
   if (!split) {
@@ -240,7 +260,8 @@ export function parseExport(text: string, options: ParseOptions = {}): ParseResu
   if (decision.conflicting) warnings.add("conflicting_date_order");
 
   // Stage 3: rows.
-  const rows = records.map((record) => toRow(record, toTimestamp(record.header, decision.order), warnings));
+  const longSenders = repeatedLongSenders(records);
+  const rows = records.map((record) => toRow(record, toTimestamp(record.header, decision.order), warnings, longSenders));
 
   // Stage 4: a sender whose every row is system wording, at least one of it
   // unmistakable (a call record, the encryption notice), is the chat itself:

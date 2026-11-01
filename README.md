@@ -32,7 +32,7 @@ WhatsApp Analytics reads a chat exported from WhatsApp and shows who wrote, when
 4. The interface shows the results in Overview and the Recap.
 5. The chat stays in memory unless you choose to keep it on this device. Saved chats can be reopened or deleted from browser-local storage.
 
-The production build ships a Content Security Policy with `connect-src 'self'`. The app has no analytics, tracking, external fonts or third-party scripts. Language and appearance preferences are stored in the browser. Keeping chats is opt-in; optional semantic search also caches verified model files and can retain indexes for saved chats. Model files come from the same site; chat content stays on your device.
+The production build ships a Content Security Policy with `connect-src 'self'`. The app has no analytics, tracking, external fonts or third-party scripts. Language and appearance preferences are stored in the browser. Keeping chats is opt-in; search by meaning in Ask is opt-in too, chosen at import or in Search settings, and caches verified model files and can retain indexes for saved chats. Model files come from the same site; chat content stays on your device.
 
 ## Technologies
 
@@ -63,6 +63,7 @@ Basic checks:
 ```bash
 npm run typecheck
 npm test
+npm run test:browser
 npm run check
 npm run build
 npm run preview

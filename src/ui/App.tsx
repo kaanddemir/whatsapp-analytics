@@ -17,7 +17,10 @@
    - Ask keeps its conversation while Overview shows; a new chat starts a
      new conversation.
    - close: confirmation, then the worker drops the chat. A crashed worker
-     takes the chat with it, so the app returns to the start and says why. */
+     takes the chat with it, so the app returns to the start and says why.
+   - reload: the history entry remembers a saved chat's id and the view, nothing
+     else, and the chat reopens from the device. A chat no longer there, or never
+     saved, leaves the start screen. */
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Grain, ParticipantId, ParticipantStats, Stats } from "@/model";
 import { NO_FILTERS } from "@/model";
@@ -29,8 +32,9 @@ import { Dialog } from "./components/Dialog";
 import { FileDrop } from "./components/FileDrop";
 import { ContextBar } from "./components/ContextBar";
 import { ALL_DATES, type DateSelection } from "./components/Filters";
-import { Ellipsis, Info, LogOut, Play, Trash2, TriangleAlert, Upload } from "lucide-react";
+import { Ellipsis, Info, LogOut, Play, Search, Trash2, TriangleAlert, Upload } from "lucide-react";
 import { ChatInfo } from "./components/ChatInfo";
+import { MeaningOption, SearchSettings } from "./components/SearchSettings";
 import { LoadingView, StartScreen, stageLabel } from "./components/StartScreen";
 import { Popover } from "./components/Popover";
 import { ParseReportView } from "./components/ParseReportView";
@@ -41,7 +45,9 @@ import { errorMessage } from "./errors";
 import { formatCount } from "@/i18n/format";
 import { importNoteCount } from "./importStatus";
 import { Recap } from "./recap/Recap";
+import { RecapBoundary } from "./recap/RecapBoundary";
 import { useAnalysisClient } from "./useAnalysisClient";
+import { useSemanticSearch, type SemanticAction } from "./useSemanticSearch";
 import { useI18n } from "@/ui/i18n";
 import { Ask, type AskPort } from "./ask/Ask";
 import { DEMO_FILE_NAME, demoChat } from "@/demo/demoChat";
@@ -49,9 +55,20 @@ import { DEMO_FILE_NAME, demoChat } from "@/demo/demoChat";
 import { LanguageSelector } from "./components/LanguageSelector";
 
 /** What App needs from the worker client; tests pass a fake. */
-export type AnalysisPort = Pick<AnalysisClient, "load" | "analyze" | "clear" | "cancel" | "openSaved" | "listSaved" | "deleteSaved"> & AskPort;
+export type AnalysisPort = Pick<AnalysisClient, "load" | "analyze" | "clear" | "cancel" | "openSaved" | "listSaved" | "deleteSaved" | "semantic" | "onSemantic"> & AskPort;
 
 type Page = "overview" | "ask";
+
+/** What the history entry remembers across a reload: an id and a view, never chat content. */
+interface Place {
+  readonly chat: string | null;
+  readonly page: Page;
+}
+
+function rememberedPlace(): Place {
+  const state = history.state as { chat?: unknown; page?: unknown } | null;
+  return { chat: typeof state?.chat === "string" ? state.chat : null, page: state?.page === "ask" ? "ask" : "overview" };
+}
 
 /** Where the open chat came from, to read it again with a chosen date order. */
 type Source = { readonly kind: "file"; readonly file: File } | { readonly kind: "saved"; readonly id: string };
@@ -91,7 +108,9 @@ export function App({ client: injected }: { client?: AnalysisPort }) {
   // Applied here so the theme (and Auto's system tracking) holds while the
   // selector, which lives in the menu, is closed.
   const [themeMode, setThemeMode] = useThemeMode();
-  const [view, setView] = useState<View>({ status: "idle" });
+  const [remembered] = useState(rememberedPlace);
+  // A chat to restore shows its loading view from the first paint, never the start screen.
+  const [view, setView] = useState<View>(remembered.chat ? { status: "loading", fileName: "", stage: "reading", saving: false } : { status: "idle" });
   const [pending, setPending] = useState<{ dates: DateSelection; sender: ParticipantId | null } | null>(null);
   const [problem, setProblem] = useState<Problem | null>(null);
   const [confirmClose, setConfirmClose] = useState(false);
@@ -102,13 +121,43 @@ export function App({ client: injected }: { client?: AnalysisPort }) {
   const [importOpen, setImportOpen] = useState(false);
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
   const [recapOpen, setRecapOpen] = useState(false);
-  const [page, setPage] = useState<Page>("overview");
+  const [page, setPage] = useState<Page>(remembered.page);
   // The grain the user picked, remembered for one date range .
   const [grainChoice, setGrainChoice] = useState<{ grain: Grain; rangeKey: string } | null>(null);
   // Only the latest request may update the view.
   const latest = useRef(0);
   const sessions = useRef(0);
   const recapButton = useRef<HTMLButtonElement>(null);
+  const [askActions, setAskActions] = useState<HTMLElement | null>(null);
+  const place = useRef<Place>(remembered);
+  const semantic = useSemanticSearch(client);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchFailed, setSearchFailed] = useState(false);
+  // The opt-in shown when opening another chat; off for each one.
+  const [replaceMeaning, setReplaceMeaning] = useState(false);
+
+  // The open Recap is one history entry, so Back closes it rather than leaving
+  // the app (and the chat). Closing any other way steps back over that entry, so
+  // open/close leaves no trace; Forward reopens it while the chat is open.
+  const dismissRecap = useCallback(() => {
+    setRecapOpen(false);
+    if ((history.state as { recap?: boolean } | null)?.recap) history.back();
+  }, []);
+  const openRecap = () => {
+    history.pushState({ ...(history.state as object | null), recap: true }, "");
+    setRecapOpen(true);
+  };
+  useEffect(() => {
+    // A reload loses the chat but keeps the entry: it must not read as open.
+    if ((history.state as { recap?: boolean } | null)?.recap) history.replaceState({ ...(history.state as object), recap: false }, "");
+    const onPop = (e: PopStateEvent) => {
+      setRecapOpen(Boolean((e.state as { recap?: boolean } | null)?.recap));
+      // The entry stepped to may predate the chat or view now showing.
+      history.replaceState({ ...(e.state as object | null), ...place.current }, "");
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   const chat = view.status === "loaded" ? view.chat : null;
   const people: readonly ParticipantStats[] = chat?.whole.participants ?? [];
@@ -123,18 +172,35 @@ export function App({ client: injected }: { client?: AnalysisPort }) {
   const lost = useCallback((error: unknown) => {
     latest.current++;
     setPending(null);
-    setRecapOpen(false);
+    dismissRecap();
     setPage("overview");
     setView({ status: "idle" });
+    semantic.reset();
+    setSearchOpen(false);
     fail(error, "closedTitle", "ok");
-  }, [fail, t]);
+  }, [dismissRecap, fail, t]);
 
-  /** Load from a file or from the device, then run the whole-chat analysis. */
-  async function open(source: Source, fileName: string, dateOrder?: "dmy" | "mdy", keep = false, demo = false) {
+  /** A request to search by meaning; a worker that lost the chat takes the app back to the start. */
+  async function searchAction(action: SemanticAction) {
+    setSearchFailed(false);
+    try {
+      await semantic.send(action);
+    } catch (error) {
+      const code = error instanceof WorkerRequestError ? error.code : null;
+      if (code === "worker_lost" || code === "no_chat_loaded") lost(error);
+      else if (code !== "cancelled") setSearchFailed(true);
+    }
+  }
+
+  /** Load from a file or from the device, then run the whole-chat analysis. `meaning`: the user opted in; indexing starts only once the chat is open. `restoring`: a reload, which nobody asked for, so a chat no longer there just leaves the start screen. */
+  async function open(source: Source, fileName: string, dateOrder?: "dmy" | "mdy", keep = false, demo = false, meaning = false, restoring = false) {
     const ticket = ++latest.current;
     setConfirmReplace(false);
     setImportOpen(false);
-    setRecapOpen(false);
+    setSearchOpen(false);
+    setSearchFailed(false);
+    semantic.reset();
+    dismissRecap();
     setPending(null);
     setProblem(null);
     setGrainChoice(null);
@@ -149,17 +215,32 @@ export function App({ client: injected }: { client?: AnalysisPort }) {
       if (ticket !== latest.current) return;
       setView({ status: "loaded", chat: { session: ++sessions.current, demo, source: summary.saved ? { kind: "saved", id: summary.saved.id } : source, summary, whole, stats: whole, dates: ALL_DATES, sender: null } });
       if (summary.saveError) fail(new WorkerRequestError(summary.saveError, ""), "x_saveFailedTitle", "ok");
+      if (meaning) void searchAction("enable");
     } catch (error) {
       if (ticket !== latest.current) return;
       setView({ status: "idle" });
-      if (error instanceof WorkerRequestError && error.code === "cancelled") return;
+      if (error instanceof WorkerRequestError && (error.code === "cancelled" || (restoring && (error.code === "not_found" || error.code === "storage_unavailable")))) return;
       fail(error, source.kind === "saved" ? "x_savedOpenTitle" : "readTitle", "tryAnother");
     }
   }
 
-  const openFile = (file: File, dateOrder?: "dmy" | "mdy", keep = false) => open({ kind: "file", file }, file.name, dateOrder, keep);
+  const openFile = (file: File, keep = false, meaning = false) => open({ kind: "file", file }, file.name, undefined, keep, false, meaning);
   /** The demo goes through the ordinary import, as a file built in memory, in the interface language; it is never saved. */
-  const openDemo = () => open({ kind: "file", file: new File([demoChat(locale)], DEMO_FILE_NAME, { type: "text/plain" }) }, t("start.demoBadge"), undefined, false, true);
+  const openDemo = (meaning: boolean) => open({ kind: "file", file: new File([demoChat(locale)], DEMO_FILE_NAME, { type: "text/plain" }) }, t("start.demoBadge"), undefined, false, true, meaning);
+
+  // No guard against StrictMode's second run: its simulated unmount ends the first run's worker.
+  useEffect(() => {
+    if (remembered.chat) void open({ kind: "saved", id: remembered.chat }, "", undefined, false, false, false, true);
+  }, []);
+
+  // Keep the entry on what shows. While a chat loads it still names the last one, so a reload then loses nothing.
+  const savedId = chat?.summary.saved?.id ?? null;
+  useEffect(() => {
+    if (view.status === "loading") return;
+    if (view.status === "idle") setPage("overview");
+    place.current = { chat: savedId, page: view.status === "idle" ? "overview" : page };
+    history.replaceState({ ...(history.state as object | null), ...place.current }, "");
+  }, [view.status, savedId, page]);
 
   // The saved list is read whenever the start screen shows.
   useEffect(() => {
@@ -211,7 +292,9 @@ export function App({ client: injected }: { client?: AnalysisPort }) {
     latest.current++;
     setConfirmClose(false);
     setImportOpen(false);
-    setRecapOpen(false);
+    setSearchOpen(false);
+    semantic.reset();
+    dismissRecap();
     setPending(null);
     setGrainChoice(null);
     setPage("overview");
@@ -263,8 +346,9 @@ export function App({ client: injected }: { client?: AnalysisPort }) {
                 <TriangleAlert size={20} />
               </button>
             )}
+            {chat && <span className="appbar-slot" ref={setAskActions} />}
             {chat && (
-              <button ref={recapButton} type="button" className="btn recap-btn" aria-haspopup="dialog" onClick={() => setRecapOpen(true)}>
+              <button ref={recapButton} type="button" className="btn recap-btn" aria-haspopup="dialog" onClick={openRecap}>
                 <Play size={14} /> <span>{t("x_recapAction")}</span>
               </button>
             )}
@@ -290,7 +374,12 @@ export function App({ client: injected }: { client?: AnalysisPort }) {
                           </button>
                         </li>
                         <li>
-                          <button type="button" onClick={() => { close(); setConfirmReplace(true); }}>
+                          <button type="button" onClick={() => { close(); setSearchFailed(false); setSearchOpen(true); void searchAction("status"); }}>
+                            <Search size={16} /> {t("search.settings")}
+                          </button>
+                        </li>
+                        <li>
+                          <button type="button" onClick={() => { close(); setReplaceMeaning(false); setConfirmReplace(true); }}>
                             <Upload size={16} /> {t("openAnother")}
                           </button>
                         </li>
@@ -332,10 +421,10 @@ export function App({ client: injected }: { client?: AnalysisPort }) {
       <main id="main" className="content">
         {view.status === "idle" && (
           <StartScreen
-            onFile={(f, keep) => void openFile(f, undefined, keep)}
-            onDemo={() => void openDemo()}
+            onFile={(f, keep, meaning) => void openFile(f, keep, meaning)}
+            onDemo={(meaning) => void openDemo(meaning)}
             saved={saved}
-            onOpenSaved={(c) => void open({ kind: "saved", id: c.id }, c.fileName)}
+            onOpenSaved={(c, meaning) => void open({ kind: "saved", id: c.id }, c.fileName, undefined, false, false, meaning)}
             onDeleteSaved={setConfirmDelete}
           />
         )}
@@ -389,19 +478,16 @@ export function App({ client: injected }: { client?: AnalysisPort }) {
               onFilters={(d, s) => void applyFilters(d, s)}
               onLost={lost}
               active={asking}
+              headerActions={askActions}
             />
           </div>
         )}
       </main>
 
       {recapOpen && whole && (
-        <Recap
-          stats={whole}
-          onClose={() => {
-            setRecapOpen(false);
-            recapButton.current?.focus();
-          }}
-        />
+        <RecapBoundary onClose={dismissRecap}>
+          <Recap stats={whole} onClose={dismissRecap} returnFocusTo={recapButton} />
+        </RecapBoundary>
       )}
 
       {importOpen && chat && (
@@ -410,8 +496,12 @@ export function App({ client: injected }: { client?: AnalysisPort }) {
           onDismiss={() => setImportOpen(false)}
           actions={<button type="button" className="btn ghost" onClick={() => setImportOpen(false)}>{t("close")}</button>}
         >
-          <ChatInfo summary={chat.summary} onDateOrder={chat.source.kind === "saved" && !chat.summary.saved ? undefined : (order) => void open(chat.source, chat.summary.file.fileName, order, false, chat.demo)} />
+          <ChatInfo summary={chat.summary} onDateOrder={chat.source.kind === "saved" && !chat.summary.saved ? undefined : (order) => void open(chat.source, chat.summary.file.fileName, order, false, chat.demo, semantic.state.status === "preparing" || semantic.state.status === "indexing" || semantic.state.status === "ready")} />
         </Dialog>
+      )}
+
+      {searchOpen && chat && (
+        <SearchSettings state={semantic.state} saved={chat.summary.saved !== null} failed={searchFailed} onAction={(action) => void searchAction(action)} onClose={() => setSearchOpen(false)} />
       )}
 
       {disclaimerOpen && (
@@ -435,11 +525,12 @@ export function App({ client: injected }: { client?: AnalysisPort }) {
           actions={
             <>
               <button type="button" className="btn ghost" onClick={() => setConfirmReplace(false)}>{t("cancel")}</button>
-              <FileDrop compact primary onFile={(f) => void openFile(f)} label={t("chooseExport")} />
+              <FileDrop compact primary onFile={(f) => void openFile(f, false, replaceMeaning)} label={t("chooseExport")} />
             </>
           }
         >
           <p>{t("replaceBody")}</p>
+          <div className="replace-option"><MeaningOption checked={replaceMeaning} onChange={setReplaceMeaning} /></div>
         </Dialog>
       )}
 

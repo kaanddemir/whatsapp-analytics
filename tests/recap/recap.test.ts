@@ -193,7 +193,7 @@ describe("recap story: every previous slide's metric survives", () => {
     expect(find(story, "shared")!.emoji!.items[0]!.glyph).toBe(stats.content.topEmojis[0]!.key); // emojis
     expect(find(story, "words")!.words[0]!.word).toBe(stats.content.topKeywords[0]!.key); // words
     expect(find(story, "balance")).toBeDefined(); // balance
-    expect(find(story, "behavior")!.starter!.person.id).toBe(stats.insights.conversationStarter.id); // starter
+    expect(find(story, "behavior")!.starter!.person!.id).toBe(stats.insights.conversationStarter.id); // starter
     expect(find(story, "behavior")!.owl!.person.id).toBe(stats.insights.nightOwl.id); // owl
     expect(find(story, "highlight")).toBeDefined(); // streak
     expect(find(story, "opening")!.span).toBeTruthy(); // cover

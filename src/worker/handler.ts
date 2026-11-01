@@ -135,7 +135,7 @@ export function createHandler({
     });
     indexer = next;
     if (await next.restore().catch(() => false)) {
-      if (indexer === next && (next.state.status === "off" || next.state.status === "paused")) void next.start();
+      if (indexer === next && !next.pausedByUser && (next.state.status === "off" || next.state.status === "paused")) void next.start();
     }
   }
 
@@ -305,7 +305,20 @@ export function createHandler({
           if (request.action === "enable") {
             void indexer.start();
           }
-          else if (request.action === "pause") indexer.cancel();
+          else if (request.action === "pause") void indexer.pause();
+          else if (request.action === "remove") {
+            // This chat's vectors only: the chat, other chats' indexes and the model files stay.
+            const parsed = current, chatId = savedId;
+            const old = indexer;
+            indexer = null;
+            await old.dispose();
+            const removed = chatId ? semanticStore?.remove(chatId).then(() => null, (error: unknown) => ({ error })) : null;
+            const failure = await removed;
+            // A failed removal reads the stored index back, so the state on screen stays true.
+            await adoptSemantic(parsed, chatId);
+            notify({ type: "semanticStatus", id: 0, state: status() });
+            if (failure) throw failure.error;
+          }
           else if (request.action === "forget") {
             // Stop, unload the model, delete it and every stored index; the open chat starts over at "off".
             const parsed = current;

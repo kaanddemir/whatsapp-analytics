@@ -1,8 +1,8 @@
 /* Before a chat is open: the welcome screen and the processing view.
 
    Welcome: the headline, then the two ways in side by side (your own
-   export, or the synthetic demo), one line on privacy and the opt-in to keep
-   the chat, the chats kept on this device when there are any, and the
+   export, or the synthetic demo), one line on privacy, the opt-ins to keep
+   the chat and to search it by meaning, the chats kept on this device when there are any, and the
    export guide last. A file can be dropped anywhere on the page; the
    overlay says so while one is held over it. The wallpaper is decorative.
 
@@ -13,6 +13,7 @@ import { useId, useRef, useState, type DragEvent, type KeyboardEvent } from "rea
 import type { Stage } from "@/worker/protocol";
 import type { SavedChat } from "@/store/chatStore";
 import { FileDrop } from "./FileDrop";
+import { MeaningOption } from "./SearchSettings";
 import { Check, ChevronDown, ChevronRight, Info, MessageCircle, Play, ShieldCheck, Trash2, Upload } from "lucide-react";
 import { useI18n } from "@/ui/i18n";
 import { translate } from "@/i18n/translate";
@@ -20,12 +21,13 @@ import type { TranslationKey } from "@/i18n/en";
 import { formatBytes, formatCount, formatDate } from "@/i18n/format";
 
 interface StartProps {
-  onFile: (file: File, keep: boolean) => void;
+  /** `meaning`: the user opted in to search by meaning for this chat. */
+  onFile: (file: File, keep: boolean, meaning: boolean) => void;
   /** Open the synthetic demo chat (never saved). */
-  onDemo?: () => void;
+  onDemo?: (meaning: boolean) => void;
   /** Chats kept on this device; empty or null hides the list (null: storage unavailable). */
   saved?: readonly SavedChat[] | null;
-  onOpenSaved?: (chat: SavedChat) => void;
+  onOpenSaved?: (chat: SavedChat, meaning: boolean) => void;
   onDeleteSaved?: (chat: SavedChat) => void;
 }
 
@@ -37,6 +39,7 @@ export function Wallpaper() {
 export function StartScreen({ onFile, onDemo, saved = null, onOpenSaved, onDeleteSaved }: StartProps) {
   const { t } = useI18n();
   const [keep, setKeep] = useState(false);
+  const [meaning, setMeaning] = useState(false);
   const [dragging, setDragging] = useState(false);
   // dragenter/dragleave fire for every child crossed; count them so the overlay does not flicker.
   const depth = useRef(0);
@@ -47,7 +50,7 @@ export function StartScreen({ onFile, onDemo, saved = null, onOpenSaved, onDelet
     depth.current = 0;
     setDragging(false);
     const file = e.dataTransfer.files[0];
-    if (file) onFile(file, keep);
+    if (file) onFile(file, keep, meaning);
   };
   return (
     <section
@@ -66,9 +69,9 @@ export function StartScreen({ onFile, onDemo, saved = null, onOpenSaved, onDelet
         </h2>
 
         <div className="welcome-actions" role="group" aria-label={t("uploadPanel")}>
-          <FileDrop primary onFile={(file) => onFile(file, keep)} />
+          <FileDrop primary onFile={(file) => onFile(file, keep, meaning)} />
           {onDemo && (
-            <button type="button" className="btn ghost welcome-demo" onClick={onDemo}>
+            <button type="button" className="btn ghost welcome-demo" onClick={() => onDemo(meaning)}>
               <Play size={16} />{t("start.demo")}
             </button>
           )}
@@ -77,7 +80,7 @@ export function StartScreen({ onFile, onDemo, saved = null, onOpenSaved, onDelet
           {t("fileTypes")}
         </p>
 
-        {/* One quiet group under the actions: the save opt-in (its one control), where chats are processed, and export help. */}
+        {/* One quiet group under the actions: the two opt-ins, where chats are processed, and export help. */}
         <div className="welcome-more">
           {saved !== null && (
             <div className="keep-option">
@@ -85,11 +88,13 @@ export function StartScreen({ onFile, onDemo, saved = null, onOpenSaved, onDelet
               <label htmlFor={keepId}>{t("x_keepOnDevice")}</label>
             </div>
           )}
+          {/* The model is kept in the same browser storage as saved chats: without it, there is nothing to offer. */}
+          {saved !== null && <MeaningOption checked={meaning} onChange={setMeaning} />}
           <p className="welcome-private"><ShieldCheck size={16} />{t("start.private")}</p>
           <ExportGuide />
         </div>
 
-        {saved && saved.length > 0 && <SavedList chats={saved} onOpen={onOpenSaved} onDelete={onDeleteSaved} />}
+        {saved && saved.length > 0 && <SavedList chats={saved} onOpen={onOpenSaved && ((chat) => onOpenSaved(chat, meaning))} onDelete={onDeleteSaved} />}
       </div>
       {dragging && (
         <div className="welcome-drop" aria-hidden="true">
@@ -221,7 +226,7 @@ export function LoadingView({ fileName, stage, fraction, saving = false, onCance
     <section className="card loading" aria-busy="true" aria-labelledby="loading-title">
       <Wallpaper />
       <h2 id="loading-title">{t("openingChat")}</h2>
-      <p className="muted file-name">{fileName}</p>
+      {fileName && <p className="muted file-name">{fileName}</p>}
       <ol className="stages">
         {stages.map((s, i) => {
           const state = i < current ? "done" : i === current ? "active" : "todo";

@@ -11,6 +11,7 @@ import type { SearchPage, TimelinePage } from "@/conversation/results";
 import type { SearchSort } from "@/search/keywordIndex";
 import type { EmbedderFactory } from "@/semantic/embedder";
 import type { SemanticState } from "@/semantic/indexer";
+import type { SemanticStore } from "@/semantic/store";
 import { parseExport } from "@/parser";
 import { WorkerRequestError, type ClientErrorCode } from "@/worker/client";
 import { createHandler } from "@/worker/handler";
@@ -48,7 +49,7 @@ export class FakeClient implements AnalysisPort {
   private readonly semanticListeners = new Set<(state: SemanticState) => void>();
 
   /** `embedder`: the model behind search by meaning; the tests' fake, so nothing is downloaded. */
-  constructor(private readonly embedder?: EmbedderFactory) {}
+  constructor(private readonly embedder?: EmbedderFactory, private readonly semanticStore: SemanticStore | null = null) {}
   /** Chats "kept on this device": shared by every handler, as OPFS outlives a worker. */
   readonly store = new MemoryChatStore();
   private handle: ReturnType<FakeClient["makeHandler"]> | null = null;
@@ -71,7 +72,7 @@ export class FakeClient implements AnalysisPort {
         return parseExport(text, options);
       },
       store: this.store,
-      semanticStore: null,
+      semanticStore: this.semanticStore,
       ...(this.embedder ? { embedder: this.embedder } : {}),
       notify: (r) => { if (r.type === "semanticStatus") for (const l of this.semanticListeners) l(r.state); },
     });
@@ -191,7 +192,7 @@ export class FakeClient implements AnalysisPort {
     return r.page;
   }
 
-  async semantic(action: "enable" | "pause" | "status" | "forget"): Promise<SemanticState> {
+  async semantic(action: "enable" | "pause" | "status" | "remove" | "forget"): Promise<SemanticState> {
     const r = await this.send({ type: "semantic", id: this.nextId++, action });
     if (r.type !== "semanticStatus") throw new Error("unexpected");
     return r.state;
